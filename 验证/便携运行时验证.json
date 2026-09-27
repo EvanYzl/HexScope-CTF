@@ -40,7 +40,7 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "bef928c64af563955bfcc8386228dc733b2554e7db82bb4c945ceda3b43dee6b",
+  "htmlSHA256": "ad5cc2b83127c72c8a99694531a8f08340f55a6eb533901b1bcfdab15e7d1ec5",
   "login": {
     "challengeLength": 21,
     "characterClasses": [
@@ -73,6 +73,11 @@
       ],
       "contents": "all SHA-256 values match packaged originals",
       "GUIFileBridge": "preload/IPC simulated in developer suite; actual native file picker not tested"
+    },
+    "E01snapshot": {
+      "read": "actual six-volume E01 extraction; snapshot SHA-256 matches",
+      "analysis": "appended ZIP still detected",
+      "cleanup": "registered snapshot and session directory removed"
     }
   },
   "icon": {

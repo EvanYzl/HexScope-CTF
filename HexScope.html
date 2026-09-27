@@ -329,7 +329,7 @@ html,body{height:100%;overflow:hidden}
         <div class="tabs" role="tablist" aria-label="文件详情"><button class="tab active" role="tab" aria-selected="true" data-tab="overview">概览</button><button class="tab" role="tab" aria-selected="false" data-tab="preview">文件预览</button><button class="tab" role="tab" aria-selected="false" data-tab="hex">十六进制</button><button class="tab" role="tab" aria-selected="false" data-tab="extract">提取文件 <span id="findingCount">0</span></button><button class="tab" role="tab" aria-selected="false" data-tab="exif">EXIF / GPS</button><button class="tab" role="tab" aria-selected="false" data-tab="strings">字符串</button><button class="tab" role="tab" aria-selected="false" data-tab="pixels">像素 / LSB</button><button class="tab" role="tab" aria-selected="false" data-tab="lab">专项隐写 <span>NEW</span></button></div>
         <div id="overviewPanel" class="tab-panel" role="tabpanel"></div>
 <div id="previewPanel" class="tab-panel" role="tabpanel" hidden>
- <div class="preview-heading"><div><strong>文件预览</strong><span id="previewFormat" class="tag info"></span></div><div class="button-group"><button id="previewReload" class="secondary">重新载入</button><button id="previewStop" class="quiet" disabled>停止预览</button></div></div>
+ <div class="preview-heading"><div><strong>文件预览</strong><span id="previewFormat" class="tag info"></span><span id="previewSource" class="tag info"></span></div><div class="button-group"><button id="previewReload" class="secondary">重新载入</button><button id="previewStop" class="quiet" disabled>停止预览</button></div></div>
  <p id="previewStatus" role="status" class="panel-intro">选择文件后在本机只读预览。</p>
  <div id="previewTools" class="preview-tools"></div>
  <form id="previewPasswordForm" class="preview-tools" hidden><label>PDF 密码 <input id="previewPassword" type="password" autocomplete="off" aria-label="PDF 密码"></label><button type="submit" class="primary">解锁预览</button><small>密码仅用于当前预览。</small></form>
@@ -1729,7 +1729,11 @@ self.onmessage = async ({data:job}) => {
   $('scanThreads').onchange=()=>changeThreads($('scanThreads').value);$('scanFullSpeed').onclick=()=>changeThreads(cpuCount);
   $('fileList').addEventListener('toggle',e=>{if(e.target.dataset.path!==undefined){const path=e.target.dataset.path;e.target.open?state.closedDirs.delete(path):state.closedDirs.add(path);}},true);
   $('cancelBtn').onclick=()=>{stopScan();toast('已停止。已完成的结果保留，未完成项可以重新扫描。');};
-  $('clearBtn').onclick=()=>{stopScan();state.items=[];state.selected=null;state.offset=0;state.page=0;state.closedDirs.clear();$('demoBtn').disabled=false;renderList();resetDetail();};
+  function releaseSnapshots(){
+    const ids=state.items.map(item=>item.file._hexSnapshot?.id).filter(Boolean);
+    for(let i=0;i<ids.length;i+=1024)window.hexscopeFiles?.releaseSnapshots?.(ids.slice(i,i+1024)).catch(()=>{});
+  }
+  $('clearBtn').onclick=()=>{stopScan();resetDetail();releaseSnapshots();state.items=[];state.selected=null;state.offset=0;state.page=0;state.closedDirs.clear();$('demoBtn').disabled=false;renderList();};
   for(const btn of document.querySelectorAll('[data-tab]'))btn.onclick=()=>showTab(btn.dataset.tab);
   $('headBtn').onclick=()=>{state.offset=0;renderHex();};$('tailBtn').onclick=()=>{state.offset=Math.max(0,Math.ceil((selected()?.file.size||0)/16)*16-256);renderHex();};
   $('boundaryBtn').onclick=()=>{state.offset=Math.max(0,(selected()?.result?.end||0)-32);renderHex();};
@@ -1751,7 +1755,7 @@ self.onmessage = async ({data:job}) => {
     for(const item of document.querySelectorAll('.mode-nav button.mode')){item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));}
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
-  window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();});
+  window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();releaseSnapshots();});
   window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail,performanceSettings};
 })();
 </script>
@@ -1966,7 +1970,8 @@ self.onmessage = async ({data:job}) => {
           for(const row of batch){
             const result=results.get(row.id);
             if(!result?.ok){failures.push({path:row.path,size:row.size,reason:result?.error||'读取未返回完整结果'});continue;}
-            const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});files.push(file);
+            const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});
+            if(result.snapshot)Object.defineProperty(file,'_hexSnapshot',{value:result.snapshot});files.push(file);
           }
           done+=H.addFiles(files);if(response.cancelled)S.cancelRequested=true;
         }catch(error){for(const row of batch)failures.push({path:row.path,size:row.size,reason:error.message});}
@@ -10689,7 +10694,11 @@ function fileReader(file,token){
   const length=Math.min(file.size,end);if(cached&&cached.length>=length)return cached.subarray(0,length);
   const requestId=++S.serial;let data;
   try{
-   if(window.hexscopeFiles?.readPreview){S.reads.add(requestId);data=await window.hexscopeFiles.readPreview(file,{offset:0,length,requestId});}
+   if(file._hexSnapshot){
+    if(!window.hexscopeFiles?.readSnapshot)throw Error('镜像预览接口不可用，请从新版便携程序重新推送该文件。');
+    S.reads.add(requestId);data=await window.hexscopeFiles.readSnapshot({snapshotId:file._hexSnapshot.id,offset:0,length,requestId});
+    if(data==null)throw Error('镜像预览副本没有返回内容，请重新推送该文件。');
+   }else if(window.hexscopeFiles?.readPreview){S.reads.add(requestId);data=await window.hexscopeFiles.readPreview(file,{offset:0,length,requestId});}
    if(token!==S.token)throw Error('预览已停止。');
    if(data==null)data=await file.slice(0,length).arrayBuffer();
    if(token!==S.token)throw Error('预览已停止。');
@@ -10807,8 +10816,9 @@ async function renderPDF(bytes,token){
  await draw();
 }
 async function load(item,force=false){
- if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token,file=item.file,read=fileReader(file,token);
- $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';bounded(token);
+ if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token;
+ const file=item.file._hexSnapshot?{name:item.file.name,size:item.file._hexSnapshot.size,_hexSnapshot:item.file._hexSnapshot}:item.file,read=fileReader(file,token);
+ $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';$('previewSource').textContent=file._hexSnapshot?'镜像提取快照 · r6':'';bounded(token);
  try{
   const header=await read(65536,'读取文件头');if(token!==S.token)return;const kind=P.classify(header,file.name);$('previewFormat').textContent=kind.label;
   if(kind.kind==='unsupported'){stage.append(el('p',kind.note,{class:'preview-empty'}));note.textContent='可使用其他文件分析标签继续检查。';ready(token,'此格式尚无内容预览。');return;}

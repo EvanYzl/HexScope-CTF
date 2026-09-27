@@ -39,7 +39,7 @@ async function readPreview(args,{signal,io=fs}={}){
     throw failure('READ_FAILED');
   }finally{await handle?.close();}
 }
-function installPreviewIPC({ipcMain},win,root){
+function installPreviewIPC({ipcMain},win,root,snapshots){
   const channel='hexscope:preview-read',active=new Map(),html=pathToFileURL(path.join(root,'HexScope.html')).href;
   ipcMain.removeHandler(channel);
   ipcMain.handle(channel,async(event,operation,args)=>{
@@ -48,9 +48,20 @@ function installPreviewIPC({ipcMain},win,root){
       if(event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame?.url!==html||
         !args||!Number.isSafeInteger(args.requestId)||args.requestId<1)throw failure('INVALID');
       if(operation==='cancel'){active.get(args.requestId)?.abort();return {ok:true,data:null};}
-      if(operation!=='read'||active.has(args.requestId))throw failure('INVALID');
+      if(operation==='releaseSnapshots'){
+        if(!snapshots||!Array.isArray(args.ids)||args.ids.length>1024||args.ids.some(id=>typeof id!=='string'))throw failure('INVALID');
+        for(const item of active.values())if(args.ids.includes(item.snapshotId))item.abort();
+        snapshots.release(args.ids);return {ok:true,data:null};
+      }
+      if(!['read','snapshot'].includes(operation)||active.has(args.requestId))throw failure('INVALID');
       if(active.size>=2)throw failure('BUSY');
       controller=new AbortController();active.set(args.requestId,controller);
+      if(operation==='snapshot'){
+        if(!snapshots||typeof args.snapshotId!=='string')throw failure('INVALID');
+        controller.snapshotId=args.snapshotId;
+        try{return {ok:true,data:await snapshots.read(args,{signal:controller.signal})};}
+        catch(error){return {ok:false,code:'SNAPSHOT_READ_FAILED',error:error.message};}
+      }
       return {ok:true,data:await readPreview(args,{signal:controller.signal})};
     }catch(error){return {ok:false,code:messages[error.code]?error.code:'READ_FAILED',error:messages[error.code]||messages.READ_FAILED};}
     finally{if(controller)active.delete(args.requestId);}

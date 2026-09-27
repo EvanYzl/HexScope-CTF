@@ -287,7 +287,11 @@
   $('scanThreads').onchange=()=>changeThreads($('scanThreads').value);$('scanFullSpeed').onclick=()=>changeThreads(cpuCount);
   $('fileList').addEventListener('toggle',e=>{if(e.target.dataset.path!==undefined){const path=e.target.dataset.path;e.target.open?state.closedDirs.delete(path):state.closedDirs.add(path);}},true);
   $('cancelBtn').onclick=()=>{stopScan();toast('已停止。已完成的结果保留，未完成项可以重新扫描。');};
-  $('clearBtn').onclick=()=>{stopScan();state.items=[];state.selected=null;state.offset=0;state.page=0;state.closedDirs.clear();$('demoBtn').disabled=false;renderList();resetDetail();};
+  function releaseSnapshots(){
+    const ids=state.items.map(item=>item.file._hexSnapshot?.id).filter(Boolean);
+    for(let i=0;i<ids.length;i+=1024)window.hexscopeFiles?.releaseSnapshots?.(ids.slice(i,i+1024)).catch(()=>{});
+  }
+  $('clearBtn').onclick=()=>{stopScan();resetDetail();releaseSnapshots();state.items=[];state.selected=null;state.offset=0;state.page=0;state.closedDirs.clear();$('demoBtn').disabled=false;renderList();};
   for(const btn of document.querySelectorAll('[data-tab]'))btn.onclick=()=>showTab(btn.dataset.tab);
   $('headBtn').onclick=()=>{state.offset=0;renderHex();};$('tailBtn').onclick=()=>{state.offset=Math.max(0,Math.ceil((selected()?.file.size||0)/16)*16-256);renderHex();};
   $('boundaryBtn').onclick=()=>{state.offset=Math.max(0,(selected()?.result?.end||0)-32);renderHex();};
@@ -309,6 +313,6 @@
     for(const item of document.querySelectorAll('.mode-nav button.mode')){item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));}
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
-  window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();});
+  window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();releaseSnapshots();});
   window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail,performanceSettings};
 })();

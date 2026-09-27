@@ -76,7 +76,8 @@
           for(const row of batch){
             const result=results.get(row.id);
             if(!result?.ok){failures.push({path:row.path,size:row.size,reason:result?.error||'读取未返回完整结果'});continue;}
-            const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});files.push(file);
+            const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});
+            if(result.snapshot)Object.defineProperty(file,'_hexSnapshot',{value:result.snapshot});files.push(file);
           }
           done+=H.addFiles(files);if(response.cancelled)S.cancelRequested=true;
         }catch(error){for(const row of batch)failures.push({path:row.path,size:row.size,reason:error.message});}

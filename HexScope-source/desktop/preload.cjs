@@ -1,6 +1,12 @@
 'use strict';
 const {contextBridge,ipcRenderer,webUtils}=require('electron');
+let snapshotReleaseRequest=Number.MAX_SAFE_INTEGER;
 contextBridge.exposeInMainWorld('hexscopeFiles',{
+  readSnapshot:async({snapshotId,offset,length,requestId})=>{
+    const result=await ipcRenderer.invoke('hexscope:preview-read','snapshot',{snapshotId,offset,length,requestId});
+    if(!result?.ok)throw Error(result?.error||'镜像预览副本读取失败，请重新推送文件。');return result.data;
+  },
+  releaseSnapshots:ids=>ipcRenderer.invoke('hexscope:preview-read','releaseSnapshots',{ids,requestId:snapshotReleaseRequest--}),
   readPreview:async(file,{offset,length,requestId})=>{
     // Paths come only from a real File selected/dropped by the user, never from
     // renderer-supplied strings. In-memory E01/crypto files stay in the renderer.

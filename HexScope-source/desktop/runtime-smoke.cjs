@@ -76,6 +76,14 @@ async function main({directory,scratch,output}){
   const entry=listing.entries.find(x=>x.path==='/PICTURES/HIDDEN.PNG');assert(entry);
   const plan=await f.task(()=>f.planAnalysis({...context,entryIds:[entry.id]}));assert.equal(plan.entries.length,1);
   const data=await f.task(()=>f.analyze({entryId:entry.id}));assert(core.HexCore.analyze(new Uint8Array(data.bytes),data.name).findings.some(x=>x.type==='ZIP'&&x.exportable));
+  const {PreviewSnapshots}=require(path.join(app,'preview-snapshots.cjs')),snapshots=new PreviewSnapshots(scratch);
+  try{
+    const snapshot=await snapshots.save(data),bytes=await snapshots.read({snapshotId:snapshot.id,offset:0,length:snapshot.size});
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),createHash('sha256').update(data.bytes).digest('hex'));
+    assert(core.HexCore.analyze(new Uint8Array(bytes),data.name).findings.some(x=>x.type==='ZIP'&&x.exportable));
+    const directory=snapshots.directory;snapshots.release([snapshot.id]);assert(!fs.existsSync(directory));
+    preview.E01snapshot={read:'actual six-volume E01 extraction; snapshot SHA-256 matches',analysis:'appended ZIP still detected',cleanup:'registered snapshot and session directory removed'};
+  }finally{snapshots.dispose();}
   const batchRows=[entry,listing.entries.find(x=>x.name==='HELLO.TXT')].filter(Boolean).slice(0,plan.limits.threads);
   const parallel=await f.task(()=>f.analyzeBatch({entryIds:batchRows.map(x=>x.id),threads:batchRows.length}));assert.equal(parallel.results.length,batchRows.length);assert(parallel.results.every(x=>x.ok));assert.deepEqual(parallel.results[0].bytes,data.bytes);
   for(const result of parallel.results){const check=await f.task(()=>f.hashEntry({entryId:result.entryId,algorithms:['sha256']}));assert.equal(check.hashes[0].hex,createHash('sha256').update(result.bytes).digest('hex'));}

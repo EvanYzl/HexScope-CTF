@@ -2,11 +2,18 @@
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url');
 const {Forensics,parsePartitions}=require('./forensics.cjs');
 const {WindowsMount}=require('./windows-mount.cjs'),{convertVhd,validateSize}=require('./vhd.cjs');
+const {PreviewSnapshots}=require('./preview-snapshots.cjs');
 const OPERATIONS=new Set(['status','open','openDropped','list','details','analyze','analyzeBatch','planAnalysis','exportFiles','close','cancel','hashCapabilities','selectHashFile','selectHashDropped','hashImage','hashFile','hashEntry']);
 for(const name of ['convertVhd','selectVhd','mountVhd','unmountVhd','mountStatus','openMounted','driveLetters'])OPERATIONS.add(name);
 function trusted(event,win,html){return event.sender===win.webContents&&event.senderFrame===win.webContents.mainFrame&&event.senderFrame?.url===pathToFileURL(html).href;}
 function installDiskIPC({ipcMain,dialog,shell},win,root){
   const service=new Forensics(path.join(root,'engines','tsk','bin'));
+  const snapshots=service.previewSnapshots=new PreviewSnapshots(),dispose=service.dispose.bind(service);
+  service.dispose=()=>{dispose();snapshots.dispose();};
+  async function withSnapshot(result){
+    try{return {...result,snapshot:await snapshots.save(result)};}
+    catch(error){throw Error('无法保留镜像提取文件的预览副本：'+error.message);}
+  }
   const mounts=new WindowsMount(root);
   ipcMain.removeHandler('hexscope:disk');let lastProgress=0;
   const notify=value=>{const now=Date.now(),complete=value.complete||(Number.isFinite(value.total)&&value.done===value.total);if(now-lastProgress<200&&!complete)return;lastProgress=now;if(!win.webContents.isDestroyed())win.webContents.send('hexscope:disk-progress',value);};
@@ -60,8 +67,15 @@ function installDiskIPC({ipcMain,dialog,shell},win,root){
           case 'openDropped':return service.open(args.path);
           case 'list':return service.list(args);
           case 'details':return service.details(args);
-          case 'analyze':return service.analyze(args);
-          case 'analyzeBatch':return service.analyzeBatch(args);
+          case 'analyze':return withSnapshot(await service.analyze(args));
+          case 'analyzeBatch':{
+            const batch=await service.analyzeBatch(args);
+            batch.results=await Promise.all(batch.results.map(async result=>{
+              if(!result.ok)return result;
+              try{return await withSnapshot(result);}catch(error){return {entryId:result.entryId,ok:false,error:error.message};}
+            }));
+            return batch;
+          }
           case 'planAnalysis':return service.planAnalysis(args);
           case 'exportFiles':{
             service.image(args.imageId);

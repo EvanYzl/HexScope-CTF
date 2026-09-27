@@ -17,7 +17,7 @@ DOCS = ['使用说明.md', '镜像功能说明.md', '哈希与盘符挂载说明
         'THIRD_PARTY_NOTICES.md', '密码分析使用说明.md', '题型覆盖与限制.md', '密码模块第三方许可.md', '4.1密码模块更新说明.md',
         '文件预览说明.md', '4.1文件预览更新说明.md', '文件预览第三方许可.md',
         'README.md', 'AUTHORS.md', 'CONTRIBUTING.md', 'CHANGELOG.md']
-APP_FILES = ['main.cjs', 'preload.cjs', 'disk-ipc.cjs', 'preview-read.cjs', 'forensics.cjs', 'hashing.cjs', 'vhd.cjs',
+APP_FILES = ['main.cjs', 'preload.cjs', 'disk-ipc.cjs', 'preview-read.cjs', 'preview-snapshots.cjs', 'forensics.cjs', 'hashing.cjs', 'vhd.cjs',
              'windows-mount.cjs', 'mount-helper.ps1', 'package.json', 'branding.json', 'enable-utf8.ps1']
 REPO_FILES = ['.gitignore', '.gitattributes',
               '.github/ISSUE_TEMPLATE/bug_report.yml', '.github/ISSUE_TEMPLATE/feature_request.yml']

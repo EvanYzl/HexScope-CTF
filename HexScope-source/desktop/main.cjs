@@ -30,8 +30,8 @@ function createWindow(){
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,
       webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,
       partition:'hexscope-offline-session',spellcheck:false}});
-  installDiskIPC({ipcMain,dialog,shell},win,__dirname);
-  installPreviewIPC({ipcMain},win,__dirname);
+  const disk=installDiskIPC({ipcMain,dialog,shell},win,__dirname);
+  installPreviewIPC({ipcMain},win,__dirname,disk.previewSnapshots);
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',event=>event.preventDefault());
   win.webContents.on('will-attach-webview',event=>event.preventDefault());

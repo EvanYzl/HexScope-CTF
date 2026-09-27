@@ -31,7 +31,11 @@ function fileReader(file,token){
   const length=Math.min(file.size,end);if(cached&&cached.length>=length)return cached.subarray(0,length);
   const requestId=++S.serial;let data;
   try{
-   if(window.hexscopeFiles?.readPreview){S.reads.add(requestId);data=await window.hexscopeFiles.readPreview(file,{offset:0,length,requestId});}
+   if(file._hexSnapshot){
+    if(!window.hexscopeFiles?.readSnapshot)throw Error('镜像预览接口不可用，请从新版便携程序重新推送该文件。');
+    S.reads.add(requestId);data=await window.hexscopeFiles.readSnapshot({snapshotId:file._hexSnapshot.id,offset:0,length,requestId});
+    if(data==null)throw Error('镜像预览副本没有返回内容，请重新推送该文件。');
+   }else if(window.hexscopeFiles?.readPreview){S.reads.add(requestId);data=await window.hexscopeFiles.readPreview(file,{offset:0,length,requestId});}
    if(token!==S.token)throw Error('预览已停止。');
    if(data==null)data=await file.slice(0,length).arrayBuffer();
    if(token!==S.token)throw Error('预览已停止。');
@@ -149,8 +153,9 @@ async function renderPDF(bytes,token){
  await draw();
 }
 async function load(item,force=false){
- if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token,file=item.file,read=fileReader(file,token);
- $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';bounded(token);
+ if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token;
+ const file=item.file._hexSnapshot?{name:item.file.name,size:item.file._hexSnapshot.size,_hexSnapshot:item.file._hexSnapshot}:item.file,read=fileReader(file,token);
+ $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';$('previewSource').textContent=file._hexSnapshot?'镜像提取快照 · r6':'';bounded(token);
  try{
   const header=await read(65536,'读取文件头');if(token!==S.token)return;const kind=P.classify(header,file.name);$('previewFormat').textContent=kind.label;
   if(kind.kind==='unsupported'){stage.append(el('p',kind.note,{class:'preview-empty'}));note.textContent='可使用其他文件分析标签继续检查。';ready(token,'此格式尚无内容预览。');return;}
