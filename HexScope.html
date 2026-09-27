@@ -10660,7 +10660,7 @@ root.HexPreviewPDF={open,OfflineBinaryDataFactory};
 'use strict';
 const H=window.HexApp,P=window.HexPreviewCore,$=H.$;
 const stage=$('previewStage'),tools=$('previewTools'),status=$('previewStatus'),note=$('previewNote');
-const S={id:null,file:null,token:0,serial:0,worker:null,pending:new Map(),urls:new Set(),pdf:null,render:null,timer:null,password:null};
+const S={id:null,file:null,token:0,serial:0,worker:null,pending:new Map(),reads:new Set(),urls:new Set(),pdf:null,render:null,timer:null,password:null};
 function el(tag,text,attrs={}){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;for(const [key,value]of Object.entries(attrs))node.setAttribute(key,value);return node;}
 function button(text,fn){const node=el('button',text,{class:'secondary',type:'button'});node.onclick=fn;tools.append(node);return node;}
 function select(label,items,fn){const node=el('select',undefined,{'aria-label':label});for(const [value,text]of items)node.append(el('option',text,{value}));node.onchange=()=>fn(node.value);const wrapper=el('label',label+' ');wrapper.append(node);tools.append(wrapper);return node;}
@@ -10668,6 +10668,7 @@ function url(blob){const value=URL.createObjectURL(blob);S.urls.add(value);retur
 function terminate(){if(S.worker){S.worker.terminate();S.worker=null;}for(const request of S.pending.values()){clearTimeout(request.timer);request.reject(Error('预览已停止。'));}S.pending.clear();}
 function cleanup(reset=true){
  ++S.token;clearTimeout(S.timer);S.timer=null;S.password=null;$('previewPassword').value='';$('previewPasswordForm').hidden=true;
+ for(const requestId of S.reads)window.hexscopeFiles?.cancelPreview(requestId).catch(()=>{});S.reads.clear();
  S.render?.cancel();S.render=null;S.pdf?.destroy().catch(()=>{});S.pdf=null;terminate();
  for(const media of stage.querySelectorAll('audio,video')){media.pause();media.removeAttribute('src');media.load();}
  for(const image of stage.querySelectorAll('img')){image.onload=null;image.onerror=null;image.removeAttribute('src');}
@@ -10679,6 +10680,28 @@ function stop(message='预览已停止，可点击重新载入。'){cleanup(fals
 function failure(error,token){if(token!==S.token)return;stop('无法预览：'+String(error.message||error));}
 function bounded(token,milliseconds=30000){clearTimeout(S.timer);S.timer=setTimeout(()=>{if(token===S.token)stop('预览超过 '+milliseconds/1000+' 秒，已停止。可改用十六进制、提取文件，或稍后重新载入。');},milliseconds);$('previewStop').disabled=false;}
 function ready(token,message){if(token!==S.token)return false;clearTimeout(S.timer);S.timer=null;$('previewStop').disabled=true;status.textContent=message;return true;}
+function fileReader(file,token){
+ // Cache only this preview's bytes. Encoding changes and small-file format
+ // detection reuse the same snapshot; no second copy is added to the queue.
+ let cached=null;
+ return async(end,step='读取文件内容')=>{
+  if(token!==S.token)throw Error('预览已停止。');
+  const length=Math.min(file.size,end);if(cached&&cached.length>=length)return cached.subarray(0,length);
+  const requestId=++S.serial;let data;
+  try{
+   if(window.hexscopeFiles?.readPreview){S.reads.add(requestId);data=await window.hexscopeFiles.readPreview(file,{offset:0,length,requestId});}
+   if(token!==S.token)throw Error('预览已停止。');
+   if(data==null)data=await file.slice(0,length).arrayBuffer();
+   if(token!==S.token)throw Error('预览已停止。');
+   cached=new Uint8Array(data);return cached;
+  }catch(error){
+   let message=String(error.message||error);
+   if(['NotReadableError','NotFoundError','SecurityError'].includes(error.name)||/requested file could not be read/i.test(message))
+    message='原文件引用已无法读取。请确认文件仍在原位置、所在磁盘已连接或挂载，然后重新选择或拖入文件；镜像提取文件可重新推送到文件分析。';
+   throw Error(step+'失败：'+message);
+  }finally{S.reads.delete(requestId);}
+ };
+}
 function request(data){
  if(!S.worker){
   S.worker=new Worker(url(new Blob([$('previewWorkerSource').textContent],{type:'text/javascript'})));
@@ -10730,30 +10753,33 @@ function renderSheet(result,token,query=''){
   try{const next=await request({action:'sheet',sheet:result.sheet,page:result.page,query,...changes});if(token===S.token&&local===S.sheetSerial)renderSheet(next,token,changes.query??query);}catch(error){failure(error,token);}
  }
 }
-async function renderText(file,token,encoding='auto'){
+async function renderText(file,read,token,encoding='auto'){
  const serial=++S.serial;S.textSerial=serial;
- const bytes=new Uint8Array(await file.slice(0,P.LIMITS.text+4).arrayBuffer());if(token!==S.token||serial!==S.textSerial)return;
+ const bytes=await read(P.LIMITS.text+4);if(token!==S.token||serial!==S.textSerial)return;
  const result=P.text(bytes,encoding);tools.replaceChildren();stage.replaceChildren();
- const picker=select('文本编码',[['auto','自动（UTF / GB18030）'],['utf-8','UTF-8'],['gb18030','GB18030 / GBK'],['utf-16le','UTF-16 LE'],['utf-16be','UTF-16 BE'],['windows-1252','Windows-1252']],value=>renderText(file,token,value).catch(e=>failure(e,token)));picker.value=encoding;
+ const picker=select('文本编码',[['auto','自动（UTF / GB18030）'],['utf-8','UTF-8'],['gb18030','GB18030 / GBK'],['utf-16le','UTF-16 LE'],['utf-16be','UTF-16 BE'],['windows-1252','Windows-1252']],value=>renderText(file,read,token,value).catch(e=>failure(e,token)));picker.value=encoding;
  stage.append(el('pre',result.text));note.textContent='按纯文本显示，不执行 HTML、SVG、脚本或文档中的链接。';ready(token,'文本已载入 · '+result.encoding+(file.size>P.LIMITS.text?' · 仅预览前 2 MiB':'')+'。');
 }
 function renderArchive(result,token){
  const table=el('table',undefined,{class:'preview-sheet'}),head=el('tr');for(const text of ['成员路径','原始大小','压缩大小'])head.append(el('th',text));table.append(head);
  for(const entry of result.entries){const tr=el('tr');for(const text of [entry.name+(entry.encrypted?' [加密]':''),H.size(entry.size),H.size(entry.packed)])tr.append(el('td',text));table.append(tr);}stage.append(table);note.textContent='容器目录预览。解压和导出请使用「提取文件」标签。';ready(token,'ZIP 容器：'+result.entries.length+' 个成员。');terminate();
 }
-function renderImage(file,kind,header,token){
+async function renderImage(file,read,kind,header,token){
  if(file.size>P.LIMITS.image)throw Error('图片预览文件上限 32 MiB。');
  const dimensions=P.dimensions(header);if(dimensions&&dimensions[0]*dimensions[1]>P.LIMITS.pixels)throw Error('图片超过 1,600 万像素预览上限。');
+ const bytes=await read(file.size);if(token!==S.token)return;
  const wrap=el('div',undefined,{class:'preview-image-wrap'}),img=el('img',undefined,{alt:file.name});let scale=1,rotation=0;
  stage.classList.add('preview-image-stage');wrap.append(img);stage.append(wrap);bounded(token,20000);
  function apply(){const width=img.naturalWidth*scale,height=img.naturalHeight*scale;wrap.style.width=(rotation%180?height:width)+'px';wrap.style.height=(rotation%180?width:height)+'px';img.style.width=width+'px';img.style.height=height+'px';img.style.transform=`rotate(${rotation}deg)`;}
  button('适合宽度',()=>{scale=Math.min(1,Math.max(200,stage.clientWidth-40)/(rotation%180?img.naturalHeight:img.naturalWidth));apply();});button('100%',()=>{scale=1;apply();});button('缩小',()=>{scale=Math.max(.1,scale/1.25);apply();});button('放大',()=>{scale=Math.min(4,scale*1.25);apply();});button('旋转 90°',()=>{rotation=(rotation+90)%360;apply();});
  img.onload=()=>{if(token!==S.token)return;if(img.naturalWidth*img.naturalHeight>P.LIMITS.pixels){failure(Error('图片超过 1,600 万像素预览上限。'),token);return;}scale=Math.min(1,Math.max(200,stage.clientWidth-40)/img.naturalWidth);apply();ready(token,`${kind.label} · ${img.naturalWidth} × ${img.naturalHeight} 像素 · ${H.size(file.size)}`);};
  img.onerror=()=>failure(Error('图片数据损坏或当前运行时不支持这种图像。'),token);
- img.src=url(file.slice(0,file.size,kind.mime));note.textContent='棋盘格表示透明区域；旋转与缩放仅影响预览，原始像素分析在「像素 / LSB」标签。动图按浏览器原生行为播放。';
+ img.src=url(new Blob([bytes],{type:kind.mime}));note.textContent='棋盘格表示透明区域；旋转与缩放仅影响预览，原始像素分析在「像素 / LSB」标签。动图按浏览器原生行为播放。';
 }
-function renderMedia(file,kind,token){
- const media=el(kind.kind,undefined,{controls:'',preload:'metadata'});media.onloadedmetadata=()=>ready(token,kind.label+' · '+(Number.isFinite(media.duration)?media.duration.toFixed(1)+' 秒':'时长未知'));media.onerror=()=>failure(Error('音视频损坏或运行时不支持该编码。'),token);media.src=url(file.slice(0,file.size,kind.mime));stage.append(media);note.textContent='使用随包浏览器的音视频解码器；不自动播放。容器扩展名相同的文件可能采用不同编码，不保证每种编码都能播放。';ready(token,'音视频已载入，点击播放。');
+async function renderMedia(file,read,kind,token){
+ const snapshot=file.size<=128*1024*1024?new Blob([await read(file.size)],{type:kind.mime}):file.slice(0,file.size,kind.mime);
+ if(token!==S.token)return;
+ const media=el(kind.kind,undefined,{controls:'',preload:'metadata'});media.onloadedmetadata=()=>ready(token,kind.label+' · '+(Number.isFinite(media.duration)?media.duration.toFixed(1)+' 秒':'时长未知'));media.onerror=()=>failure(Error('音视频无法解码或文件引用已失效，请重新导入文件；当前运行时可能不支持该编码。'),token);media.src=url(snapshot);stage.append(media);note.textContent='使用随包浏览器的音视频解码器；不自动播放。容器扩展名相同的文件可能采用不同编码，不保证每种编码都能播放。'+(file.size>128*1024*1024?'大于 128 MiB 的音视频按原文件流式读取，播放期间请保持磁盘连接。':'');ready(token,'音视频已载入，点击播放。');
 }
 async function renderPDF(bytes,token){
  let pdf,pageNumber=1,scale=1,rotation=0,drawId=0;
@@ -10781,16 +10807,16 @@ async function renderPDF(bytes,token){
  await draw();
 }
 async function load(item,force=false){
- if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token,file=item.file;
+ if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token,file=item.file,read=fileReader(file,token);
  $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';bounded(token);
  try{
-  const header=new Uint8Array(await file.slice(0,65536).arrayBuffer());if(token!==S.token)return;const kind=P.classify(header,file.name);$('previewFormat').textContent=kind.label;
+  const header=await read(65536,'读取文件头');if(token!==S.token)return;const kind=P.classify(header,file.name);$('previewFormat').textContent=kind.label;
   if(kind.kind==='unsupported'){stage.append(el('p',kind.note,{class:'preview-empty'}));note.textContent='可使用其他文件分析标签继续检查。';ready(token,'此格式尚无内容预览。');return;}
-  if(kind.kind==='text'){await renderText(file,token);return;}
-  if(kind.kind==='image'){renderImage(file,kind,header,token);return;}
-  if(['audio','video'].includes(kind.kind)){renderMedia(file,kind,token);return;}
+  if(kind.kind==='text'){await renderText(file,read,token);return;}
+  if(kind.kind==='image'){await renderImage(file,read,kind,header,token);return;}
+  if(['audio','video'].includes(kind.kind)){await renderMedia(file,read,kind,token);return;}
   if(file.size>(kind.kind==='pdf'?P.LIMITS.pdf:P.LIMITS.office))throw Error(kind.kind==='pdf'?'PDF 预览文件上限 64 MiB。':'Office / ZIP 预览文件上限 32 MiB。');
-  const bytes=new Uint8Array(await file.arrayBuffer());if(token!==S.token)return;
+  const bytes=await read(file.size);if(token!==S.token)return;
   if(kind.kind==='pdf'){await renderPDF(bytes,token);return;}
   const result=await request({action:'open',kind:kind.kind,name:file.name,bytes});if(token!==S.token)return;
   if(result.kind==='docx')renderWord(result,token);else if(result.kind==='spreadsheet')renderSheet(result,token);else if(result.kind==='archive')renderArchive(result,token);

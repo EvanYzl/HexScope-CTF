@@ -76,4 +76,10 @@ Node.js 22.13+；`jsdom` 和 `@napi-rs/canvas` 仅供开发测试。所有解析
 
 `desktop/forensics.cjs` 的 `analyzeBatch` 在同一个服务任务锁内并行启动只读 icat 进程；`children` 集合让取消覆盖全部进程。`src/disk.js` 按并发数和单批活动字节预算连续提交，没有单次推送的总量截断。IPC 和 preload 明确暴露此操作，不增加任意文件读取或命令执行接口。
 
-新增 `scan-pool.test.cjs`、`queue-performance.test.cjs` 与 `transfer-performance.test.cjs` 共 15 项验证。完整 `test-all.cjs` 当前为 487 项；打包入口仍校验全部源码输入和正式 HTML，并在包内运行时复核并行 E01 读取。运行依赖和许可保持内置。
+新增 `scan-pool.test.cjs`、`queue-performance.test.cjs` 与 `transfer-performance.test.cjs` 共 15 项验证。r4 完整回归为 487 项；打包入口仍校验全部源码输入和正式 HTML，并在包内运行时复核并行 E01 读取。运行依赖和许可保持内置。
+
+## 4.1 r5 预览读取修复
+
+`desktop/preview-read.cjs` 提供独立的只读预览通道，`preload.cjs` 从真实 File 对象取得路径，`main.cjs` 注册主框架 IPC。校验来源大小、修改时间与读取期间的文件身份；停止任务会中断后续分块读取并关闭句柄。`preview/ui.js` 为当前预览保留字节快照，减少对浏览器原文件引用的依赖；生成字节与独立 HTML 仍走原有 File API。
+
+新增 `tests/preview-read.test.cjs` 共 14 项验证，完整回归为 501 项。正式打包包含新模块，并在包内运行时核对常见预览文件的读取哈希。实际桌面文件选择、拖放及用户报错的原始文件尚未复现验证；边界记录在上级 `验证记录.md`。

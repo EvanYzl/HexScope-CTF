@@ -1,5 +1,17 @@
 'use strict';
 const {contextBridge,ipcRenderer,webUtils}=require('electron');
+contextBridge.exposeInMainWorld('hexscopeFiles',{
+  readPreview:async(file,{offset,length,requestId})=>{
+    // Paths come only from a real File selected/dropped by the user, never from
+    // renderer-supplied strings. In-memory E01/crypto files stay in the renderer.
+    const filename=webUtils.getPathForFile(file);if(!filename)return null;
+    const result=await ipcRenderer.invoke('hexscope:preview-read','read',{
+      path:filename,size:file.size,lastModified:file.lastModified,offset,length,requestId
+    });
+    if(!result?.ok)throw Error(result?.error||'本机文件读取失败，请重新选择文件。');return result.data;
+  },
+  cancelPreview:requestId=>ipcRenderer.invoke('hexscope:preview-read','cancel',{requestId})
+});
 async function invoke(operation,args={}){const result=await ipcRenderer.invoke('hexscope:disk',operation,args);if(!result?.ok)throw Error(result?.error||'镜像操作失败');return result.data;}
 contextBridge.exposeInMainWorld('hexscopeDisk',{
   status:()=>invoke('status'),

@@ -40,7 +40,7 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "e25cd3e9c5c07cdad94b390ac1a0d09c3354b48c32dfa3458db1799ef4186037",
+  "htmlSHA256": "bef928c64af563955bfcc8386228dc733b2554e7db82bb4c945ceda3b43dee6b",
   "login": {
     "challengeLength": 21,
     "characterClasses": [
@@ -63,7 +63,17 @@
     "pdf": "actual packaged PDF worker: two-page PDF and text extraction passed",
     "assets": "CMaps, fonts and WASM embedded in tested HTML",
     "network": "no fetching implemented in the verification harness",
-    "nativeRendering": "not tested by this smoke; native off-screen canvas tested by developer suite"
+    "nativeRendering": "not tested by this smoke; native off-screen canvas tested by developer suite",
+    "nativeFileReads": {
+      "files": [
+        "sample.docx",
+        "sample.xlsx",
+        "sample.pdf",
+        "pixel.png"
+      ],
+      "contents": "all SHA-256 values match packaged originals",
+      "GUIFileBridge": "preload/IPC simulated in developer suite; actual native file picker not tested"
+    }
   },
   "icon": {
     "sizes": [

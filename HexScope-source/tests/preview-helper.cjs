@@ -21,10 +21,11 @@ function previewWorker(){
   port.native.on('message',message);port.native.once('error',error);port.postMessage({...data,id});
  });}};
 }
-function page(diskApi){
+function page(diskApi,fileApi){
  const errors=[],blobs=new Map(),workers=new Set();let serial=0;const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e));
  const dom=new JSDOM(readBuiltHTML(),{runScripts:'dangerously',url:'https://offline.invalid/',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
   w.hexscopeDisk=diskApi;
+  w.hexscopeFiles=fileApi;
   Object.assign(w,{TextEncoder,TextDecoder,Uint8Array,Uint8ClampedArray,Uint16Array,Uint32Array,Int8Array,Int16Array,Int32Array,Float32Array,Float64Array,ArrayBuffer,DataView,Blob,File,DOMMatrix,Path2D,ImageData,ReadableStream,WritableStream,TransformStream,structuredClone,AbortController});
   Object.assign(w,{Response,Request,Headers});Object.defineProperty(w,'crypto',{value:webcrypto});w.matchMedia=()=>({matches:false});
   w.URL.createObjectURL=blob=>{const id='blob:preview-test/'+(++serial);blobs.set(id,blob);return id;};w.URL.revokeObjectURL=id=>blobs.delete(id);

@@ -54,6 +54,13 @@ async function main({directory,scratch,output}){
  assert(html.includes('data:image/png;base64,'+fs.readFileSync(path.join(app,'assets/hexscope.png')).toString('base64')));
  const cryptography=await cryptoSmoke(html);
  const preview=await require('../preview/runtime-smoke.cjs').run(html,path.join(root,'示例文件/12_文件预览'));
+ const {readPreview}=require(path.join(app,'preview-read.cjs')),previewPaths=['sample.docx','sample.xlsx','sample.pdf','pixel.png'];
+ for(const name of previewPaths){
+  const filename=path.join(root,'示例文件/12_文件预览',name),stat=fs.statSync(filename,{bigint:true});
+  const bytes=await readPreview({path:filename,size:Number(stat.size),lastModified:Number(stat.mtimeNs/1000000n),offset:0,length:Number(stat.size)});
+  assert.equal(createHash('sha256').update(bytes).digest('hex'),createHash('sha256').update(fs.readFileSync(filename)).digest('hex'));
+ }
+ preview.nativeFileReads={files:previewPaths,contents:'all SHA-256 values match packaged originals',GUIFileBridge:'preload/IPC simulated in developer suite; actual native file picker not tested'};
  const core={TextEncoder,TextDecoder,Uint8Array,Uint32Array,DataView};core.self=core;core.globalThis=core;vm.createContext(core);vm.runInContext(script(html,'coreCode'),core);
  const {Forensics}=require(path.join(app,'forensics.cjs')),{convertVhd}=require(path.join(app,'vhd.cjs')),{WindowsMount}=require(path.join(app,'windows-mount.cjs'));
  const f=new Forensics(path.join(app,'engines/tsk/bin'));

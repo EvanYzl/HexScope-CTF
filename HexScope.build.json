@@ -17,7 +17,7 @@
     "video",
     "zip"
   ],
-  "htmlSHA256": "e25cd3e9c5c07cdad94b390ac1a0d09c3354b48c32dfa3458db1799ef4186037",
+  "htmlSHA256": "bef928c64af563955bfcc8386228dc733b2554e7db82bb4c945ceda3b43dee6b",
   "inputs": {
     "src/template.html": "0dd95ac602de70559c15b8e9c99ac03fb3382cb1e5a745a60f221549702307ce",
     "build.cjs": "8cd640b90b3a67acdd9f11eaa0043b21aea7383cf8f9887da70998524b5fc0c1",
@@ -63,7 +63,7 @@
     "crypto/src/ui.js": "f4621bb7d4cb0be90ebf9d05320e963c49af6d795e7458bd4ee91407b3e661bc",
     "preview/core.js": "1039dd2127de46ed01fa1e43d9db5f349c95574a90db2747ca4aa8d533cf9736",
     "preview/pdf.js": "151de90fe66b57b88b412242b397f0453fdb10f3da7271a6b4eb2ac13b6aee37",
-    "preview/ui.js": "93dc862dbf344695ac8ce666bbd9242750f56c9f0caadfcff6409c89943eca8f",
+    "preview/ui.js": "82dcdfee8d89b13ec1ea2fceafd244011beda332c5380806769999164a99f421",
     "preview/style.css": "5147cf22f1308d2f1aff79c03501c1d222e02af691325ffb597c425d628f21ef",
     "preview/panel.html": "1d2d50966486d0a090e22a4df9b56e9af7b39515b0f645d14b0cbe48aec9a87a",
     "preview/vendor/mammoth.js": "e549ac6375e8d0d991d526a49d89530a72f7ee006b512b9821ce1b8af93e8e89",

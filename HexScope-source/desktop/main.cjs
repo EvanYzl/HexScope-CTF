@@ -4,6 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const branding=require('./branding.json');
 const {installDiskIPC}=require('./disk-ipc.cjs');
+const {installPreviewIPC}=require('./preview-read.cjs');
 
 app.setName('HexScope CTF');
 if(typeof app.setAppUserModelId==='function')app.setAppUserModelId('org.hexscope.ctf');
@@ -30,6 +31,7 @@ function createWindow(){
       webSecurity:true,allowRunningInsecureContent:false,webviewTag:false,
       partition:'hexscope-offline-session',spellcheck:false}});
   installDiskIPC({ipcMain,dialog,shell},win,__dirname);
+  installPreviewIPC({ipcMain},win,__dirname);
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',event=>event.preventDefault());
   win.webContents.on('will-attach-webview',event=>event.preventDefault());
