@@ -1,0 +1,592 @@
+{
+  "engine": "Tesseract.js 7.0.0",
+  "repository": "https://github.com/tesseract-ocr/tessdata_fast",
+  "commit": "87416418657359cb625c412a48b6e1d6d41c29bd",
+  "license": "Apache-2.0",
+  "models": [
+    {
+      "code": "eng",
+      "name": "英语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
+      "sha256": "7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2",
+      "compressedSHA256": "f22e6d9b2804c62b69c5d2afd9007724469ded1c523f939be743bf829fcf9c6d",
+      "bytes": 4113088
+    },
+    {
+      "code": "chi_sim",
+      "name": "简体中文",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim.traineddata",
+      "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+      "compressedSHA256": "ed85cc1662e3b47492c22a63e9e7e71bdbc67d638a0a783520244b2d7fa7e15a",
+      "bytes": 2469156
+    },
+    {
+      "code": "chi_tra",
+      "name": "繁体中文",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_tra.traineddata",
+      "sha256": "529c5b5797d64b126065cd55f2bb4c7fd7b15790798091b1ff259941a829330b",
+      "compressedSHA256": "2a945bca4c78da980bef88ef3a75e4b2b3bb0474a8be4e57afde0530b41cb90f",
+      "bytes": 2366642
+    },
+    {
+      "code": "jpn",
+      "name": "日语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/jpn.traineddata",
+      "sha256": "1f5de9236d2e85f5fdf4b3c500f2d4926f8d9449f28f5394472d9e8d83b91b4d",
+      "compressedSHA256": "aad7bdb8ea84183a957ae283fee93d38e449a9243c5069d14c2b07c591e2726a",
+      "bytes": 2471260
+    },
+    {
+      "code": "kor",
+      "name": "韩语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/kor.traineddata",
+      "sha256": "6b85e11d9bbf07863b97b3523b1b112844c43e713df8b66418a081fd1060b3b2",
+      "compressedSHA256": "d1cb98db916d566de9043b72bf153a6819a50088f286a0a273a86710fc403a85",
+      "bytes": 1677415
+    },
+    {
+      "code": "chi_sim_vert",
+      "name": "简体中文（竖排）",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_sim_vert.traineddata",
+      "sha256": "20590de84725bab69cde93bd6e8ed360a13cc5421a7e7364ddeb93e9af53d6da",
+      "compressedSHA256": "956b04a93584b3502849aa0ad95810d1d394aaaa1ae43efce232bb8f8fcd2bd8",
+      "bytes": 1927902
+    },
+    {
+      "code": "chi_tra_vert",
+      "name": "繁体中文（竖排）",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/chi_tra_vert.traineddata",
+      "sha256": "1df02a4b210e5c217b783819538b63e9dfe6904e2b5e53b62664f1b9f7a989d0",
+      "compressedSHA256": "6ba45280bb7fac15de7da8fc637a7deceab009db8fa04b491bd4e14e93586a10",
+      "bytes": 1824756
+    },
+    {
+      "code": "jpn_vert",
+      "name": "日语（竖排）",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/jpn_vert.traineddata",
+      "sha256": "bf1e2640954691797e2dc14f38533e601b59ee37958698ae0f0b81dc6f09c71b",
+      "compressedSHA256": "b8aeb9be5a0bc874a59d6e866da441d3f323935bc819745cc6f2fe05c2a2009a",
+      "bytes": 3037480
+    },
+    {
+      "code": "afr",
+      "name": "南非荷兰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/afr.traineddata",
+      "sha256": "126d480bfae95be2a911ed4916465e27bde75fea2da631e21b96762e5f239646",
+      "compressedSHA256": "e250e2630b7b07d62fb4050fa488a40520f6318f2e61571b6122c8d2f84ef237",
+      "bytes": 2652786
+    },
+    {
+      "code": "ara",
+      "name": "阿拉伯语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ara.traineddata",
+      "sha256": "e3206d3dc87fd50c24a0fb9f01838615911d25168f4e64415244b67d2bb3e729",
+      "compressedSHA256": "6f2683d88a1f93f02b71a35be7d7d08f4a18e9fbfacdec98f6966362b54ae2d2",
+      "bytes": 1432056
+    },
+    {
+      "code": "aze",
+      "name": "阿塞拜疆语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/aze.traineddata",
+      "sha256": "a365310848aecb739f19369cb3831d4660fcd9345d798e91a3042455f9ccc9f0",
+      "compressedSHA256": "8829f7fa1663f3664235c659861144d737416b0efea13666bc2c40db81cdc70f",
+      "bytes": 3524799
+    },
+    {
+      "code": "bel",
+      "name": "白俄罗斯语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/bel.traineddata",
+      "sha256": "9c6668a0b202f3dcfe074b64620d108e1902ca7498a40b5a11b4a3da6112d58f",
+      "compressedSHA256": "0aae90fa5302a4670b8ecc82a300eba3bed99c60bbf8687d7313d3adcc6d76d0",
+      "bytes": 3692098
+    },
+    {
+      "code": "ben",
+      "name": "孟加拉语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ben.traineddata",
+      "sha256": "31163084c279aaebd376216f0c3d5c17ad4b5fee8db49dae79c20000b5de5964",
+      "compressedSHA256": "807ffeb79668bfa10ac8bf3b34b99b474e01e417fcf44361e6954e30a1514ef7",
+      "bytes": 855841
+    },
+    {
+      "code": "bos",
+      "name": "波斯尼亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/bos.traineddata",
+      "sha256": "6cc8cc87cf1afbfa6a41febb725dbadb14bed96a46685906440a6eb8a7892f04",
+      "compressedSHA256": "a8c9cd52d950c85564195251117fb20b4105cb91cbd813094126289f56b8398d",
+      "bytes": 2498242
+    },
+    {
+      "code": "bul",
+      "name": "保加利亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/bul.traineddata",
+      "sha256": "aebc9b0fcc8cfaf8a9f38a02bb7b85052bd850744696a2c11cf0081820e5b21e",
+      "compressedSHA256": "17070e77ded5e7dd61af01efa4364f4d8b70191f9dd507a66ba0a661c1d43aa1",
+      "bytes": 1675212
+    },
+    {
+      "code": "cat",
+      "name": "加泰罗尼亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/cat.traineddata",
+      "sha256": "250db73cd5b380d2798581295dc12f20d0828cdb335a65d833d12dfdbf57117d",
+      "compressedSHA256": "c472c916dc6e6f3592213318f22f893a76e032f7e0e5cd4caaddf5ebd6bdfaae",
+      "bytes": 1146012
+    },
+    {
+      "code": "ces",
+      "name": "捷克语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ces.traineddata",
+      "sha256": "934bcaf97ef3348413263331131c9fa7f55f30db333c711929c124fb635f7e1b",
+      "compressedSHA256": "dfec85181cfb27a2a152d159d382c8529266771cc381cceb4a2cf47064f8eeeb",
+      "bytes": 3795684
+    },
+    {
+      "code": "cym",
+      "name": "威尔士语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/cym.traineddata",
+      "sha256": "7f6ee3374749645a7c92dfe773f5c3d6492194d371712ecfd775edc53c363fb4",
+      "compressedSHA256": "6f97f74f9d313c3d68a519f932bb5524f9cde90c2eab580e5433a2b2cc09a98b",
+      "bytes": 2208919
+    },
+    {
+      "code": "dan",
+      "name": "丹麦语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/dan.traineddata",
+      "sha256": "acb1fd074487a31d1294fcdfd7d7c673467ffd8aeacb2ccd61ebcbf04eb4e2fa",
+      "compressedSHA256": "5a6e368d16d3bf690cde647034a4a964c1866f22a4b54b9f2fc9880791cd0b37",
+      "bytes": 2580059
+    },
+    {
+      "code": "deu",
+      "name": "德语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/deu.traineddata",
+      "sha256": "19d219bbb6672c869d20a9636c6816a81eb9a71796cb93ebe0cb1530e2cdb22d",
+      "compressedSHA256": "1227db2cc58218d255733a08491a4fc28a3d24463b37c4dc05be63e5cde63162",
+      "bytes": 1525436
+    },
+    {
+      "code": "ell",
+      "name": "希腊语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ell.traineddata",
+      "sha256": "4fba8a0b461038d51f1c20d043d4f2ac38c4e778f1b90830847f7bd8fa3ba726",
+      "compressedSHA256": "e673be6b65877c748b60bbc61375588a5e5f3e89770020724438af464096ff59",
+      "bytes": 1419514
+    },
+    {
+      "code": "est",
+      "name": "爱沙尼亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/est.traineddata",
+      "sha256": "515d4a773682b286369511e83fe412bcff16a92a886f99c761c1d760a7e30456",
+      "compressedSHA256": "9372aace4ae327b93c8a00bea536243c84ab413e1ce5f3daa4fbbcc1a5f26520",
+      "bytes": 4458101
+    },
+    {
+      "code": "eus",
+      "name": "巴斯克语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/eus.traineddata",
+      "sha256": "40e7418296c355d9fd9ca843d115c51e740089e576e887443e61704823cd6624",
+      "compressedSHA256": "5f3b510bad7483d742878891bc40b6f1a3d406828b796628e59a9652384571fc",
+      "bytes": 5175921
+    },
+    {
+      "code": "fas",
+      "name": "波斯语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/fas.traineddata",
+      "sha256": "db1c0a91208aff00d3cf1ed2c1d23f76419afd5f024688b4f71adc3f2ce4a505",
+      "compressedSHA256": "36b06ed69b1bf7d9c0ea98de1e0d73e9f2d4213d9dccba1c73005d1a978a5f99",
+      "bytes": 431500
+    },
+    {
+      "code": "fin",
+      "name": "芬兰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/fin.traineddata",
+      "sha256": "61a04cd62b507c3d9ae0e1cda399e6715ebf49dea9df47897c8acdcd3bd3e13c",
+      "compressedSHA256": "274847c781c8807936cc28e6d69b1ee47711c28f2c7d0ecd7a576509efe19fe8",
+      "bytes": 7865732
+    },
+    {
+      "code": "fra",
+      "name": "法语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/fra.traineddata",
+      "sha256": "ced037562e8c80c13122dece28dd477d399af80911a28791a66a63ac1e3445ca",
+      "compressedSHA256": "fcbca540f9f28d259716771707ea3f8e9ea0a909d0c9661287cda900cca81ea2",
+      "bytes": 1130365
+    },
+    {
+      "code": "gle",
+      "name": "爱尔兰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/gle.traineddata",
+      "sha256": "2fe9ba6119aac7e2a20d6cfb69ed91afe9520f41bc7e3a903f84280f2663858d",
+      "compressedSHA256": "885401edc707deda75c56d5ab9c45a64ac5adc11efa0759778d29e618be13e56",
+      "bytes": 1181824
+    },
+    {
+      "code": "glg",
+      "name": "加利西亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/glg.traineddata",
+      "sha256": "7947619c5544d86849f563bd737ad90dbea9f5319fbd838c4747a7a1cd40b260",
+      "compressedSHA256": "8b888ff1b33f0f25ffa58eb8c16088bd81a3108cbdf58f96e5126a0e9f178cdd",
+      "bytes": 2554555
+    },
+    {
+      "code": "guj",
+      "name": "古吉拉特语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/guj.traineddata",
+      "sha256": "fa69658614b4946a9afae8853d67e0689838803dfa3d12c2e35ec53ee6f8df34",
+      "compressedSHA256": "6e08fe7cd866f8b39e23ae8fcf6c012854640c72155a898be4718e46f6b25ef9",
+      "bytes": 1418394
+    },
+    {
+      "code": "heb",
+      "name": "希伯来语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/heb.traineddata",
+      "sha256": "11f9e43ab227f786352a50f75c94c2e9906f1baba86d93276da19da7ce0904db",
+      "compressedSHA256": "69b52a32193fa9a0807412f51d627027b1b5c84c16353e1f10f5fb1f1bb4c9f2",
+      "bytes": 961404
+    },
+    {
+      "code": "hin",
+      "name": "印地语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/hin.traineddata",
+      "sha256": "4c73ffc59d497c186b19d1e90f5d721d678ea6b2e277b719bee4e2af12271825",
+      "compressedSHA256": "8fa12cc307ccfe0bfbb95b31232aa8cce815693cb7564ba00f9f57023ec0668a",
+      "bytes": 1122751
+    },
+    {
+      "code": "hrv",
+      "name": "克罗地亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/hrv.traineddata",
+      "sha256": "9e515d9832ce259dbab550b1cc6b998f8b929faf2edacaaca981b05adb130571",
+      "compressedSHA256": "c78b0a43e61c45434566d68289a6a1e44e9b0ffef14009a2c35606d8569a1db1",
+      "bytes": 4103348
+    },
+    {
+      "code": "hun",
+      "name": "匈牙利语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/hun.traineddata",
+      "sha256": "35067e7cfe102dcdc953f9a758fdfaa6296b17a1ee6d874ee780fa306430b9fb",
+      "compressedSHA256": "9b5eeb281569a81bbe14f82870aa63669ff739c2df0c7c98805f69ce8d756384",
+      "bytes": 5296273
+    },
+    {
+      "code": "ind",
+      "name": "印度尼西亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ind.traineddata",
+      "sha256": "69786901da87ab8766c1ea7fbb10b28f2110c14da3f6c8f2735df131fba95d88",
+      "compressedSHA256": "fc6cb316ab836e5d75059956071f32ee873b8e12031a8b0f202ae57d3e96e6ec",
+      "bytes": 1122661
+    },
+    {
+      "code": "isl",
+      "name": "冰岛语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/isl.traineddata",
+      "sha256": "5ec828c363f3f0062c3caf08216677cf5f3c0c981b05fab445123a16b98f10a9",
+      "compressedSHA256": "a98eed62f6030e4b7ae9b4ce4083bce4cc0ab230c33b45b646e2f69103a36501",
+      "bytes": 2278973
+    },
+    {
+      "code": "ita",
+      "name": "意大利语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ita.traineddata",
+      "sha256": "b8f89e1e785118dac4d51ae042c029a64edb5c3ee42ef73027a6d412748d8827",
+      "compressedSHA256": "71cde8c4fbb29a4238f5601abbc9db058f77e85e93ae2dbb8b28ce7f3e8dfd5b",
+      "bytes": 2701314
+    },
+    {
+      "code": "kan",
+      "name": "卡纳达语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/kan.traineddata",
+      "sha256": "bd31e6b6ae93271e3bcf5383d306d8eefbb91542937cd6d735a5930c970e61d8",
+      "compressedSHA256": "357d33b95a584df1b7a54a5dd230a4a676ca123ee03e1fe4bece6836dcd106c5",
+      "bytes": 3608331
+    },
+    {
+      "code": "kat",
+      "name": "格鲁吉亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/kat.traineddata",
+      "sha256": "557abb6f1c68bc1b286f1bdd00bb6b82f85a427a91899807dab6c2f6c7986731",
+      "compressedSHA256": "eceea8b77c3f404d00fb15ab94049ec7ec952dcddd7e2db4fe30b2cc8377e67e",
+      "bytes": 2524769
+    },
+    {
+      "code": "kaz",
+      "name": "哈萨克语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/kaz.traineddata",
+      "sha256": "fcc01eed3815a42b9c6321c4c9d3606f39b166cbf95ade98b7d8d12063eae53d",
+      "compressedSHA256": "79851c4a87d5e5a9fcb10189fc36b32b784f8b4e8e3510a4327d0d3735d356ec",
+      "bytes": 4734644
+    },
+    {
+      "code": "khm",
+      "name": "高棉语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/khm.traineddata",
+      "sha256": "47f110575341b322052f3becbefee61a3ecf1ef549352b5d4d33d28afe30d099",
+      "compressedSHA256": "45b4240cf4b002beea42e70ce295fcda9db1e2a965c35e26ebdef6d253aa4624",
+      "bytes": 1446926
+    },
+    {
+      "code": "lao",
+      "name": "老挝语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/lao.traineddata",
+      "sha256": "20124962e93e68121e02c49a949d1f9df5db87dd62e5e4aa578362ca532444f8",
+      "compressedSHA256": "0c7b34bf90fe874093ea7a8a0c57d6ffd219e4ad5602ad7ef8bdb10b3993f2d9",
+      "bytes": 6386744
+    },
+    {
+      "code": "lat",
+      "name": "拉丁语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/lat.traineddata",
+      "sha256": "3859d8ba60404f4b79830622625bbc76fb4ee2808eac1ad360ffa77f0a533328",
+      "compressedSHA256": "644cb4afaf488963e97b08ef28e9ae954f3dd7893567d2bb5c764811135949f4",
+      "bytes": 3187463
+    },
+    {
+      "code": "lav",
+      "name": "拉脱维亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/lav.traineddata",
+      "sha256": "7d9eaf22254b381f18b806cd6cb647862a397a7221adbce3e22cc421793a8847",
+      "compressedSHA256": "c4950cdf0ea790b6982fc07d92c080df9425ff75758a8cdee9322fc2d52d2dc0",
+      "bytes": 2717247
+    },
+    {
+      "code": "lit",
+      "name": "立陶宛语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/lit.traineddata",
+      "sha256": "1e383df5b055583bc01cb5764ecdf74c540753f2cb3f8205e7105361da4bc989",
+      "compressedSHA256": "8d4801e9930cefa0a94f520e4505a6391b44c102de472e69375cda956b2acd6e",
+      "bytes": 3154896
+    },
+    {
+      "code": "mal",
+      "name": "马拉雅拉姆语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/mal.traineddata",
+      "sha256": "bd05cbf1b197e7810d2903419aedb06f9ef77bfedf50b358673c1d18d707cdb4",
+      "compressedSHA256": "77e5b5de263e32f2d02a8de61127195e20a6694c5ebb88f36137bb497327443a",
+      "bytes": 5275996
+    },
+    {
+      "code": "mar",
+      "name": "马拉地语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/mar.traineddata",
+      "sha256": "0ba3f2d116972e72fe9e176bc84c38e81dfb6670f4ed1f7f6c8e16a27da7cb61",
+      "compressedSHA256": "8d2dfadc6c0d675c6bbefae67ff72da01f4ca584533c704315f2bd7121ed3fce",
+      "bytes": 2118233
+    },
+    {
+      "code": "mkd",
+      "name": "马其顿语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/mkd.traineddata",
+      "sha256": "58622bf154830fa62103359938564aeb8112b929759e22a48224f3ecfaac34c6",
+      "compressedSHA256": "1ee87f5c26febb5f564acdc67423e3a352caf47b334fb0e5b1685085b25f1a13",
+      "bytes": 1600188
+    },
+    {
+      "code": "msa",
+      "name": "马来语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/msa.traineddata",
+      "sha256": "e41a3e5febfec50c90371eb1cbb17a48b10cad387900e3420b1f134c1b766cba",
+      "compressedSHA256": "0f950cdb4ec3468fde1cf557200c72c82bb65dba0ddf3d3f8073f6ed1afde8c3",
+      "bytes": 1747801
+    },
+    {
+      "code": "mya",
+      "name": "缅甸语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/mya.traineddata",
+      "sha256": "02aa6c25cfe9e583fa7b5d4131eac948f962308983f0f397df077dea58212b03",
+      "compressedSHA256": "b0fbfaca0e27dd622f811516cbab6d61867d28577d604dbdd16c204bb0574b61",
+      "bytes": 4640561
+    },
+    {
+      "code": "nep",
+      "name": "尼泊尔语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/nep.traineddata",
+      "sha256": "280ba9450b4f21afbf5985e0de87857b75a972577c50ef0603c141ddde4f1cb8",
+      "compressedSHA256": "9f56774e3e5260bec6b8fb4828609c04920edac8309533aebad69f29bff73d58",
+      "bytes": 1002911
+    },
+    {
+      "code": "nld",
+      "name": "荷兰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/nld.traineddata",
+      "sha256": "ced0e5e046a84c908a6aa7accbef9a232c4a5d9a8276691b81c6ee64d02963f6",
+      "compressedSHA256": "8a3cbb99e081d05b0d78696605f126c02c8431af47ee415a10682d88ee33690d",
+      "bytes": 6050296
+    },
+    {
+      "code": "nor",
+      "name": "挪威语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/nor.traineddata",
+      "sha256": "0451eb4f8049ae78196806bf878a389a2f40f1386fe038568cf4441226ba6ef2",
+      "compressedSHA256": "2b2d0aa6bb0a07213b91d26d8d44da4c05c147f08d1bb3c827a0f503526c1dcc",
+      "bytes": 3610079
+    },
+    {
+      "code": "pan",
+      "name": "旁遮普语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/pan.traineddata",
+      "sha256": "1ec0907fc3534065ea9ae190c6bb7ec9e5c74fd9d2fa996aaec7407f11ad8131",
+      "compressedSHA256": "4b252fc79ad23b9cacd0c70c5c1ba9b027d6f38acb6eb065408a5faf602a9f04",
+      "bytes": 497721
+    },
+    {
+      "code": "pol",
+      "name": "波兰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/pol.traineddata",
+      "sha256": "c4476cdbc0e33d898d32345122b7be1cbf85ace15f920f06c7714756e1ef79b2",
+      "compressedSHA256": "ffeedad4581eb8fdfcd7a6ad8c8103354fc7b70c8f01c611c8c1e7f93a56cf82",
+      "bytes": 4765518
+    },
+    {
+      "code": "por",
+      "name": "葡萄牙语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/por.traineddata",
+      "sha256": "c4932b937207a9514b7514d518b931a99938c02a28a5a5a553f8599ed58b7deb",
+      "compressedSHA256": "052409525705eb2bf0dce146f8293e8a8302d3b061ee4497ffbdea76e17d3305",
+      "bytes": 1982756
+    },
+    {
+      "code": "ron",
+      "name": "罗马尼亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ron.traineddata",
+      "sha256": "9adfde6b51ba4b97efd10ea37c3070fd3fc2bad7815e81f5c3c198cd96216cc9",
+      "compressedSHA256": "15087c2270057bfab17ef83b76a121278d5600c00fb2928bba7d2c7477f31ad1",
+      "bytes": 2376323
+    },
+    {
+      "code": "rus",
+      "name": "俄语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/rus.traineddata",
+      "sha256": "e16e5e036cce1d9ec2b00063cf8b54472625b9e14d893a169e2b0dedeb4df225",
+      "compressedSHA256": "aba5ad36f83aa102cda23b8d7fb6682ce976da34796f91787a3e490727a8372d",
+      "bytes": 3861738
+    },
+    {
+      "code": "sin",
+      "name": "僧伽罗语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/sin.traineddata",
+      "sha256": "bc75c6df2375a30c9f7e759fa7d4b58ae3ecf9ce72668a702d01acb13e551422",
+      "compressedSHA256": "8263c9ff81b4d7ec3e35861f8dbb0d0593f5a74c9128e42e0556f57d3b29dce2",
+      "bytes": 1727413
+    },
+    {
+      "code": "slk",
+      "name": "斯洛伐克语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/slk.traineddata",
+      "sha256": "fbcc400a9c74c6a13d922fcb1211b655d1b165387b675ed75cd2dbd756b974a5",
+      "compressedSHA256": "8d97bff0281fe5b214a4f70b2bbed085f1b14f68f86e59e8fb231ba1408e12be",
+      "bytes": 4427661
+    },
+    {
+      "code": "slv",
+      "name": "斯洛文尼亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/slv.traineddata",
+      "sha256": "b937632c17ce5fdf20535d25feec044da10a0c4c8234f4302d5606fd671cf60d",
+      "compressedSHA256": "49e091138dcb6933163e20513a38c84ea35a01463e30b062614d3bed5a08610a",
+      "bytes": 3003829
+    },
+    {
+      "code": "spa",
+      "name": "西班牙语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/spa.traineddata",
+      "sha256": "6f2e04d02774a18f01bed44b1111f2cd7f3ba7ac9dc4373cd3f898a40ea6b464",
+      "compressedSHA256": "809333af68aa83502859921c85b8965b011528baef4c49836668872b69dbd6a3",
+      "bytes": 2294433
+    },
+    {
+      "code": "sqi",
+      "name": "阿尔巴尼亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/sqi.traineddata",
+      "sha256": "1d89621d9afe8ddf35b403ecf8951edea52c3a960d241f287b1a7b2c5ba8daac",
+      "compressedSHA256": "95d4fbda5c14f14facbd6a378232c0917a7a26343cec7676e582a39cd0644776",
+      "bytes": 1874705
+    },
+    {
+      "code": "srp",
+      "name": "塞尔维亚语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/srp.traineddata",
+      "sha256": "aa41ae3d9cc705e60d398ab38a5c3cc8b772c0d420c7d4f0859beb13d0e321b6",
+      "compressedSHA256": "47b89a19510cc834cc9ecfb43faeba1607918a72e66c224df715186c0e9d4a2f",
+      "bytes": 2149931
+    },
+    {
+      "code": "swa",
+      "name": "斯瓦希里语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/swa.traineddata",
+      "sha256": "395439d1ec308535066cbaea9b15e0e4cc81f8609170af76ab7e7e8d3ec42f3e",
+      "compressedSHA256": "2638990ec32260c0f1690c8af1d654efdf50c275dfb15bfd277590596d722705",
+      "bytes": 2167651
+    },
+    {
+      "code": "swe",
+      "name": "瑞典语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/swe.traineddata",
+      "sha256": "f7304988d41f833efebcc2d529df54b1903ecebbc3da1faabd19a0fddd4fe586",
+      "compressedSHA256": "034b4d29bfdd3cca4e64121b6e6bf51086415d5e14847f18ffcb00ae471e0e3b",
+      "bytes": 4167034
+    },
+    {
+      "code": "tam",
+      "name": "泰米尔语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/tam.traineddata",
+      "sha256": "d02fbec24be4b07e32e80d0ccfc3b6b67a3c5d61c9d0a7c8532677990912c6ec",
+      "compressedSHA256": "3e63c05f259b9faa9620f81153a8e61ca2a94e031d8ded59b50ba0ef3d840635",
+      "bytes": 3237963
+    },
+    {
+      "code": "tel",
+      "name": "泰卢固语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/tel.traineddata",
+      "sha256": "d10691fddd5b67802e1c12800ebb321d3b8bcd8d24a2ac3ff206f93188c04ab5",
+      "compressedSHA256": "0cbc5a9f64dcf49fbf9a7083d77e8eabdc93e9a290152b08cee2201c24ca5180",
+      "bytes": 2769654
+    },
+    {
+      "code": "tha",
+      "name": "泰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/tha.traineddata",
+      "sha256": "294227cc2d1292b0acb28d61d4115c88252b96d466ca90b417cf4cf0c67bf07c",
+      "compressedSHA256": "29c028f0e5e771818b0232969a9ad2c97b1eff5df7f19fbc16bd765fd74f337c",
+      "bytes": 1072600
+    },
+    {
+      "code": "tur",
+      "name": "土耳其语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/tur.traineddata",
+      "sha256": "7393381111e1152420fc4092cb44eef4237580d21b92bf30d7d221aad192c6b7",
+      "compressedSHA256": "9791c8e38ca9ef9d4739215d4486c0bb3d120e45ce425c8651169cb9128a7b78",
+      "bytes": 4550554
+    },
+    {
+      "code": "ukr",
+      "name": "乌克兰语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/ukr.traineddata",
+      "sha256": "d59e53e2bded32f4445f124b4b00240fcac7e8044c003ab822ccb94f0b3db59b",
+      "compressedSHA256": "9bfc5321520377b3d73b24341a6b6bc6ad8dd1f6d207ddc39dbac2b5dfa5eb1f",
+      "bytes": 3825102
+    },
+    {
+      "code": "urd",
+      "name": "乌尔都语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/urd.traineddata",
+      "sha256": "62e8250ce2a994106e313a82e26a516a39e2cf159d0ce3c5b5008387fd0d555f",
+      "compressedSHA256": "9044c659f435ef1f75c7ce4d8c845c2ebc71fa70abc204a3612a0a1fdd961e14",
+      "bytes": 1398718
+    },
+    {
+      "code": "uzb",
+      "name": "乌兹别克语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/uzb.traineddata",
+      "sha256": "0e39021eefe692906b50d9bd22e580fa57fe43fa35db6846ad8b6369ddc21ea8",
+      "compressedSHA256": "0eefe77777cc96ebb29368bc1c889767976d538924b50bc630d53145518befff",
+      "bytes": 6470703
+    },
+    {
+      "code": "vie",
+      "name": "越南语",
+      "url": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/87416418657359cb625c412a48b6e1d6d41c29bd/vie.traineddata",
+      "sha256": "79df64caf7bcfb2a27df5042ecb6121e196eada34da774956995747636d5bfa1",
+      "compressedSHA256": "97a09fa3458aa05075dff19cc78600d236397782fd87e95a11f0fbc585b5627a",
+      "bytes": 531275
+    }
+  ]
+}

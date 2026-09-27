@@ -16,9 +16,10 @@ LOCK = {
 DOCS = ['使用说明.md', '镜像功能说明.md', '哈希与盘符挂载说明.md', '新增题型与示例.md', '验证记录.md',
         'THIRD_PARTY_NOTICES.md', '密码分析使用说明.md', '题型覆盖与限制.md', '密码模块第三方许可.md', '4.1密码模块更新说明.md',
         '文件预览说明.md', '4.1文件预览更新说明.md', '文件预览第三方许可.md',
-        'README.md', 'AUTHORS.md', 'CONTRIBUTING.md', 'CHANGELOG.md']
+        'README.md', 'AUTHORS.md', 'CONTRIBUTING.md', 'CHANGELOG.md', '图文与扩展工坊说明.md', '扩展功能覆盖清单.md']
 APP_FILES = ['main.cjs', 'preload.cjs', 'disk-ipc.cjs', 'preview-read.cjs', 'preview-snapshots.cjs', 'forensics.cjs', 'hashing.cjs', 'vhd.cjs',
-             'windows-mount.cjs', 'mount-helper.ps1', 'package.json', 'branding.json', 'enable-utf8.ps1']
+             'windows-mount.cjs', 'mount-helper.ps1', 'package.json', 'branding.json', 'enable-utf8.ps1',
+             'vision-ipc.cjs', 'vision-worker.cjs', 'vision-engine.cjs', 'vision-capture.cjs', 'extensions-protocol.cjs']
 REPO_FILES = ['.gitignore', '.gitattributes',
               '.github/ISSUE_TEMPLATE/bug_report.yml', '.github/ISSUE_TEMPLATE/feature_request.yml']
 VERIFICATION_FILES = {'自动化测试.json', '自动化测试.log', '便携运行时验证.json', '便携运行时验证.log',
@@ -115,6 +116,7 @@ def main():
     for item in APP_FILES: shutil.copy2(SOURCE / 'desktop' / item, app / item)
     shutil.copy2(html, app / 'HexScope.html'); shutil.copy2(docs_root / 'HexScope.build.json', app / 'HexScope.build.json')
     shutil.copytree(SOURCE / 'desktop/vendor', app / 'vendor')
+    shutil.copytree(SOURCE / 'extensions', app / 'extensions')
     shutil.copytree(assets, app / 'assets')
     for p in engines.rglob('*'):
         if p.is_file() and ship_engine(p.relative_to(engines)):
@@ -132,11 +134,12 @@ def main():
     shutil.copy2(SOURCE / 'preview/THIRD_PARTY_NOTICES.md', target / 'licenses-and-libraries/preview/THIRD_PARTY_NOTICES.md')
     shutil.copytree(docs_root / '示例文件', target / '示例文件')
     (target / '快速开始.txt').write_text(
-        'HexScope CTF 4.1 · 文件预览增强版（含 78 项密码工具）\n'
+        'HexScope CTF 4.1 r8 · 图文与扩展工坊版（含 78 项密码工具）\n'
         + branding['credit'] + '\n' + branding['repository'] + '\n\n解压整个目录后双击 HexScope-CTF.exe。移动时复制整个文件夹。\n'
         '适用 Windows 10 1903+ / Windows 11 x64，无需安装 Python、Node.js、Java 或额外运行环境。\n'
         '密码分析：78 个工具入口、有限预算多层分析、转换路径、停止、报告和原始字节回送。全部本地离线运行。\n'
         '文件预览：在文件分析里选择文件，点击「文件预览」。支持 DOCX、Excel、PDF、图片、文本及部分音视频。无需安装 Office。\n'
+        '图文识别：73 个内置语言模型、条码读写、OCR/PDF/Office 导出与图片处理。扩展工坊内置 CyberChef 11.5.0。\n'
         '镜像提取与密码分析恢复的文件同样可预览；Office/PDF 格式范围、预览大小限制见文件预览说明.md。\n'
         '保留文件分析、EXIF/GPS、文件树与大小筛选、E01 浏览、12 种源盘/单文件哈希、VHD 转换和只读盘符流程。\n'
         'VHD 转换需要接近源盘容量的空间，挂载/卸载请求 Windows 管理员授权。未安装额外驱动。\n'
@@ -162,7 +165,7 @@ def main():
     (target / '集成验证').mkdir()
     for p in verification.iterdir():
         if p.is_file() and p.name in VERIFICATION_FILES:shutil.copy2(p,target/'集成验证'/p.name)
-    info = {'application': 'HexScope CTF', 'version': '4.1.0', 'edition': 'crypto-integrated', 'cryptoTools':78, 'filePreview':True,
+    info = {'application': 'HexScope CTF', 'version': '4.1.0', 'edition': 'crypto-integrated', 'cryptoTools':78, 'filePreview':True, 'revision':'r8', 'vision':{'models':73,'barcodeGenerators':111,'CPU':True}, 'extensions':{'version':'11.5.0','catalog':505},
             'author':branding['author'], 'credit':branding['credit'], 'repository':branding['repository'],
             'platform':'Windows 10 1903+ / Windows 11 x64', 'archives':LOCK, 'htmlSHA256':digest(html),
             'tests':{k:report[k] for k in ['tests','passed','failed','cancelled','skipped']},

@@ -46,6 +46,7 @@ function app(t,diskApi,options={}) {
       }
       terminate(){this.dead=true;}
     };
+    options.beforeParse?.(w,blobs);
   }});
 
  if(!options.locked)require('./unlock.cjs')(dom.window);

@@ -1,10 +1,14 @@
 'use strict';
-const {app,BrowserWindow,Menu,session,dialog,ipcMain,shell,screen}=require('electron');
+const {app,BrowserWindow,Menu,session,dialog,ipcMain,shell,screen,protocol,desktopCapturer,globalShortcut}=require('electron');
 const fs=require('node:fs');
 const path=require('node:path');
 const branding=require('./branding.json');
 const {installDiskIPC}=require('./disk-ipc.cjs');
 const {installPreviewIPC}=require('./preview-read.cjs');
+const {installVisionIPC}=require('./vision-ipc.cjs');
+const {createExtensionHandler}=require('./extensions-protocol.cjs');
+const {installVisionCapture}=require('./vision-capture.cjs');
+protocol.registerSchemesAsPrivileged([{scheme:'hexscope-tools',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 
 app.setName('HexScope CTF');
 if(typeof app.setAppUserModelId==='function')app.setAppUserModelId('org.hexscope.ctf');
@@ -32,6 +36,8 @@ function createWindow(){
       partition:'hexscope-offline-session',spellcheck:false}});
   const disk=installDiskIPC({ipcMain,dialog,shell},win,__dirname);
   installPreviewIPC({ipcMain},win,__dirname,disk.previewSnapshots);
+  installVisionIPC({ipcMain},win,__dirname);
+  installVisionCapture({ipcMain,desktopCapturer,screen,globalShortcut,BrowserWindow},win,__dirname);
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',event=>event.preventDefault());
   win.webContents.on('will-attach-webview',event=>event.preventDefault());
@@ -47,6 +53,7 @@ function createWindow(){
 app.whenReady().then(()=>{
   Menu.setApplicationMenu(null);
   const local=session.fromPartition('hexscope-offline-session');
+  local.protocol.handle('hexscope-tools',createExtensionHandler(__dirname));
   local.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
   local.setPermissionCheckHandler(()=>false);
   local.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*','ws://*/*','wss://*/*','ftp://*/*']},(_details,callback)=>callback({cancel:true}));

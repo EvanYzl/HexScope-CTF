@@ -1,0 +1,13 @@
+{
+  "name": "CyberChef",
+  "version": "11.5.0",
+  "commit": "8cd426dd4f40f1423912d5fad91b578a86a65112",
+  "license": "Apache-2.0",
+  "copyright": "Crown Copyright 2016-2026",
+  "repository": "https://github.com/gchq/CyberChef",
+  "download": "https://github.com/gchq/CyberChef/releases/download/v11.5.0/CyberChef_8cd426dd4f40f1423912d5fad91b578a86a65112.zip",
+  "archiveSHA256": "f6478925d3eaa16ec08626a85f5b85eed10d531a5e18700615fed7ecb024cccf",
+  "source": "https://registry.npmjs.org/cyberchef/-/cyberchef-11.5.0.tgz",
+  "sourceSHA256": "cfb0864bd840e1d24c7fd2410a3efbeb18eadd0b3369f67e5378d9d4da59c252",
+  "modifications": "Upstream assets unchanged. An HTML copy receives offline CSP and HexScope byte/recipe bridge during build. Original attribution and bundled license notices retained."
+}

@@ -1,5 +1,5 @@
 {
-  "application": "HexScope CTF 4.1 + Crypto + Preview",
+  "application": "HexScope CTF 4.1 + Crypto + Preview + Vision + Extensions",
   "branding": {
     "author": "是羊羊羊呀",
     "credit": "Created by 是羊羊羊呀",
@@ -40,7 +40,7 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "b38a392a8b2325f1c31837f0ce92580301de99508d7e44c0715f3a3f69da655e",
+  "htmlSHA256": "990d07d375e226312e59cdbb8926f0937567582efd45b7578b1c7045740cef7e",
   "login": {
     "challengeLength": 21,
     "characterClasses": [
@@ -84,6 +84,27 @@
       },
       "cleanup": "registered snapshot and session directory removed"
     }
+  },
+  "vision": {
+    "models": 73,
+    "barcodeGenerators": 111,
+    "QRroundtrip": true,
+    "OCR": "HexScope Offline OCR 123456\nflag{image_to_ text}\n",
+    "searchablePDFBytes": 22298,
+    "DOCXBytes": 7766,
+    "XLSXBytes": 16006,
+    "environment": "packaged Electron only; no external Node/Python/Java",
+    "nativeScreenshotAndPin": "mocked in developer suite, not performed"
+  },
+  "extensions": {
+    "catalog": 505,
+    "recipes": [
+      "Base92 roundtrip",
+      "ROT8000 roundtrip",
+      "Bzip2 roundtrip"
+    ],
+    "assets": "packaged app/extensions",
+    "iframeAndBridgeInNativeWindow": "not tested"
   },
   "icon": {
     "sizes": [

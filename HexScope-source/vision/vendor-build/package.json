@@ -1,0 +1,16 @@
+{
+  "name": "hexscope-offline-vision-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build-time dependencies for the bundled offline OCR and document workspace",
+  "dependencies": {
+    "tesseract.js": "7.0.0",
+    "zxing-wasm": "3.1.4",
+    "bwip-js": "4.11.4",
+    "pdf-lib": "1.17.1",
+    "@pdf-lib/fontkit": "1.1.1",
+    "docx": "9.7.2"
+  },
+  "devDependencies": { "esbuild": "0.25.12" },
+  "scripts": { "build": "node build.cjs" }
+}

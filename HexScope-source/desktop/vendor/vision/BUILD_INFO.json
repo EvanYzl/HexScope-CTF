@@ -1,0 +1,8 @@
+{
+  "builtFrom": "vision/vendor-build/package-lock.json",
+  "files": {
+    "libraries.cjs": "2774b284bf2de4dae8e6d647651c2b53342a3e7c1d258b6ce3dda45f906145ec",
+    "ocr-worker.cjs": "64a1e2b15266087cb44e153035c467b0adcfb23ceb217069704feaae3e5b55b6",
+    "zxing_full.wasm": "5721ed87da5d582b7a65a69ea4bed7852699e7c4a1cf5a77d6ef9376152d96a5"
+  }
+}

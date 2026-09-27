@@ -1,5 +1,12 @@
 'use strict';
 const {contextBridge,ipcRenderer,webUtils}=require('electron');
+contextBridge.exposeInMainWorld('hexscopeVision',{
+  run:async(id,op,args)=>{const result=await ipcRenderer.invoke('hexscope:vision',op,{id,args});if(!result?.ok)throw Error(result?.error||'图文任务失败');return result.data;},
+  cancel:id=>ipcRenderer.invoke('hexscope:vision','cancel',{id}),
+  capture:async(op,args={})=>{const result=await ipcRenderer.invoke('hexscope:vision-capture',op,args);if(!result?.ok)throw Error(result?.error||'截图操作失败');return result.data;},
+  onShortcut:callback=>{const listener=(_event,value)=>callback(value);ipcRenderer.on('hexscope:vision-capture-shortcut',listener);return ()=>ipcRenderer.removeListener('hexscope:vision-capture-shortcut',listener);},
+  onProgress:callback=>{const listener=(_event,value)=>callback(value);ipcRenderer.on('hexscope:vision-progress',listener);return ()=>ipcRenderer.removeListener('hexscope:vision-progress',listener);}
+});
 let snapshotReleaseRequest=Number.MAX_SAFE_INTEGER;
 contextBridge.exposeInMainWorld('hexscopeFiles',{
   readSnapshot:async({snapshotId,offset,length,requestId})=>{

@@ -11,7 +11,7 @@ function loginSmoke(html){
  }
  assert.equal(passwordFor('a1B2c3D4e5F6g7H8i9J0!'),'aBcD');
  assert(html.includes('id="appShell" hidden inert aria-hidden="true"'));
- assert.equal((html.match(/data-hexscope-startup/g)||[]).length,9); // Eight inert UI scripts and their boot selector.
+ assert.equal((html.match(/data-hexscope-startup/g)||[]).length,11); // Ten inert UI scripts and their boot selector.
  return {challengeLength:21,characterClasses:['ASCII letters','digits','punctuation'],randomSamples:32,startup:'initially hidden; computation checked using packaged HTML',DOMAndSubmitFlow:'covered by developer regression suite'};
 }
 async function cryptoSmoke(html){
@@ -75,6 +75,18 @@ async function main({directory,scratch,output}){
  for(const [file,sha]of Object.entries(icon.files))assert.equal(createHash('sha256').update(fs.readFileSync(path.join(app,'assets',file))).digest('hex'),sha);
  assert(html.includes('data:image/png;base64,'+fs.readFileSync(path.join(app,'assets/hexscope.png')).toString('base64')));
  const cryptography=await cryptoSmoke(html);
+ const {VisionService}=require(path.join(app,'vision-ipc.cjs')),visionService=new VisionService({root:app});let vision;
+ try{
+  const capabilities=await visionService.run(1,'capabilities',{});assert.equal(capabilities.languages.length,73);
+  const png=await visionService.run(2,'barcode-create',{format:'qrcode',text:'flag{portable_offline}'});
+  const found=await visionService.run(3,'barcode-read',{bytes:png});assert(found.some(x=>x.text==='flag{portable_offline}'));
+  const sample=fs.readFileSync(path.join(root,'示例文件/13_图文工具/ocr-english.png'));
+  const ocr=await visionService.run(4,'ocr',{bytes:sample,languages:['eng']});assert.match(ocr.text,/HexScope Offline OCR 123456/);assert(ocr.pdf.length>100);
+  const docx=await visionService.run(5,'docx',{text:ocr.text}),xlsx=await visionService.run(6,'xlsx',{rows:[['text'],[ocr.text]]});assert(docx.length>100);assert(xlsx.length>100);
+  vision={models:capabilities.languages.length,barcodeGenerators:capabilities.barcodeWrite.length,QRroundtrip:true,OCR:ocr.text,searchablePDFBytes:ocr.pdf.length,DOCXBytes:docx.length,XLSXBytes:xlsx.length,environment:'packaged Electron only; no external Node/Python/Java',nativeScreenshotAndPin:'mocked in developer suite, not performed'};
+ }finally{visionService.close();}
+ const chef=require('../tests/extension-worker.cjs').chef({directory:path.join(app,'extensions')});let extensions;
+ try{for(const recipe of [['To Base92','From Base92'],['ROT8000','ROT8000'],['Bzip2 Compress','Bzip2 Decompress']])assert.equal((await chef.run('HexScope offline',recipe)).result,'HexScope offline');extensions={catalog:505,recipes:['Base92 roundtrip','ROT8000 roundtrip','Bzip2 roundtrip'],assets:'packaged app/extensions',iframeAndBridgeInNativeWindow:'not tested'};}finally{chef.close();}
  const preview=await require('../preview/runtime-smoke.cjs').run(html,path.join(root,'示例文件/12_文件预览'));
  const {readPreview}=require(path.join(app,'preview-read.cjs')),previewPaths=['sample.docx','sample.xlsx','sample.pdf','pixel.png'];
  for(const name of previewPaths){
@@ -114,7 +126,7 @@ async function main({directory,scratch,output}){
   fs.mkdirSync(scratch,{recursive:true});const converted=await f.task(()=>convertVhd(f,image.id,scratch));assert.equal(converted.manifest.decodedSHA256,expected.hashes.sha256);
   const mounts=new WindowsMount(app),chosen=await mounts.select(converted.filename),status=await mounts.execute('status',{vhdId:chosen.id});
   assert.equal(status.attached,false);assert.equal(status.mediaBytes,expected.bytes);
-  const result={application:'HexScope CTF 4.1 + Crypto + Preview',branding:{author:branding.author,credit:branding.credit,repository:branding.repository,HTMLCredits:3},runtime:process.versions,PATH:'Windows system directories only',htmlSHA256:createHash('sha256').update(html).digest('hex'),login,cryptography,preview,icon:{sizes:icon.sizes,sourceSHA256:icon.files['icon-source.jpg'],assets:'all hashes match',offlineFavicon:'matches bundled PNG'},
+  const result={application:'HexScope CTF 4.1 + Crypto + Preview + Vision + Extensions',branding:{author:branding.author,credit:branding.credit,repository:branding.repository,HTMLCredits:3},runtime:process.versions,PATH:'Windows system directories only',htmlSHA256:createHash('sha256').update(html).digest('hex'),login,cryptography,preview,vision,extensions,icon:{sizes:icon.sizes,sourceSHA256:icon.files['icon-source.jpg'],assets:'all hashes match',offlineFavicon:'matches bundled PNG'},
    E01segments:6,E01sourceHashAlgorithms:sourceHash.hashes.length,singleFileHashAlgorithms:localHash.hashes.length,sourceHashes:'all match independent Python RAW vectors',
    fileHandoffZIP:'detected using bundled file-analysis code',parallelImageReads:{readers:batchRows.length,allEntryHashes:'matched',maximumThreads:plan.limits.threads},fileWithinImageHash:'matched',VHDdecodedSHA256:'matched',WindowsVHDRecognition:'correct media size, detached',actualDriveMount:'not performed',nativeGUI:'not launched or tested'};
   fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));

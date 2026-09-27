@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="author" content="/*__BRAND_AUTHOR_HTML__*/">
 <meta name="description" content="HexScope CTF：本地离线的隐写检查、密码分析、取证镜像与文件预览工作台。">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src blob:; style-src 'unsafe-inline'; img-src blob: data:; media-src blob: data:; font-src blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src blob:; style-src 'unsafe-inline'; img-src blob: data:; media-src blob: data:; font-src blob: data:; connect-src 'none'; object-src 'none'; frame-src hexscope-tools:; base-uri 'none'; form-action 'none'">
 <title>HexScope CTF 4.1 · /*__TITLE_AUTHOR_HTML__*/</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,/*__APP_ICON__*/">
 <style>/*__CSS__*/</style>
 <style>/*__CRYPTO_CSS__*/</style>
 <style>/*__PREVIEW_CSS__*/</style>
+<style>/*__VISION_CSS__*/</style>
+<style>/*__EXTENSION_CSS__*/</style>
 <style>/*__SHELL_CSS__*/</style>
 </head>
 <body class="login-locked">
@@ -181,6 +183,8 @@
     <div class="codec-editors"><label>输入<textarea id="codecInput" spellcheck="false" placeholder="在这里粘贴编码文本，例如 ZmxhZ3toZWxsb30="></textarea></label><label>输出<textarea id="codecOutput" spellcheck="false" readonly placeholder="转换结果"></textarea></label></div>
     <div class="section-toolbar"><span id="codecStatus" role="status" class="muted">全部运算在本机执行。</span><button id="codecNext" class="secondary" disabled>结果作为下一步输入</button><button id="codecTextSave" class="quiet" disabled>保存输出文本</button><button id="codecBytesSave" class="quiet" disabled>保存原始字节</button></div><details class="manual"><summary>本次转换历史（最近 20 步）</summary><ol id="codecHistory"></ol></details>
   </section>
+/*__VISION_HTML__*/
+/*__EXTENSION_HTML__*/
   <footer><span class="footer-identity"><span>HEXSCOPE CTF <b>/</b> LOCAL BINARY LAB</span><small class="footer-credit">/*__FOOTER_CREDIT_HTML__*/</small></span><p>文件结构、元数据与六类专项隐写工具。未检出不等于无隐写；不含 DCT 隐写、密码破解与所有格式变体。</p></footer>
 </main>
 <div id="toast" class="toast" role="status" hidden></div>
@@ -219,5 +223,7 @@
 <script id="previewPdfAssets" type="application/json">/*__PREVIEW_PDF_JSON__*/</script>
 <script id="previewPdfCode">/*__PREVIEW_PDF__*/</script>
 <script id="previewUiCode" type="text/plain" data-hexscope-startup>/*__PREVIEW_UI__*/</script>
+<script id="visionUiCode" type="text/plain" data-hexscope-startup>/*__VISION_UI__*/</script>
+<script id="extensionUiCode" type="text/plain" data-hexscope-startup>/*__EXTENSION_UI__*/</script>
 <script id="loginCode">/*__LOGIN__*/</script>
 </body></html>

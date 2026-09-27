@@ -2,7 +2,7 @@
 
 **Created by 是羊羊羊呀** · [项目主页](https://github.com/EvanYzl/HexScope-CTF) · [中文项目说明](../README.md)
 
-中文使用说明位于上级目录 `使用说明.md`。成品 `HexScope.html` 是可独立使用的离线文件，无运行时 npm 依赖。
+中文使用说明位于上级目录 `使用说明.md`。成品 `HexScope.html` 的原有文件、密码和预览功能可独立离线使用；OCR、条码、文档导出、截图与扩展工坊需要 Windows 便携包中的内置资源。用户不需要 npm 或额外环境。
 
 - `src/core.js`：签名识别、格式解析、候选扫描、CRC、ZIP 打包/成员解压。可在 Node 中 `require()` 使用。
 - `src/app.js`：批量队列、DOM 事件、十六进制与导出流程。
@@ -48,9 +48,9 @@ Node.js 22.13+；`jsdom` 和 `@napi-rs/canvas` 仅供开发测试。所有解析
 
 ## 4.1 密码模块正式集成
 
-`crypto/` 包含完整算法、启发式搜索、Worker、78 项工具目录、界面、第三方发行文件、锁文件、许可证和测试。构建入口已接入当前 4.1 模板，不依赖旧版生成页面。顶层 `HexApp.showWorkspace` 统一五个工作区的按钮、镜像拖入和程序跳转。
+`crypto/` 包含完整算法、启发式搜索、Worker、78 项工具目录、界面、第三方发行文件、锁文件、许可证和测试。构建入口已接入当前 4.1 模板，不依赖旧版生成页面。顶层 `HexApp.showWorkspace` 统一各工作区的按钮、镜像拖入和程序跳转。
 
-`npm test` 先构建，再执行原有 216 项、密码 197 项和集成 12 项测试，保存日志及输入 SHA-256。算法、Worker 和密码 UI 读取真实构建产物；测试辅助文件校验产物及源码是否一致。`npm run test:crypto` 可单独运行密码相关用例。
+`npm test` 先构建，再执行全部原有、密码及新增集成测试，保存日志及输入 SHA-256；精确数量见本次报告。算法、Worker 和密码 UI 读取真实构建产物；测试辅助文件校验产物及源码是否一致。`npm run test:crypto` 可单独运行密码相关用例。
 
 `test-all.cjs` 是可重复的完整验证入口。`desktop/package-portable.py` 是正式打包入口，文档见 `desktop/PACKAGING-CRYPTO.md`；脚本还在包内 Electron 中再次运行全部密码入口及原生镜像、哈希和 VHD 冒烟检查，然后生成 ZIP 与 SHA-256 清单。
 
@@ -97,3 +97,15 @@ Node.js 22.13+；`jsdom` 和 `@napi-rs/canvas` 仅供开发测试。所有解析
 `src/file-read.js` 随 `scanPoolCode` 嵌入构建，供分析、导出和预览共用。它以每个任务的临时编号关联原始 File / E01 快照，让 Worker 请求所需字节；不向 Worker 传送路径，也不预读整个队列。`src/worker.js` 保留离线 HTML 的 File 路径，同时处理字节响应；`scan-pool.js` 与 `HexApp.job` 管理请求与取消。桌面原生读取同时最多两项，CPU Worker 仍按用户并发设置运行，原有工作内存预算继续生效。
 
 `tests/export-source.test.cjs` 新增 10 项，使用真实构建页面、真实计算线程、实际六卷 E01 和正式 preload / IPC 代码的模拟传输。覆盖损坏 File 引用下的扫描/预览/导出联动、ZIP 内容和清单、绝对 ZIP 偏移修正、本机只读读取、并发和取消、来源失效时拒绝不完整导出。当前完整回归 521 项；原生 Electron 文件对话框与用户原始故障文件仍未实测。
+
+## 4.1 r8 图文与扩展工坊
+
+`vision/` 是图文工作台、文字清洗、坐标表格推断和图片处理源码。`desktop/vision-engine.cjs` 使用内置库进行 OCR、条码、PDF 和 Office 导出；`vision-ipc.cjs` 用可取消的子进程运行，`vision-capture.cjs` 只在用户主动操作后截图或注册快捷键。图片和 E01 文件统一使用 `HexFileIO` 字节接口。
+
+开发者更新依赖时在 `vision/vendor-build` 执行 `npm ci --ignore-scripts`、`node build.cjs`；模型获取脚本 `fetch-models.py` 固定上游提交并记录逐文件 SHA-256。这些是开发步骤，成品运行不需要额外环境。
+
+`extensions/` 包含内置 CyberChef 11.5.0 发行资源、505 项操作目录、上游源码归档、版权和桥接源码。`extensions/build.cjs` 从未修改的上游 HTML 生成添加离线 CSP 与桥接的入口，`desktop/extensions-protocol.cjs` 仅映射内置静态资源。完整页面没有 Node API，跨框架消息只携带字节和转换步骤。联网请求仍被桌面主进程阻止。
+
+重新运行 `node build.cjs` 会重新包含这两个模块。打包脚本包含新 IPC、子进程入口、语言模型、WASM、许可及扩展资源；包内 Electron 验证 OCR、条码、文档输出和扩展转换，并将 PATH 限定为系统目录。
+
+测试入口仍为 `node test-all.cjs`。新增图文和扩展测试覆盖实际计算字节，截图与系统窗口使用模拟，未声称真实桌面界面已经验收。详细范围见上级目录「图文与扩展工坊说明.md」及「扩展功能覆盖清单.md」。

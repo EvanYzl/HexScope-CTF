@@ -17,10 +17,21 @@
     "video",
     "zip"
   ],
-  "htmlSHA256": "b38a392a8b2325f1c31837f0ce92580301de99508d7e44c0715f3a3f69da655e",
+  "revision": "r8",
+  "vision": {
+    "languageModels": 73,
+    "barcodeGenerators": 111,
+    "offlineCPU": true
+  },
+  "extensions": {
+    "engine": "CyberChef 11.5.0",
+    "catalogOperations": 505,
+    "network": false
+  },
+  "htmlSHA256": "990d07d375e226312e59cdbb8926f0937567582efd45b7578b1c7045740cef7e",
   "inputs": {
-    "src/template.html": "0dd95ac602de70559c15b8e9c99ac03fb3382cb1e5a745a60f221549702307ce",
-    "build.cjs": "1586ba2f3d6f7c7379bf762d19bec3232287fd91b2b7a7fb0e2d0430ce08ed64",
+    "src/template.html": "063695baddbde589ece30f8442494257d7484f01b2574cb42e768479054da947",
+    "build.cjs": "f923a979ebc0a70666b1ca9c253a0120f86a8643ada3242b77480be16e44e3f5",
     "crypto/build.cjs": "a4ce25d839f104887653c8df5cf91368c9cc1e2bd887271567f8ecb68600ec1e",
     "preview/build.cjs": "6647baa184983422e63cf40b88a00bcc7616e7be514b488946560bb0a4843c9e",
     "src/login.js": "f5982604b169f673ac6fefe6388770ae4ba5145091a40ca7a1238a57627ab241",
@@ -257,6 +268,16 @@
     "preview/vendor/pdfjs/wasm/jbig2.wasm": "e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc",
     "preview/vendor/pdfjs/wasm/openjpeg.wasm": "004a0e62db930ba9ff2a22212f4554d0bb57a0635a8287caf70f98117cee14ba",
     "preview/vendor/pdfjs/wasm/qcms_bg.wasm": "663d86126d5f5fcb1c61490f94353e2a8375660b8c5498ab3ebab5a34b08800e",
-    "preview/vendor/pdfjs/wasm/quickjs-eval.wasm": "7bcacc9f22cacf7e9b23866d2a6d1639693d40c7f144e41b7c69ed37ba9cbe8f"
+    "preview/vendor/pdfjs/wasm/quickjs-eval.wasm": "7bcacc9f22cacf7e9b23866d2a6d1639693d40c7f144e41b7c69ed37ba9cbe8f",
+    "vision/style.css": "d57dc65514069758205e55f20956cfa0877c93f548dbf1231598fefa8fed8c24",
+    "vision/panel.html": "7d3d4b98fa4275bef342ba5996a5ba6db55c77726265d7c61cf19d9873905c94",
+    "vision/core.js": "28c214749e4e2659427d3d5dce92c779ce6d610441c254daae4444dac9af9228",
+    "vision/ui.js": "459453145d30dba009e6c566385814e6a3c37d71bbcb016a84a0fbfa00e617d7",
+    "extensions/build.cjs": "48b98d813af84c450f8610503c83a06ccac1f2ca04c3dbdde86960eeac35a3de",
+    "extensions/vendor/cyberchef/CyberChef_v11.5.0.html": "809174936fd5f895e23f45e6d06448b6dc6f8f115cf7acc969029f3d894903e9",
+    "extensions/bridge.js": "e44957ec43bc3ab472811a68510944e93dabaa43dd2454cfd0f698131436956e",
+    "extensions/ui.js": "7a6a8937482fb4428a6b18e2598a3599efbaee3708e51e97912a8f71b34f4033",
+    "extensions/style.css": "a90cef18873dc2b523f6549f0a60d8e012a403bd24dcbef4332ef5e5f1182d4d",
+    "extensions/panel.html": "faf6267ba54a20755147efd95dd31db58b31d3f3f4846ae861141bcd23032983"
   }
 }

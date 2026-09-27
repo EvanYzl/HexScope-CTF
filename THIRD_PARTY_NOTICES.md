@@ -44,3 +44,9 @@ Twofish 上游包以 package.json 声明 MIT，未附独立 LICENSE；随包保�
 ## 文件预览组件（4.1 增强）
 
 新增 Mammoth 1.13.0、SheetJS CE 0.20.3、PDF.js 6.3.289 及其 core-js 3.50.0、字体、CMap 和 WASM。详细许可、重建变化与按文件声明见 **文件预览第三方许可.md**；源码对应 `HexScope-source/preview/THIRD_PARTY_NOTICES.md` 与 `preview/vendor`，便携包对应 `licenses-and-libraries/preview`。所有运行依赖内置。开发用 @napi-rs/canvas 1.0.9 不作为用户运行依赖。
+
+## 图文与扩展组件（4.1 r8）
+
+图文组件包括 Tesseract.js / core 7.0.0、固定提交的 tessdata_fast、zxing-wasm 3.1.4、bwip-js 4.11.4、pdf-lib 1.17.1、docx 9.7.2 与 Noto CJK 字体；原始许可证、依赖版本、字体来源、73 个模型的逐文件 SHA-256 在源码 `HexScope-source/desktop/vendor/vision`，便携版位置为 `resources/app/vendor/vision`。构建与许可概览见源码 `vision/THIRD_PARTY_NOTICES.md`。
+
+扩展工坊使用 CyberChef 11.5.0（Apache-2.0，Crown Copyright），保留上游资源、各模块第三方许可与 npm 源码发行归档；来源、提交和 SHA-256 见 `HexScope-source/extensions/UPSTREAM.json`，便携目录为 `resources/app/extensions`。HexScope 仅在独立入口加入离线 CSP 与数据桥接。详见同目录 `THIRD_PARTY_NOTICES.md`。未使用未获再分发许可的软件二进制。

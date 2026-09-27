@@ -8,13 +8,13 @@
 
 ### Created by 是羊羊羊呀
 
-离线隐写检查 · 密码分析 · 数字取证 · 文件预览
+离线隐写检查 · 密码分析 · 数字取证 · 文件预览 · OCR 与图文处理
 
 ![版本](https://img.shields.io/badge/version-4.1-176751)
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4)
 ![离线](https://img.shields.io/badge/Local-Offline-426B50)
 ![密码工具](https://img.shields.io/badge/Crypto-78%20tools-A77736)
-![回归测试](https://img.shields.io/badge/Local%20tests-521%20passed-2D854B)
+![回归测试](https://img.shields.io/badge/Local%20tests-574%20passed-2D854B)
 
 [下载免安装版](https://github.com/EvanYzl/HexScope-CTF/releases/latest) · [使用说明](使用说明.md) · [功能范围](题型覆盖与限制.md) · [提交问题](https://github.com/EvanYzl/HexScope-CTF/issues)
 
@@ -55,6 +55,14 @@ Get-FileHash -Algorithm SHA256 .\HexScope-CTF-4.1-GitHub-Windows-x64-Portable.zi
 | 哈希校验 | 源盘解码数据流、本机文件、镜像内单个文件的 12 种哈希；HEX/Base64 表示、预期值比对及报告。 |
 | VHD 与盘符 | 将 E01 解码数据转换为固定 VHD，使用 Windows 自带功能选择分区和盘符，只读挂载。 |
 | 文件预览 | DOCX、Excel/CSV、PDF、常见图片、文本和部分音视频；镜像提取及密码恢复的文件共用预览入口。 |
+| 图文识别 | 73 个语言模型、图片 / PDF OCR、条码读写、TXT/DOCX/XLSX/可搜索 PDF、裁剪标注、取色、水印、图片压缩、长图拼接、可选截图快捷键。 |
+| 扩展工坊 | 内置 CyberChef 11.5.0 的 505 项操作目录，支持组合转换步骤、停止和字节回送；联网操作不可用。 |
+
+### 图文与扩展工坊
+
+4.1 r8 新增两个工作台，所有运行依赖、WASM 与语言模型随 Windows 便携包内置。OCR 使用 CPU；内置语言模型数量不代表所有语言已实测准确率。505 是上游目录数量，包含重复功能与未逐项验证的工具。
+
+操作方法见 [图文与扩展工坊说明](图文与扩展工坊说明.md)，已实现、部分覆盖和未实现的高级变体见 [扩展功能覆盖清单](扩展功能覆盖清单.md)。截图、快捷键、置顶窗口及扩展页面的真实桌面交互尚未实测。
 
 ### 文件读取与导出
 
@@ -83,6 +91,10 @@ flowchart LR
     Q --> H[结构 / 十六进制 / 提取]
     Q --> P[DOCX / Excel / PDF / 图片预览]
     Q --> M[EXIF / GPS / 专项隐写]
+    Q --> V[图文识别 / OCR]
+    V --> C
+    Q --> X[扩展编码工坊]
+    X -->|恢复字节| Q
     E --> D[源盘哈希 / VHD 转换]
 ```
 
@@ -158,7 +170,7 @@ Windows 回归模板位于 `HexScope-source/desktop/windows-test.example.yml`，
 
 ## 验证情况
 
-本次发行对应 **521/521 项本地自动化测试通过**，包含原有文件/取证/密码能力，以及文件预览、E01 推送快照、读取异常与跨模块联动。另使用包内 Electron，在 PATH 仅包含 Windows 系统目录的情况下复核密码工具、DOCX/Excel/PDF 解析、预览读取与 E01 快照哈希、E01、哈希与 VHD 转换。
+本次发行对应 **521/574 项本地自动化测试通过**，包含原有文件/取证/密码能力，以及文件预览、E01 推送快照、读取异常与跨模块联动。另使用包内 Electron，在 PATH 仅包含 Windows 系统目录的情况下复核密码工具、DOCX/Excel/PDF 解析、预览读取与 E01 快照哈希、E01、哈希与 VHD 转换。
 
 PDF 页面经过原生离屏 Canvas 绘制测试；**真实桌面窗口布局、原生拖放、全部图片/音视频编码、真实 UAC 与盘符挂载尚未完成实测**。这些边界不以 DOM 测试代替，详情见 [验证记录](验证记录.md)。
 

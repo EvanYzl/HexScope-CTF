@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const {createHash} = require('node:crypto');
 const {cryptoAssets} = require('./crypto/build.cjs');
 const {previewAssets} = require('./preview/build.cjs');
+const {extensionAssets}=require('./extensions/build.cjs');
 const root = __dirname, inputs = {};
 const digest = data => createHash('sha256').update(data).digest('hex');
 function read(file, encoding='utf8') {
@@ -36,6 +37,11 @@ assets.CSS += '\n' + read('src/branding.css');
 assets.CSS += '\n' + read('src/login.css');
 Object.assign(assets, cryptoAssets(read));
 Object.assign(assets, previewAssets(read));
+assets.VISION_CSS=read('vision/style.css');
+assets.VISION_HTML=read('vision/panel.html');
+assets.VISION_UI=read('vision/core.js')+'\n;'+read('vision/ui.js');
+read('extensions/build.cjs');
+Object.assign(assets,extensionAssets(read));
 for (const [key, value] of Object.entries(assets)) {
   const marker = '/*__' + key + '__*/';
   if (html.split(marker).length !== 2) throw Error('Expected exactly one template marker: ' + marker);
@@ -55,6 +61,7 @@ fs.writeFileSync(output, html);
 fs.writeFileSync(path.join(root, '..', 'HexScope.build.json'), JSON.stringify({
   application:'HexScope CTF', version:'4.1.0', edition:'crypto-integrated', author:branding.author, credit:branding.credit, repository:branding.repository,
   base:'src/template.html (current 4.1)', cryptoTools:toolCount, preview:['docx','spreadsheet','pdf','image','text','audio','video','zip'],
+  revision:'r8',vision:{languageModels:73,barcodeGenerators:111,offlineCPU:true},extensions:{engine:'CyberChef 11.5.0',catalogOperations:505,network:false},
   htmlSHA256:digest(Buffer.from(html)), inputs
 }, null, 2) + '\n');
 console.log('Built HexScope 4.1 + ' + toolCount + ' crypto tools (' + Buffer.byteLength(html) + ' bytes)');
