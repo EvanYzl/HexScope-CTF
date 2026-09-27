@@ -18,6 +18,7 @@ read('crypto/build.cjs');
 read('preview/build.cjs');
 const assets = {};
 assets.LOGIN=read('src/login.js');
+assets.SHELL_CSS=read('src/shell.css');
 const branding=JSON.parse(read('desktop/branding.json'));
 if(branding.version!=='4.1.0'||!branding.author||!branding.credit)throw Error('Invalid application branding');
 const escapeHTML=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));

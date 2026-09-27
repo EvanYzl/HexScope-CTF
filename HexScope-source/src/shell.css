@@ -1,0 +1,229 @@
+/* Desktop workbench: the viewport belongs to the tools, not the document. */
+html,body{height:100%;overflow:hidden}
+#appShell{height:100vh;height:100dvh;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+#appShell .topbar{height:52px;flex:0 0 52px;padding:0 18px;background:#fafcf8}
+#appShell .brand{font-size:19px;gap:9px;letter-spacing:-.5px}
+#appShell .brandmark{width:30px;height:30px;font-size:18px;border-radius:6px}
+#appShell .brand small{font-size:10px;letter-spacing:.5px;margin-left:9px}
+#appShell .top-actions{gap:14px;min-width:0}
+#appShell .local{font-size:10px;white-space:nowrap}
+#appShell .creator-badge{padding:3px 9px;font-size:10px}
+#appShell>main{flex:1;min-height:0;min-width:0;max-width:none;width:100%;margin:0;padding:10px 16px 0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+#appShell .mode-nav{flex:0 0 37px;min-width:0;gap:4px;margin:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#appShell .mode-nav .mode{flex-shrink:0;font-size:12px;line-height:20px;padding:7px 15px}
+#appShell .mode-nav .mode.active{background:#e8f1e9;border-radius:5px 5px 0 0}
+#appShell .mode-nav>span{white-space:nowrap;letter-spacing:1.2px;padding-right:2px;font-size:8px}
+#appShell main>[id$="Workspace"]{flex:1;min-width:0;min-height:0;margin:0;overscroll-behavior:contain}
+#appShell input,#appShell select{padding:6px 8px}
+#appShell .primary,#appShell .secondary{font-size:12px;padding:7px 12px}
+#appShell .quiet{font-size:11px;padding:5px 7px}
+
+/* Import / summary / work area / export stay inside one screen. */
+#inspectionWorkspace{display:flex;flex-direction:column;gap:9px;overflow:hidden}
+#inspectionWorkspace>.dropzone{flex:0 0 auto;min-height:60px;padding:9px 13px;gap:13px;border-radius:7px}
+#appShell .drop-icon{width:34px;height:38px;flex-shrink:0;border-radius:5px}
+#appShell .drop-icon svg{width:19px;height:23px}
+#appShell .drop-copy{min-width:0}
+#appShell .drop-copy h2{font-size:13px;line-height:20px}
+#appShell .drop-copy p{font-size:10px;line-height:16px;margin:1px 0 0;max-width:none}
+#appShell .drop-buttons{margin:0;gap:7px;flex-shrink:0}
+#appShell .drop-buttons .quiet{padding:7px 10px}
+#inspectionWorkspace>.stats{flex:0 0 38px;min-height:38px;margin:0;border-radius:6px;background:#fafcf8}
+#appShell .stats>div{margin:7px 0;padding:0 14px;gap:8px;grid-template-columns:minmax(0,1fr) auto}
+#appShell .stats .stat-label{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell .stats strong{grid-row:1;font-size:19px;line-height:22px}
+#appShell .stats small{display:none}
+#inspectionWorkspace>.progress-area{flex:0 0 auto;margin:0}
+#appShell .progress-line{font-size:10px}
+#inspectionWorkspace>.workspace{flex:1;min-height:0;grid-template-columns:clamp(245px,23vw,325px) minmax(0,1fr);border-radius:7px;overflow:hidden}
+#appShell .file-pane{min-height:0;overflow:hidden}
+#appShell .panel-title{flex-shrink:0;padding:10px 12px 7px}
+#appShell .panel-title h2{font-size:13px}
+#appShell .filters{flex-shrink:0;padding:0 12px 8px;gap:5px}
+#appShell .filters input,#appShell .filters select{font-size:11px;padding:6px 7px}
+#appShell .queue-options{flex-shrink:0;border-top:1px solid #e8ede4;border-bottom:1px solid #e8ede4;max-height:44%;overflow:auto;scrollbar-width:thin}
+#appShell .queue-options>summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;font-size:10px;color:#73846c;cursor:pointer;list-style:none;background:#f8faf5}
+#appShell .queue-options>summary::-webkit-details-marker{display:none}
+#appShell .queue-options>summary:after{content:'＋';font:12px var(--mono);color:#84957d}
+#appShell .queue-options[open]>summary:after{content:'−'}
+#appShell .queue-options.has-filter>summary{color:var(--teal);background:#edf4e9}
+#appShell .file-controls{padding:5px 12px 8px;gap:6px}
+#appShell .file-controls select{font-size:10px;padding:5px 6px}
+#appShell .size-filters{padding:0 12px 9px;gap:4px}
+#appShell .size-filters label{font-size:9px}
+#appShell .size-filters input{padding:5px;font-size:10px}
+#appShell .size-filters select{padding:6px 2px;width:53px;font-size:10px}
+#appShell .size-filters .quiet{padding:6px 0;font-size:10px}
+#appShell .size-hint{flex-shrink:0;padding:6px 12px;font-size:9px;line-height:15px;overflow-wrap:anywhere}
+#appShell .file-list{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#appShell .file-row{padding:10px 10px 9px 9px;gap:9px}
+#appShell .file-icon{width:31px;height:35px;font-size:9px}
+#appShell .file-content strong{font-size:11px}
+#appShell .file-sub{font-size:9px;margin:1px 0 4px}
+#appShell .tag{font-size:9px;padding:1px 5px}
+#appShell .tree-directory>summary{padding:7px 9px;font-size:10px}
+#appShell .empty-list{padding:30px 12px}
+#appShell .empty-symbol{font-size:32px;margin-bottom:10px}
+#appShell .empty-list p{font-size:11px}
+#appShell .queue-footer{flex-shrink:0;min-height:30px;padding:5px 9px;font-size:9px}
+#appShell .queue-footer .quiet{font-size:10px;padding:4px}
+#appShell .detail-pane{min-height:0;overflow:hidden;display:flex;flex-direction:column}
+#appShell .detail-empty{flex:1;min-height:0;height:auto;padding:18px;overflow:auto}
+#appShell .hex-decoration{font-size:17px;letter-spacing:5px;padding:15px 19px;margin-bottom:18px;border-radius:7px}
+#appShell .detail-empty h2{font-size:16px}
+#appShell .detail-empty p{font-size:11px;max-width:480px}
+#appShell .legend-inline{margin-top:17px;font-size:9px;gap:15px;flex-wrap:wrap;justify-content:center}
+#detail{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#appShell .detail-head{flex-shrink:0;padding:11px 16px 9px;gap:10px}
+#appShell .detail-head>div{flex:1;min-width:0}
+#appShell .detail-head .eyebrow{font-size:8px;margin:0 0 3px;letter-spacing:1px}
+#appShell .detail-head h2{font-size:15px;line-height:22px;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell #detailMeta{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell .detail-head .secondary{font-size:10px;padding:6px 9px}
+#appShell .tabs{flex-shrink:0;min-height:35px;padding:0 15px;gap:16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#appShell .tab{font-size:11px;padding:8px 0;line-height:17px}
+#appShell .tab span{font-size:8px;margin-left:2px;padding:1px 4px}
+#detail>.tab-panel{flex:1;min-height:0;padding:14px 16px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+#appShell .verdict{padding:10px 12px;margin-bottom:14px}
+#appShell .overview-grid{margin-bottom:17px;gap:13px}
+#appShell .subhead{margin:14px 0 8px}
+#appShell .panel-intro{margin-bottom:12px}
+#appShell .section-toolbar{gap:8px;margin-bottom:11px}
+#appShell .metadata-scroll,#appShell .strings-results{max-height:none}
+#appShell .candidate{padding:11px 12px;margin-bottom:10px}
+#inspectionWorkspace>.export-bar{flex:0 0 auto;min-height:44px;margin:0;padding:6px 12px;border-radius:6px;gap:12px}
+#appShell .export-bar>div{min-width:0;display:flex;align-items:center;gap:12px}
+#appShell .export-bar strong{font-size:11px;white-space:nowrap}
+#appShell .export-bar div>span{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell .export-bar .primary{min-width:175px;padding:7px 12px;font-size:11px}
+
+/* Each reader keeps its own controls while its payload scrolls. */
+#hexPanel:not([hidden]),#previewPanel:not([hidden]){display:flex;flex-direction:column}
+#appShell #hexPanel>.hex-tools,#appShell #hexPanel>.hex-legend,#appShell #hexPanel>.hex-footer,#appShell #hexPanel>.manual{flex-shrink:0}
+#appShell #hexPanel>.hex-scroll{flex:1;min-height:80px;overscroll-behavior:contain}
+#appShell #hexPanel>.manual{margin-top:8px}
+#appShell .range-form{margin:9px 0 0}
+#appShell #previewPanel{overflow:auto}
+#appShell #previewPanel>.preview-stage{flex:1 1 auto;min-height:100px;max-height:none;padding:12px;border-radius:6px;overscroll-behavior:contain}
+#appShell .preview-heading,#appShell .preview-tools,#appShell .preview-note,#appShell #previewStatus{flex-shrink:0}
+#appShell .preview-tools{margin:8px 0;gap:8px;font-size:11px}
+#appShell .preview-tools input,#appShell .preview-tools select{font-size:11px}
+#appShell .preview-tools select{max-width:230px}
+#appShell .preview-note{font-size:10px;line-height:16px;margin-top:8px}
+#appShell .preview-sheet th{top:-12px}
+#appShell .preview-document{padding:22px}
+#appShell .preview-cell{max-height:54px;font-size:10px}
+
+/* The other workspaces scroll inside the application frame. */
+#appShell main>.disk-workspace,#appShell main>.hash-workspace,#appShell main>.codec-workspace,#appShell main>.crypto-workspace{overflow:auto;padding:16px 18px;border-radius:7px;scrollbar-gutter:stable}
+#appShell .disk-heading,#appShell .codec-title{margin-bottom:14px;gap:12px}
+#appShell .disk-heading h2,#appShell .codec-title h2,#appShell .crypto-title h2{font-size:19px;margin:0 0 4px;line-height:28px}
+#appShell .disk-heading .eyebrow,#appShell .codec-title .eyebrow,#appShell .crypto-title .eyebrow{font-size:8px;margin-bottom:4px}
+#appShell .disk-drop{padding:11px 13px;font-size:11px}
+#appShell .disk-state{padding:9px 0;min-height:38px;font-size:11px}
+#appShell .disk-image{padding:11px 0;gap:12px}
+#appShell .disk-image strong{font-size:15px}
+#appShell .disk-partition{margin-bottom:12px}
+#appShell .disk-browser{grid-template-columns:190px minmax(0,1fr)}
+#appShell .disk-table-scroll{max-height:clamp(160px,43vh,550px);min-height:150px;margin-top:10px}
+#appShell .disk-tree{max-height:clamp(150px,47vh,580px)}
+#appShell .disk-actions{gap:7px;padding:9px 0;flex-wrap:wrap}
+#appShell .disk-actions button{padding:6px 9px;font-size:10px}
+#appShell .disk-note{font-size:10px;margin-top:10px}
+#appShell .mount-panel{margin-top:18px;padding-top:16px}
+#appShell .hash-target{margin:12px 0;padding:13px}
+#appShell .hash-target strong{font-size:16px;margin:4px 0}
+#appShell .hash-note,#appShell .hash-target p{font-size:11px}
+#appShell .hash-algorithms{gap:9px 18px;padding:12px 0}
+#appShell .hash-algorithms label{font-size:11px}
+#appShell .codec-controls{padding:12px;gap:10px}
+#appShell .codec-parameters{padding:13px 0;gap:12px}
+#appShell .codec-editors{gap:12px;margin-bottom:12px}
+#appShell .codec-editors textarea{height:clamp(140px,37vh,420px);margin-top:7px;padding:12px;font-size:12px}
+#appShell .crypto-title{gap:12px}
+#appShell .crypto-title .muted{font-size:11px}
+#appShell .crypto-badge{font-size:10px;padding:5px 9px}
+#appShell .crypto-tabs{margin:13px 0 12px;gap:20px}
+#appShell .crypto-tabs button{font-size:12px;padding:8px 2px}
+#appShell .crypto-input-head{margin:8px 0}
+#appShell .crypto-input-head strong{font-size:12px}
+#appShell .crypto-input{min-height:105px;height:clamp(105px,18vh,190px);padding:11px;font-size:12px}
+#appShell .crypto-controls{gap:10px;margin:10px 0}
+#appShell .crypto-runbar{padding:10px 0;gap:8px}
+#appShell .crypto-facts{margin:10px 0}
+#appShell .crypto-facts>div{padding:8px 12px}
+#appShell .crypto-facts strong{font-size:15px;margin-top:3px}
+#appShell .crypto-hints{padding:9px 12px;margin:10px 0;max-height:90px;overflow:auto}
+#appShell .crypto-results{grid-template-columns:210px minmax(0,1fr);margin-top:10px}
+#appShell .crypto-result-detail{padding:13px}
+#appShell #cryptoCandidates{max-height:390px}
+#appShell #cryptoOutput{min-height:180px;max-height:55vh}
+#appShell .crypto-result-actions{margin-top:11px;gap:7px}
+#appShell .crypto-parameters{margin:10px 0;gap:9px}
+#appShell .crypto-footnote{font-size:10px;margin-top:10px}
+
+#appShell main>footer{flex:0 0 22px;min-height:22px;padding:0 1px 5px;gap:18px;align-items:center;overflow:hidden;font-size:9px}
+#appShell footer .footer-identity{flex-direction:row;align-items:center;gap:13px;min-width:0;letter-spacing:.6px}
+#appShell .footer-credit{font-size:9px}
+#appShell footer p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}
+#appShell .toast{bottom:28px}
+
+@media(max-width:1100px){
+  #appShell .brand small{display:none}
+  #appShell .top-actions{gap:10px}
+  #appShell .local{display:none}
+  #inspectionWorkspace>.workspace{grid-template-columns:250px minmax(0,1fr)}
+  #appShell .drop-copy p{max-width:290px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #appShell .tabs{gap:14px}
+  #appShell .export-bar div>span,#appShell footer p{display:none}
+  #appShell .disk-browser{grid-template-columns:165px minmax(0,1fr)}
+  #appShell .crypto-key{min-width:130px}
+}
+@media(max-width:800px){
+  #appShell .topbar{padding:0 12px}
+  #appShell .top-actions>.creator-badge{display:none}
+  #appShell>main{padding:8px 10px 0;gap:8px}
+  #appShell .mode-nav>span{display:none}
+  #appShell .mode-nav .mode{padding:7px 13px}
+  #appShell .dropzone{flex-wrap:nowrap}
+  #appShell .drop-icon,#appShell .drop-copy p{display:none}
+  #appShell .drop-copy h2{font-size:12px}
+  #appShell .drop-buttons{gap:5px}
+  #appShell .drop-buttons button{padding:6px 8px;font-size:11px}
+  #inspectionWorkspace>.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #appShell .stats>div{margin:7px 0;padding:0 8px}
+  #inspectionWorkspace>.workspace{grid-template-columns:220px minmax(0,1fr)}
+  #appShell .file-pane{border-right:1px solid var(--line);border-bottom:0}
+  #appShell .detail-head{flex-wrap:nowrap;padding:9px 12px}
+  #appShell .detail-head h2{font-size:14px}
+  #appShell .overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #appShell .tabs{padding:0 12px;gap:13px}
+  #detail>.tab-panel{padding:11px 12px}
+  #appShell .disk-browser{grid-template-columns:150px minmax(0,1fr)}
+  #appShell .disk-browser aside{border-right:1px solid var(--line);border-bottom:0}
+  #appShell .crypto-title{flex-direction:row}
+  #appShell .crypto-badge{display:none}
+  #appShell .crypto-results{grid-template-columns:175px minmax(0,1fr)}
+  #appShell .codec-editors{grid-template-columns:1fr 1fr}
+  #appShell .codec-title{flex-direction:row;align-items:center}
+  #appShell main>footer{display:flex}
+}
+@media(max-height:680px){
+  #appShell .topbar{height:46px;flex-basis:46px}
+  #appShell>main{padding-top:7px;gap:7px}
+  #appShell .mode-nav{flex-basis:33px}
+  #appShell .mode-nav .mode{padding-top:5px;padding-bottom:5px}
+  #inspectionWorkspace{gap:7px}
+  #inspectionWorkspace>.dropzone{min-height:44px;padding:6px 11px}
+  #appShell .drop-copy p,#appShell .drop-icon{display:none}
+  #inspectionWorkspace>.stats{min-height:32px;flex-basis:32px}
+  #appShell .stats>div{margin:5px 0}
+  #appShell .stats strong{font-size:17px}
+  #appShell .detail-empty .hex-decoration{display:none}
+  #appShell .empty-symbol{display:none}
+  #appShell .empty-list{padding:18px 10px}
+  #appShell .detail-head .eyebrow{display:none}
+  #appShell .detail-head{padding-top:7px;padding-bottom:7px}
+  #inspectionWorkspace>.export-bar{min-height:38px;padding:4px 10px}
+  #appShell main>footer{flex-basis:20px;min-height:20px}
+}

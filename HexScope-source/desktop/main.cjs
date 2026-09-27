@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,Menu,session,dialog,ipcMain,shell}=require('electron');
+const {app,BrowserWindow,Menu,session,dialog,ipcMain,shell,screen}=require('electron');
 const fs=require('node:fs');
 const path=require('node:path');
 const branding=require('./branding.json');
@@ -19,7 +19,11 @@ fs.mkdirSync(sessionProfile,{recursive:true});
 app.setPath('sessionData',sessionProfile);
 
 function createWindow(){
-  const win=new BrowserWindow({width:1420,height:990,minWidth:860,minHeight:680,
+  const area=screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
+  const width=Math.min(1440,Math.max(1,Math.floor(area.width)-32));
+  const height=Math.min(920,Math.max(1,Math.floor(area.height)-32));
+  const win=new BrowserWindow({width,height,minWidth:Math.min(760,width),minHeight:Math.min(540,height),
+    x:Math.floor(area.x+(area.width-width)/2),y:Math.floor(area.y+(area.height-height)/2),
     title:branding.productName+' '+branding.displayVersion+' · '+branding.author,backgroundColor:'#f4f5f2',show:false,
     icon:path.join(__dirname,'assets','hexscope.ico'),
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,

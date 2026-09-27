@@ -20,7 +20,7 @@
 - `tests/ui.test.cjs`：32 项 DOM / 事件逻辑测试，模拟 Worker 消息及 Canvas API；不是浏览器渲染测试。
 - `tests/ctf.test.cjs`：32 项编码、压缩、元数据、GPS 和像素检查。
 - `tests/stego.test.cjs`：42 项专项算法与异常输入测试。
-- `tests/desktop.test.cjs`：3 项桌面配置测试。
+- `tests/desktop.test.cjs`：4 项桌面配置与屏幕边界测试。
 - `tests/fixtures/`：为测试生成的无隐私图片、ZIP、文本、PCM WAV 和动图样本。
 
 ```sh
@@ -65,3 +65,7 @@ Node.js 22.13+；`jsdom` 和 `@napi-rs/canvas` 仅供开发测试。所有解析
 `npm test` 在原有 425 项基础上再运行预览测试，确切总数见生成的验证报告。`npm run test:preview` 单独运行预览验证。正式打包脚本生成 `4.1-GitHub` 便携与源码 ZIP，保留密码 78 项工具、自定义图标及原生镜像能力。
 
 项目署名统一保存在 `desktop/branding.json`。HTML 构建、桌面窗口和便携包读取这一配置；`src/branding.css` 提供首页、页脚与关于面板的样式。源码 ZIP 包含 Windows CI 模板（`desktop/windows-test.example.yml`，当前未启用 Actions）及中文问题模板，便于后续维护。
+
+## 4.1 r3 桌面布局
+
+`src/shell.css` 是最后载入的工作台布局层，统一视口、工作区、列表和详情的滚动边界。`src/template.html` 采用紧凑导入与统计栏，并把队列大小/排序设置放入可展开区；相关筛选状态由 `src/app.js` 更新。窗口尺寸由 `desktop/main.cjs` 使用当前显示器工作区计算。布局测试采用 DOM 状态与桌面 API 模拟，没有声称真实窗口像素验收。

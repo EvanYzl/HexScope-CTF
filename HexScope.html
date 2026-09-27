@@ -40,6 +40,236 @@ body.login-locked{min-height:100vh;min-height:100dvh;overflow:hidden}
 </style>
 <style>.preview-heading,.preview-heading>div,.preview-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.preview-heading{justify-content:space-between}.preview-heading .tag:empty{display:none}.preview-tools{margin:12px 0}.preview-tools:empty{display:none}.preview-tools label{display:flex;align-items:center;gap:7px}.preview-tools input[type=number]{width:80px}.preview-tools input[type=search]{min-width:180px;flex:1}.preview-tools select{max-width:300px}.preview-stage{border:1px solid var(--border,#dce2e2);border-radius:10px;min-height:160px;max-height:76vh;overflow:auto;background:#f0f3f5;color:#25333d;padding:18px;position:relative}.preview-stage:empty{display:none}.preview-note{color:var(--muted,#687779);line-height:1.65;font-size:12px;margin-top:12px}.preview-document{background:#fff;color:#182c3a;max-width:850px;margin:auto;padding:30px;line-height:1.8;overflow-wrap:anywhere;box-shadow:0 2px 12px #17334412}.preview-document h1,.preview-document h2,.preview-document h3{color:#183849;line-height:1.5}.preview-document p{color:inherit}.preview-document img{max-width:100%;height:auto}.preview-document table,.preview-sheet{border-collapse:collapse;width:100%;background:#fff;color:#182c3a}.preview-document td,.preview-document th{border:1px solid #c9d6dc;padding:8px}.preview-sheet{font:12px/1.6 ui-monospace,Consolas,monospace;width:max-content;min-width:100%}.preview-sheet td,.preview-sheet th{border:1px solid #dce4e8;padding:7px 10px;min-width:90px;max-width:320px;white-space:pre-wrap;overflow-wrap:anywhere;vertical-align:top}.preview-sheet td{cursor:pointer}.preview-sheet td:focus{outline:2px solid #218576;outline-offset:-2px}.preview-sheet th{background:#e9f1f3;position:sticky;top:-18px;z-index:1;font-weight:600}.preview-sheet th:first-child{min-width:46px}.preview-sheet tr[data-hidden=true]{background:#fffbe9}.preview-sheet td[data-hidden=true]{background:#fffbe9}.preview-stage pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.7 ui-monospace,Consolas,monospace;tab-size:4;color:#233647}.preview-stage.preview-image-stage{background-color:#eef1f2;background-image:linear-gradient(45deg,#dce2e4 25%,transparent 25%),linear-gradient(-45deg,#dce2e4 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#dce2e4 75%),linear-gradient(-45deg,transparent 75%,#dce2e4 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}.preview-image-wrap{display:grid;place-items:center;margin:auto}.preview-image-wrap img{display:block;max-width:none;transform-origin:center}.preview-stage video{max-width:100%;max-height:60vh;display:block;margin:auto}.preview-stage audio{width:100%;margin:20px auto}.preview-pdf-page{display:block;margin:0 auto;background:#fff;box-shadow:0 2px 14px #142b3030}.preview-pdf-text{margin-top:18px;background:#fff;padding:12px}.preview-cell{flex-basis:100%;font:12px/1.7 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:100px;overflow:auto}.preview-warning{color:#8b5106;background:#fff6df;padding:10px;border-radius:6px}.preview-stage .preview-empty{padding:30px 15px;line-height:1.8}.preview-stage [hidden],#previewPanel [hidden]{display:none!important}@media(max-width:800px){.preview-document{padding:16px}.preview-stage{padding:10px}.preview-tools select{max-width:220px}}
 </style>
+<style>/* Desktop workbench: the viewport belongs to the tools, not the document. */
+html,body{height:100%;overflow:hidden}
+#appShell{height:100vh;height:100dvh;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+#appShell .topbar{height:52px;flex:0 0 52px;padding:0 18px;background:#fafcf8}
+#appShell .brand{font-size:19px;gap:9px;letter-spacing:-.5px}
+#appShell .brandmark{width:30px;height:30px;font-size:18px;border-radius:6px}
+#appShell .brand small{font-size:10px;letter-spacing:.5px;margin-left:9px}
+#appShell .top-actions{gap:14px;min-width:0}
+#appShell .local{font-size:10px;white-space:nowrap}
+#appShell .creator-badge{padding:3px 9px;font-size:10px}
+#appShell>main{flex:1;min-height:0;min-width:0;max-width:none;width:100%;margin:0;padding:10px 16px 0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+#appShell .mode-nav{flex:0 0 37px;min-width:0;gap:4px;margin:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#appShell .mode-nav .mode{flex-shrink:0;font-size:12px;line-height:20px;padding:7px 15px}
+#appShell .mode-nav .mode.active{background:#e8f1e9;border-radius:5px 5px 0 0}
+#appShell .mode-nav>span{white-space:nowrap;letter-spacing:1.2px;padding-right:2px;font-size:8px}
+#appShell main>[id$="Workspace"]{flex:1;min-width:0;min-height:0;margin:0;overscroll-behavior:contain}
+#appShell input,#appShell select{padding:6px 8px}
+#appShell .primary,#appShell .secondary{font-size:12px;padding:7px 12px}
+#appShell .quiet{font-size:11px;padding:5px 7px}
+
+/* Import / summary / work area / export stay inside one screen. */
+#inspectionWorkspace{display:flex;flex-direction:column;gap:9px;overflow:hidden}
+#inspectionWorkspace>.dropzone{flex:0 0 auto;min-height:60px;padding:9px 13px;gap:13px;border-radius:7px}
+#appShell .drop-icon{width:34px;height:38px;flex-shrink:0;border-radius:5px}
+#appShell .drop-icon svg{width:19px;height:23px}
+#appShell .drop-copy{min-width:0}
+#appShell .drop-copy h2{font-size:13px;line-height:20px}
+#appShell .drop-copy p{font-size:10px;line-height:16px;margin:1px 0 0;max-width:none}
+#appShell .drop-buttons{margin:0;gap:7px;flex-shrink:0}
+#appShell .drop-buttons .quiet{padding:7px 10px}
+#inspectionWorkspace>.stats{flex:0 0 38px;min-height:38px;margin:0;border-radius:6px;background:#fafcf8}
+#appShell .stats>div{margin:7px 0;padding:0 14px;gap:8px;grid-template-columns:minmax(0,1fr) auto}
+#appShell .stats .stat-label{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell .stats strong{grid-row:1;font-size:19px;line-height:22px}
+#appShell .stats small{display:none}
+#inspectionWorkspace>.progress-area{flex:0 0 auto;margin:0}
+#appShell .progress-line{font-size:10px}
+#inspectionWorkspace>.workspace{flex:1;min-height:0;grid-template-columns:clamp(245px,23vw,325px) minmax(0,1fr);border-radius:7px;overflow:hidden}
+#appShell .file-pane{min-height:0;overflow:hidden}
+#appShell .panel-title{flex-shrink:0;padding:10px 12px 7px}
+#appShell .panel-title h2{font-size:13px}
+#appShell .filters{flex-shrink:0;padding:0 12px 8px;gap:5px}
+#appShell .filters input,#appShell .filters select{font-size:11px;padding:6px 7px}
+#appShell .queue-options{flex-shrink:0;border-top:1px solid #e8ede4;border-bottom:1px solid #e8ede4;max-height:44%;overflow:auto;scrollbar-width:thin}
+#appShell .queue-options>summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;font-size:10px;color:#73846c;cursor:pointer;list-style:none;background:#f8faf5}
+#appShell .queue-options>summary::-webkit-details-marker{display:none}
+#appShell .queue-options>summary:after{content:'＋';font:12px var(--mono);color:#84957d}
+#appShell .queue-options[open]>summary:after{content:'−'}
+#appShell .queue-options.has-filter>summary{color:var(--teal);background:#edf4e9}
+#appShell .file-controls{padding:5px 12px 8px;gap:6px}
+#appShell .file-controls select{font-size:10px;padding:5px 6px}
+#appShell .size-filters{padding:0 12px 9px;gap:4px}
+#appShell .size-filters label{font-size:9px}
+#appShell .size-filters input{padding:5px;font-size:10px}
+#appShell .size-filters select{padding:6px 2px;width:53px;font-size:10px}
+#appShell .size-filters .quiet{padding:6px 0;font-size:10px}
+#appShell .size-hint{flex-shrink:0;padding:6px 12px;font-size:9px;line-height:15px;overflow-wrap:anywhere}
+#appShell .file-list{flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#appShell .file-row{padding:10px 10px 9px 9px;gap:9px}
+#appShell .file-icon{width:31px;height:35px;font-size:9px}
+#appShell .file-content strong{font-size:11px}
+#appShell .file-sub{font-size:9px;margin:1px 0 4px}
+#appShell .tag{font-size:9px;padding:1px 5px}
+#appShell .tree-directory>summary{padding:7px 9px;font-size:10px}
+#appShell .empty-list{padding:30px 12px}
+#appShell .empty-symbol{font-size:32px;margin-bottom:10px}
+#appShell .empty-list p{font-size:11px}
+#appShell .queue-footer{flex-shrink:0;min-height:30px;padding:5px 9px;font-size:9px}
+#appShell .queue-footer .quiet{font-size:10px;padding:4px}
+#appShell .detail-pane{min-height:0;overflow:hidden;display:flex;flex-direction:column}
+#appShell .detail-empty{flex:1;min-height:0;height:auto;padding:18px;overflow:auto}
+#appShell .hex-decoration{font-size:17px;letter-spacing:5px;padding:15px 19px;margin-bottom:18px;border-radius:7px}
+#appShell .detail-empty h2{font-size:16px}
+#appShell .detail-empty p{font-size:11px;max-width:480px}
+#appShell .legend-inline{margin-top:17px;font-size:9px;gap:15px;flex-wrap:wrap;justify-content:center}
+#detail{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#appShell .detail-head{flex-shrink:0;padding:11px 16px 9px;gap:10px}
+#appShell .detail-head>div{flex:1;min-width:0}
+#appShell .detail-head .eyebrow{font-size:8px;margin:0 0 3px;letter-spacing:1px}
+#appShell .detail-head h2{font-size:15px;line-height:22px;margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell #detailMeta{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell .detail-head .secondary{font-size:10px;padding:6px 9px}
+#appShell .tabs{flex-shrink:0;min-height:35px;padding:0 15px;gap:16px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#appShell .tab{font-size:11px;padding:8px 0;line-height:17px}
+#appShell .tab span{font-size:8px;margin-left:2px;padding:1px 4px}
+#detail>.tab-panel{flex:1;min-height:0;padding:14px 16px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+#appShell .verdict{padding:10px 12px;margin-bottom:14px}
+#appShell .overview-grid{margin-bottom:17px;gap:13px}
+#appShell .subhead{margin:14px 0 8px}
+#appShell .panel-intro{margin-bottom:12px}
+#appShell .section-toolbar{gap:8px;margin-bottom:11px}
+#appShell .metadata-scroll,#appShell .strings-results{max-height:none}
+#appShell .candidate{padding:11px 12px;margin-bottom:10px}
+#inspectionWorkspace>.export-bar{flex:0 0 auto;min-height:44px;margin:0;padding:6px 12px;border-radius:6px;gap:12px}
+#appShell .export-bar>div{min-width:0;display:flex;align-items:center;gap:12px}
+#appShell .export-bar strong{font-size:11px;white-space:nowrap}
+#appShell .export-bar div>span{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#appShell .export-bar .primary{min-width:175px;padding:7px 12px;font-size:11px}
+
+/* Each reader keeps its own controls while its payload scrolls. */
+#hexPanel:not([hidden]),#previewPanel:not([hidden]){display:flex;flex-direction:column}
+#appShell #hexPanel>.hex-tools,#appShell #hexPanel>.hex-legend,#appShell #hexPanel>.hex-footer,#appShell #hexPanel>.manual{flex-shrink:0}
+#appShell #hexPanel>.hex-scroll{flex:1;min-height:80px;overscroll-behavior:contain}
+#appShell #hexPanel>.manual{margin-top:8px}
+#appShell .range-form{margin:9px 0 0}
+#appShell #previewPanel{overflow:auto}
+#appShell #previewPanel>.preview-stage{flex:1 1 auto;min-height:100px;max-height:none;padding:12px;border-radius:6px;overscroll-behavior:contain}
+#appShell .preview-heading,#appShell .preview-tools,#appShell .preview-note,#appShell #previewStatus{flex-shrink:0}
+#appShell .preview-tools{margin:8px 0;gap:8px;font-size:11px}
+#appShell .preview-tools input,#appShell .preview-tools select{font-size:11px}
+#appShell .preview-tools select{max-width:230px}
+#appShell .preview-note{font-size:10px;line-height:16px;margin-top:8px}
+#appShell .preview-sheet th{top:-12px}
+#appShell .preview-document{padding:22px}
+#appShell .preview-cell{max-height:54px;font-size:10px}
+
+/* The other workspaces scroll inside the application frame. */
+#appShell main>.disk-workspace,#appShell main>.hash-workspace,#appShell main>.codec-workspace,#appShell main>.crypto-workspace{overflow:auto;padding:16px 18px;border-radius:7px;scrollbar-gutter:stable}
+#appShell .disk-heading,#appShell .codec-title{margin-bottom:14px;gap:12px}
+#appShell .disk-heading h2,#appShell .codec-title h2,#appShell .crypto-title h2{font-size:19px;margin:0 0 4px;line-height:28px}
+#appShell .disk-heading .eyebrow,#appShell .codec-title .eyebrow,#appShell .crypto-title .eyebrow{font-size:8px;margin-bottom:4px}
+#appShell .disk-drop{padding:11px 13px;font-size:11px}
+#appShell .disk-state{padding:9px 0;min-height:38px;font-size:11px}
+#appShell .disk-image{padding:11px 0;gap:12px}
+#appShell .disk-image strong{font-size:15px}
+#appShell .disk-partition{margin-bottom:12px}
+#appShell .disk-browser{grid-template-columns:190px minmax(0,1fr)}
+#appShell .disk-table-scroll{max-height:clamp(160px,43vh,550px);min-height:150px;margin-top:10px}
+#appShell .disk-tree{max-height:clamp(150px,47vh,580px)}
+#appShell .disk-actions{gap:7px;padding:9px 0;flex-wrap:wrap}
+#appShell .disk-actions button{padding:6px 9px;font-size:10px}
+#appShell .disk-note{font-size:10px;margin-top:10px}
+#appShell .mount-panel{margin-top:18px;padding-top:16px}
+#appShell .hash-target{margin:12px 0;padding:13px}
+#appShell .hash-target strong{font-size:16px;margin:4px 0}
+#appShell .hash-note,#appShell .hash-target p{font-size:11px}
+#appShell .hash-algorithms{gap:9px 18px;padding:12px 0}
+#appShell .hash-algorithms label{font-size:11px}
+#appShell .codec-controls{padding:12px;gap:10px}
+#appShell .codec-parameters{padding:13px 0;gap:12px}
+#appShell .codec-editors{gap:12px;margin-bottom:12px}
+#appShell .codec-editors textarea{height:clamp(140px,37vh,420px);margin-top:7px;padding:12px;font-size:12px}
+#appShell .crypto-title{gap:12px}
+#appShell .crypto-title .muted{font-size:11px}
+#appShell .crypto-badge{font-size:10px;padding:5px 9px}
+#appShell .crypto-tabs{margin:13px 0 12px;gap:20px}
+#appShell .crypto-tabs button{font-size:12px;padding:8px 2px}
+#appShell .crypto-input-head{margin:8px 0}
+#appShell .crypto-input-head strong{font-size:12px}
+#appShell .crypto-input{min-height:105px;height:clamp(105px,18vh,190px);padding:11px;font-size:12px}
+#appShell .crypto-controls{gap:10px;margin:10px 0}
+#appShell .crypto-runbar{padding:10px 0;gap:8px}
+#appShell .crypto-facts{margin:10px 0}
+#appShell .crypto-facts>div{padding:8px 12px}
+#appShell .crypto-facts strong{font-size:15px;margin-top:3px}
+#appShell .crypto-hints{padding:9px 12px;margin:10px 0;max-height:90px;overflow:auto}
+#appShell .crypto-results{grid-template-columns:210px minmax(0,1fr);margin-top:10px}
+#appShell .crypto-result-detail{padding:13px}
+#appShell #cryptoCandidates{max-height:390px}
+#appShell #cryptoOutput{min-height:180px;max-height:55vh}
+#appShell .crypto-result-actions{margin-top:11px;gap:7px}
+#appShell .crypto-parameters{margin:10px 0;gap:9px}
+#appShell .crypto-footnote{font-size:10px;margin-top:10px}
+
+#appShell main>footer{flex:0 0 22px;min-height:22px;padding:0 1px 5px;gap:18px;align-items:center;overflow:hidden;font-size:9px}
+#appShell footer .footer-identity{flex-direction:row;align-items:center;gap:13px;min-width:0;letter-spacing:.6px}
+#appShell .footer-credit{font-size:9px}
+#appShell footer p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9px}
+#appShell .toast{bottom:28px}
+
+@media(max-width:1100px){
+  #appShell .brand small{display:none}
+  #appShell .top-actions{gap:10px}
+  #appShell .local{display:none}
+  #inspectionWorkspace>.workspace{grid-template-columns:250px minmax(0,1fr)}
+  #appShell .drop-copy p{max-width:290px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #appShell .tabs{gap:14px}
+  #appShell .export-bar div>span,#appShell footer p{display:none}
+  #appShell .disk-browser{grid-template-columns:165px minmax(0,1fr)}
+  #appShell .crypto-key{min-width:130px}
+}
+@media(max-width:800px){
+  #appShell .topbar{padding:0 12px}
+  #appShell .top-actions>.creator-badge{display:none}
+  #appShell>main{padding:8px 10px 0;gap:8px}
+  #appShell .mode-nav>span{display:none}
+  #appShell .mode-nav .mode{padding:7px 13px}
+  #appShell .dropzone{flex-wrap:nowrap}
+  #appShell .drop-icon,#appShell .drop-copy p{display:none}
+  #appShell .drop-copy h2{font-size:12px}
+  #appShell .drop-buttons{gap:5px}
+  #appShell .drop-buttons button{padding:6px 8px;font-size:11px}
+  #inspectionWorkspace>.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #appShell .stats>div{margin:7px 0;padding:0 8px}
+  #inspectionWorkspace>.workspace{grid-template-columns:220px minmax(0,1fr)}
+  #appShell .file-pane{border-right:1px solid var(--line);border-bottom:0}
+  #appShell .detail-head{flex-wrap:nowrap;padding:9px 12px}
+  #appShell .detail-head h2{font-size:14px}
+  #appShell .overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #appShell .tabs{padding:0 12px;gap:13px}
+  #detail>.tab-panel{padding:11px 12px}
+  #appShell .disk-browser{grid-template-columns:150px minmax(0,1fr)}
+  #appShell .disk-browser aside{border-right:1px solid var(--line);border-bottom:0}
+  #appShell .crypto-title{flex-direction:row}
+  #appShell .crypto-badge{display:none}
+  #appShell .crypto-results{grid-template-columns:175px minmax(0,1fr)}
+  #appShell .codec-editors{grid-template-columns:1fr 1fr}
+  #appShell .codec-title{flex-direction:row;align-items:center}
+  #appShell main>footer{display:flex}
+}
+@media(max-height:680px){
+  #appShell .topbar{height:46px;flex-basis:46px}
+  #appShell>main{padding-top:7px;gap:7px}
+  #appShell .mode-nav{flex-basis:33px}
+  #appShell .mode-nav .mode{padding-top:5px;padding-bottom:5px}
+  #inspectionWorkspace{gap:7px}
+  #inspectionWorkspace>.dropzone{min-height:44px;padding:6px 11px}
+  #appShell .drop-copy p,#appShell .drop-icon{display:none}
+  #inspectionWorkspace>.stats{min-height:32px;flex-basis:32px}
+  #appShell .stats>div{margin:5px 0}
+  #appShell .stats strong{font-size:17px}
+  #appShell .detail-empty .hex-decoration{display:none}
+  #appShell .empty-symbol{display:none}
+  #appShell .empty-list{padding:18px 10px}
+  #appShell .detail-head .eyebrow{display:none}
+  #appShell .detail-head{padding-top:7px;padding-bottom:7px}
+  #inspectionWorkspace>.export-bar{min-height:38px;padding:4px 10px}
+  #appShell main>footer{flex-basis:20px;min-height:20px}
+}
+</style>
 </head>
 <body class="login-locked">
 <section id="loginScreen" class="login-screen" aria-labelledby="loginTitle">
@@ -54,16 +284,15 @@ body.login-locked{min-height:100vh;min-height:100dvh;overflow:hidden}
 <div id="appShell" hidden inert aria-hidden="true">
 <header class="topbar">
   <div class="brand"><span class="brandmark" aria-hidden="true">H<span>›</span></span><div>HexScope <small>CTF 隐写与密码分析</small></div><span class="version">4.1</span></div>
-  <div class="top-actions"><span class="local"><i></i> 完全离线 · 文件留在本机</span><button id="helpBtn" class="quiet">使用说明 <span>↗</span></button></div>
+  <div class="top-actions"><span class="creator-badge"><span class="creator-spark" aria-hidden="true">✦</span><span>Created by 是羊羊羊呀</span></span><span class="local"><i></i> 完全离线 · 文件留在本机</span><button id="helpBtn" class="quiet">使用说明 <span>↗</span></button></div>
 </header>
 <main>
-  <section class="intro"><div><div class="eyebrow">CTF FORENSICS WORKSPACE</div><h1>让每一条隐藏线索，浮出表面<span>。</span></h1><p>文件透视 · 隐写检查 · 取证镜像 · 哈希校验 · 编码与密码分析</p><div class="creator-line"><span class="creator-badge"><span class="creator-spark" aria-hidden="true">✦</span><span>Created by 是羊羊羊呀</span></span><span class="creator-edition">4.1 · 本地离线 · 免安装便携版</span></div></div><button id="demoBtn" class="secondary">试试演示文件 <span>↗</span></button></section>
-  <nav class="mode-nav" aria-label="工作台"><button id="inspectMode" class="mode active">文件分析</button><button id="diskMode" class="mode">取证镜像</button><button id="hashMode" class="mode">哈希校验</button><button id="codecMode" class="mode">编码工作台</button><span>LOCAL / OFFLINE</span></nav>
+  <nav class="mode-nav" aria-label="工作台"><button id="inspectMode" aria-pressed="true" class="mode active">文件分析</button><button id="diskMode" aria-pressed="false" class="mode">取证镜像</button><button id="hashMode" aria-pressed="false" class="mode">哈希校验</button><button id="codecMode" aria-pressed="false" class="mode">编码工作台</button><span>LOCAL / OFFLINE</span></nav>
   <div id="inspectionWorkspace">
   <section id="dropzone" class="dropzone" aria-label="拖放文件区域">
     <div class="drop-icon" aria-hidden="true"><svg width="28" height="32" viewBox="0 0 28 32" fill="none"><path d="M5 1H17L25 9V30H5V1Z" stroke="currentColor" stroke-width="1.5"/><path d="M17 1V9H25M10 18H20M15 13V23" stroke="currentColor" stroke-width="1.5"/></svg></div>
-    <div class="drop-copy"><h2>拖入一批文件，开始透视</h2><p>支持文件与文件夹 · 图片、压缩包及任意二进制文件 · 单文件 ≤ 128 MiB</p></div>
-    <div class="drop-buttons"><button id="addBtn" class="primary">＋ 选择文件</button><button id="folderBtn" class="secondary">选择文件夹</button></div>
+    <div class="drop-copy"><h2>拖入文件，开始分析</h2><p>支持文件与文件夹 · 图片、压缩包及任意二进制文件 · 单文件 ≤ 128 MiB</p></div>
+    <div class="drop-buttons"><button id="demoBtn" class="quiet">载入演示</button><button id="folderBtn" class="secondary">选择文件夹</button><button id="addBtn" class="primary">＋ 选择文件</button></div>
     <input id="fileInput" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory multiple hidden>
   </section>
   <div id="progressArea" class="progress-area" hidden><div class="progress-line"><span id="progressText" role="status"></span><button id="cancelBtn" class="quiet">停止扫描</button></div><progress id="progressBar" value="0" max="1" aria-label="批量扫描进度"></progress></div>
@@ -77,8 +306,10 @@ body.login-locked{min-height:100vh;min-height:100dvh;overflow:hidden}
     <div class="file-pane">
       <div class="panel-title"><h2>文件队列 <span id="fileCount">0</span></h2><button id="clearBtn" class="quiet" disabled>清空</button></div>
       <div class="filters"><input id="searchInput" type="search" placeholder="搜索文件名…" aria-label="搜索文件名"><select id="filterSelect" aria-label="筛选结果"><option value="all">全部结果</option><option value="suspect">附加 / 可疑</option><option value="mismatch">后缀不匹配</option><option value="damaged">结构损坏</option><option value="limited">检测受限</option><option value="clean">未见异常</option></select></div>
+      <details id="queueOptions" class="queue-options"><summary><span id="queueOptionsLabel">大小与排序</span></summary>
       <div class="file-controls"><select id="listMode" aria-label="列表或文件树"><option value="tree">文件树</option><option value="list">平铺列表</option></select><select id="sortSelect" aria-label="文件排序"><option value="original">导入顺序</option><option value="sizeDesc">大小 ↓</option><option value="sizeAsc">大小 ↑</option><option value="name">文件名 A—Z</option></select></div>
-      <div class="size-filters"><label>大小范围<input id="minSize" type="number" min="0" step="any" placeholder="最小" aria-label="最小文件大小"></label><span>—</span><label>含边界<input id="maxSize" type="number" min="0" step="any" placeholder="最大" aria-label="最大文件大小"></label><select id="sizeUnit" aria-label="大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option></select><button id="resetSize" class="quiet" title="重置大小筛选">重置</button></div><div id="sizeFilterHint" class="size-hint" role="status"></div>
+      <div class="size-filters"><label>大小范围<input id="minSize" type="number" min="0" step="any" placeholder="最小" aria-label="最小文件大小"></label><span>—</span><label>含边界<input id="maxSize" type="number" min="0" step="any" placeholder="最大" aria-label="最大文件大小"></label><select id="sizeUnit" aria-label="大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option></select><button id="resetSize" class="quiet" title="重置大小筛选">重置</button></div></details>
+      <div id="sizeFilterHint" class="size-hint" role="status"></div>
       <div id="fileList" class="file-list"><div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div></div>
       <div class="queue-footer"><span id="queueStatus">所有分析均在本地进行</span><button id="reportBtn" class="quiet" disabled>导出报告 ↓</button></div>
     </div>
@@ -1217,6 +1448,9 @@ self.onmessage = async ({data:job}) => {
     const rows=state.items.filter(x=>((x.path||x.file.name).toLowerCase().includes(needle))&&(filter==='all'||(filter==='mismatch'?x.result?.matches===false:x.result?.status===filter))&&(!valid||(x.file.size>=min&&x.file.size<=max)));
     const sort=$('sortSelect').value;if(sort==='sizeAsc')rows.sort((a,b)=>a.file.size-b.file.size);else if(sort==='sizeDesc')rows.sort((a,b)=>b.file.size-a.file.size);else if(sort==='name')rows.sort((a,b)=>a.path.localeCompare(b.path));
     $('sizeFilterHint').textContent=valid?rows.length+' 个可见 · '+size(rows.reduce((n,x)=>n+x.file.size,0))+' · 目录显示筛选后合计':'范围无效，请检查最小/最大值（当前未应用大小条件）。';
+    const sized=$('minSize').value!==''||$('maxSize').value!=='';
+    $('queueOptions').classList.toggle('has-filter',sized||sort!=='original'||$('listMode').value!=='tree');
+    $('queueOptionsLabel').textContent=sized?(valid?'大小筛选已应用':'大小范围无效'):'大小与排序';
     if(!state.items.length) {
       $('fileList').innerHTML='<div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div>';
     } else if(!rows.length)$('fileList').innerHTML='<div class="empty-list"><p>没有符合条件的文件</p></div>';
@@ -1242,8 +1476,9 @@ self.onmessage = async ({data:job}) => {
   function renderDetail() {
     const item=selected();if(!item){resetDetail();return;}
     $('detailEmpty').hidden=true;$('detail').hidden=false;
-    $('detailName').textContent=item.file.name;$('detailType').textContent='FILE INSPECTOR / '+(item.result?.type||'UNKNOWN');
+    $('detailName').textContent=item.file.name;$('detailName').title=item.file.name;$('detailType').textContent='FILE INSPECTOR / '+(item.result?.type||'UNKNOWN');
     $('detailMeta').textContent=item.file.size.toLocaleString()+' 字节 · '+size(item.file.size)+' · '+(item.path||item.file.name)+(item.result?.dimensions?' · '+item.result.dimensions.width+' × '+item.result.dimensions.height:'');
+    $('detailMeta').title=$('detailMeta').textContent;
     $('correctBtn').hidden=item.result?.matches!==false;
     $('findingCount').textContent=item.result?.findings.length||0;
     if(!item.result) {
@@ -1438,7 +1673,7 @@ self.onmessage = async ({data:job}) => {
     const pane=$(name+'Workspace'),button=$(name==='inspection'?'inspectMode':name+'Mode');
     if(!pane||!button)throw Error('Unknown workspace: '+name);
     for(const item of document.querySelectorAll('main [id$="Workspace"]'))item.hidden=item!==pane;
-    for(const item of document.querySelectorAll('.mode-nav button.mode'))item.classList.toggle('active',item===button);
+    for(const item of document.querySelectorAll('.mode-nav button.mode')){item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));}
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
   window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail};
@@ -9363,7 +9598,7 @@ root.HexCryptoCatalog={rows,formats};
 'use strict';
 if(!window.HexApp||document.getElementById('cryptoWorkspace'))return;
 const H=window.HexApp,{$,esc,toast,download}=H,Catalog=window.HexCryptoCatalog;
-const button=document.createElement('button');button.id='cryptoMode';button.className='mode';button.textContent='密码分析';const nav=document.querySelector('.mode-nav');nav.insertBefore(button,nav.querySelector('span'));
+const button=document.createElement('button');button.id='cryptoMode';button.className='mode';button.setAttribute('aria-pressed','false');button.textContent='密码分析';const nav=document.querySelector('.mode-nav');nav.insertBefore(button,nav.querySelector('span'));
 const section=document.createElement('section');section.id='cryptoWorkspace';section.className='crypto-workspace';section.hidden=true;document.querySelector('main footer').before(section);
 section.innerHTML=`<div class="crypto-title"><div><div class="eyebrow">CRYPTO / LOCAL REASONING</div><h2>从未知密文，到可验证的线索</h2><p class="muted">多层编码搜索 · 古典密码 · RSA / ECC · 参数化密码实验</p></div><span class="crypto-badge">离线运行 · 可随时停止</span></div>
 <div class="crypto-tabs" role="tablist"><button id="cryptoAutoTab" class="active" role="tab" aria-selected="true">自动分析</button><button id="cryptoManualTab" role="tab" aria-selected="false">题型工具</button><button id="cryptoGuideTab" role="tab" aria-selected="false">覆盖范围</button></div>

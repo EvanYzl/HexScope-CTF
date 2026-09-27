@@ -2,7 +2,7 @@
 'use strict';
 if(!window.HexApp||document.getElementById('cryptoWorkspace'))return;
 const H=window.HexApp,{$,esc,toast,download}=H,Catalog=window.HexCryptoCatalog;
-const button=document.createElement('button');button.id='cryptoMode';button.className='mode';button.textContent='密码分析';const nav=document.querySelector('.mode-nav');nav.insertBefore(button,nav.querySelector('span'));
+const button=document.createElement('button');button.id='cryptoMode';button.className='mode';button.setAttribute('aria-pressed','false');button.textContent='密码分析';const nav=document.querySelector('.mode-nav');nav.insertBefore(button,nav.querySelector('span'));
 const section=document.createElement('section');section.id='cryptoWorkspace';section.className='crypto-workspace';section.hidden=true;document.querySelector('main footer').before(section);
 section.innerHTML=`<div class="crypto-title"><div><div class="eyebrow">CRYPTO / LOCAL REASONING</div><h2>从未知密文，到可验证的线索</h2><p class="muted">多层编码搜索 · 古典密码 · RSA / ECC · 参数化密码实验</p></div><span class="crypto-badge">离线运行 · 可随时停止</span></div>
 <div class="crypto-tabs" role="tablist"><button id="cryptoAutoTab" class="active" role="tab" aria-selected="true">自动分析</button><button id="cryptoManualTab" role="tab" aria-selected="false">题型工具</button><button id="cryptoGuideTab" role="tab" aria-selected="false">覆盖范围</button></div>

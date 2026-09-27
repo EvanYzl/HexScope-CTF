@@ -11,6 +11,7 @@
 <style>/*__CSS__*/</style>
 <style>/*__CRYPTO_CSS__*/</style>
 <style>/*__PREVIEW_CSS__*/</style>
+<style>/*__SHELL_CSS__*/</style>
 </head>
 <body class="login-locked">
 <section id="loginScreen" class="login-screen" aria-labelledby="loginTitle">
@@ -25,16 +26,15 @@
 <div id="appShell" hidden inert aria-hidden="true">
 <header class="topbar">
   <div class="brand"><span class="brandmark" aria-hidden="true">H<span>›</span></span><div>HexScope <small>CTF 隐写与密码分析</small></div><span class="version">4.1</span></div>
-  <div class="top-actions"><span class="local"><i></i> 完全离线 · 文件留在本机</span><button id="helpBtn" class="quiet">使用说明 <span>↗</span></button></div>
+  <div class="top-actions"><span class="creator-badge"><span class="creator-spark" aria-hidden="true">✦</span><span>/*__HEADER_CREDIT_HTML__*/</span></span><span class="local"><i></i> 完全离线 · 文件留在本机</span><button id="helpBtn" class="quiet">使用说明 <span>↗</span></button></div>
 </header>
 <main>
-  <section class="intro"><div><div class="eyebrow">CTF FORENSICS WORKSPACE</div><h1>让每一条隐藏线索，浮出表面<span>。</span></h1><p>文件透视 · 隐写检查 · 取证镜像 · 哈希校验 · 编码与密码分析</p><div class="creator-line"><span class="creator-badge"><span class="creator-spark" aria-hidden="true">✦</span><span>/*__HEADER_CREDIT_HTML__*/</span></span><span class="creator-edition">4.1 · 本地离线 · 免安装便携版</span></div></div><button id="demoBtn" class="secondary">试试演示文件 <span>↗</span></button></section>
-  <nav class="mode-nav" aria-label="工作台"><button id="inspectMode" class="mode active">文件分析</button><button id="diskMode" class="mode">取证镜像</button><button id="hashMode" class="mode">哈希校验</button><button id="codecMode" class="mode">编码工作台</button><span>LOCAL / OFFLINE</span></nav>
+  <nav class="mode-nav" aria-label="工作台"><button id="inspectMode" aria-pressed="true" class="mode active">文件分析</button><button id="diskMode" aria-pressed="false" class="mode">取证镜像</button><button id="hashMode" aria-pressed="false" class="mode">哈希校验</button><button id="codecMode" aria-pressed="false" class="mode">编码工作台</button><span>LOCAL / OFFLINE</span></nav>
   <div id="inspectionWorkspace">
   <section id="dropzone" class="dropzone" aria-label="拖放文件区域">
     <div class="drop-icon" aria-hidden="true"><svg width="28" height="32" viewBox="0 0 28 32" fill="none"><path d="M5 1H17L25 9V30H5V1Z" stroke="currentColor" stroke-width="1.5"/><path d="M17 1V9H25M10 18H20M15 13V23" stroke="currentColor" stroke-width="1.5"/></svg></div>
-    <div class="drop-copy"><h2>拖入一批文件，开始透视</h2><p>支持文件与文件夹 · 图片、压缩包及任意二进制文件 · 单文件 ≤ 128 MiB</p></div>
-    <div class="drop-buttons"><button id="addBtn" class="primary">＋ 选择文件</button><button id="folderBtn" class="secondary">选择文件夹</button></div>
+    <div class="drop-copy"><h2>拖入文件，开始分析</h2><p>支持文件与文件夹 · 图片、压缩包及任意二进制文件 · 单文件 ≤ 128 MiB</p></div>
+    <div class="drop-buttons"><button id="demoBtn" class="quiet">载入演示</button><button id="folderBtn" class="secondary">选择文件夹</button><button id="addBtn" class="primary">＋ 选择文件</button></div>
     <input id="fileInput" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory multiple hidden>
   </section>
   <div id="progressArea" class="progress-area" hidden><div class="progress-line"><span id="progressText" role="status"></span><button id="cancelBtn" class="quiet">停止扫描</button></div><progress id="progressBar" value="0" max="1" aria-label="批量扫描进度"></progress></div>
@@ -48,8 +48,10 @@
     <div class="file-pane">
       <div class="panel-title"><h2>文件队列 <span id="fileCount">0</span></h2><button id="clearBtn" class="quiet" disabled>清空</button></div>
       <div class="filters"><input id="searchInput" type="search" placeholder="搜索文件名…" aria-label="搜索文件名"><select id="filterSelect" aria-label="筛选结果"><option value="all">全部结果</option><option value="suspect">附加 / 可疑</option><option value="mismatch">后缀不匹配</option><option value="damaged">结构损坏</option><option value="limited">检测受限</option><option value="clean">未见异常</option></select></div>
+      <details id="queueOptions" class="queue-options"><summary><span id="queueOptionsLabel">大小与排序</span></summary>
       <div class="file-controls"><select id="listMode" aria-label="列表或文件树"><option value="tree">文件树</option><option value="list">平铺列表</option></select><select id="sortSelect" aria-label="文件排序"><option value="original">导入顺序</option><option value="sizeDesc">大小 ↓</option><option value="sizeAsc">大小 ↑</option><option value="name">文件名 A—Z</option></select></div>
-      <div class="size-filters"><label>大小范围<input id="minSize" type="number" min="0" step="any" placeholder="最小" aria-label="最小文件大小"></label><span>—</span><label>含边界<input id="maxSize" type="number" min="0" step="any" placeholder="最大" aria-label="最大文件大小"></label><select id="sizeUnit" aria-label="大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option></select><button id="resetSize" class="quiet" title="重置大小筛选">重置</button></div><div id="sizeFilterHint" class="size-hint" role="status"></div>
+      <div class="size-filters"><label>大小范围<input id="minSize" type="number" min="0" step="any" placeholder="最小" aria-label="最小文件大小"></label><span>—</span><label>含边界<input id="maxSize" type="number" min="0" step="any" placeholder="最大" aria-label="最大文件大小"></label><select id="sizeUnit" aria-label="大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option></select><button id="resetSize" class="quiet" title="重置大小筛选">重置</button></div></details>
+      <div id="sizeFilterHint" class="size-hint" role="status"></div>
       <div id="fileList" class="file-list"><div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div></div>
       <div class="queue-footer"><span id="queueStatus">所有分析均在本地进行</span><button id="reportBtn" class="quiet" disabled>导出报告 ↓</button></div>
     </div>

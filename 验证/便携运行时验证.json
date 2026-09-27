@@ -40,7 +40,7 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "55485dec1d62e556d25561a0f55b0232a6ac4644316efca01bb37e2e3de3bd57",
+  "htmlSHA256": "cea4cbca8106ec3c4a36a77e90a0b9f02d224acc4edf515984afb1b72128f9b2",
   "login": {
     "challengeLength": 21,
     "characterClasses": [

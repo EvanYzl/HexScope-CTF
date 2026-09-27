@@ -14,13 +14,15 @@
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4)
 ![离线](https://img.shields.io/badge/Local-Offline-426B50)
 ![密码工具](https://img.shields.io/badge/Crypto-78%20tools-A77736)
-![回归测试](https://img.shields.io/badge/Local%20tests-462%20passed-2D854B)
+![回归测试](https://img.shields.io/badge/Local%20tests-472%20passed-2D854B)
 
 [下载免安装版](https://github.com/EvanYzl/HexScope-CTF/releases/latest) · [使用说明](使用说明.md) · [功能范围](题型覆盖与限制.md) · [提交问题](https://github.com/EvanYzl/HexScope-CTF/issues)
 
 </div>
 
 HexScope 是一款面向 CTF 隐写题、编码题和数字取证练习的中文桌面工作台。把文件拖进来，可以从文件结构、十六进制、元数据、像素、编码和密码等角度查找线索；镜像内提取的文件、密码分析恢复的字节，也可以回到同一个文件分析队列继续检查。
+
+工作台随窗口尺寸伸缩，文件队列与详情各自滚动；模块导航和导出入口保留在窗口内。大小与排序条件可以展开设置，收起后仍可看见是否应用了大小筛选。
 
 **Windows 便携版解压即可运行，无需安装 Python、Node.js、Java、Office 或额外运行环境。**程序的分析和预览在本机完成，运行组件、字体和解码资源随包内置。
 
@@ -144,11 +146,11 @@ HexScope-source/
 .github/          中文问题模板
 ```
 
-Windows CI 模板位于 `HexScope-source/desktop/windows-test.example.yml`，目前未启用 Actions。维护者获得 `workflow` 权限后，可将模板放入 `.github/workflows/windows-test.yml`；它在 Windows runner 上安装锁定的开发依赖并执行同一 `npm test`。
+Windows 回归模板位于 `HexScope-source/desktop/windows-test.example.yml`，使用 Windows runner、Node.js 24 和相同的 `npm test`。仓库现有发布工作流另行保留；本地验证记录与 Actions 运行结果分别核对。
 
 ## 验证情况
 
-本次发行对应 **462/462 项本地自动化测试通过**，包含原有文件/取证/密码能力，以及文件预览和跨模块联动。另使用包内 Electron，在 PATH 仅包含 Windows 系统目录的情况下复核密码工具、DOCX/Excel/PDF 解析、E01、哈希与 VHD 转换。
+本次发行对应 **472/472 项本地自动化测试通过**，包含原有文件/取证/密码能力，以及文件预览和跨模块联动。另使用包内 Electron，在 PATH 仅包含 Windows 系统目录的情况下复核密码工具、DOCX/Excel/PDF 解析、E01、哈希与 VHD 转换。
 
 PDF 页面经过原生离屏 Canvas 绘制测试；**真实桌面窗口布局、原生拖放、全部图片/音视频编码、真实 UAC 与盘符挂载尚未完成实测**。这些边界不以 DOM 测试代替，详情见 [验证记录](验证记录.md)。
 

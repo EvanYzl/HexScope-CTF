@@ -52,6 +52,9 @@
     const rows=state.items.filter(x=>((x.path||x.file.name).toLowerCase().includes(needle))&&(filter==='all'||(filter==='mismatch'?x.result?.matches===false:x.result?.status===filter))&&(!valid||(x.file.size>=min&&x.file.size<=max)));
     const sort=$('sortSelect').value;if(sort==='sizeAsc')rows.sort((a,b)=>a.file.size-b.file.size);else if(sort==='sizeDesc')rows.sort((a,b)=>b.file.size-a.file.size);else if(sort==='name')rows.sort((a,b)=>a.path.localeCompare(b.path));
     $('sizeFilterHint').textContent=valid?rows.length+' 个可见 · '+size(rows.reduce((n,x)=>n+x.file.size,0))+' · 目录显示筛选后合计':'范围无效，请检查最小/最大值（当前未应用大小条件）。';
+    const sized=$('minSize').value!==''||$('maxSize').value!=='';
+    $('queueOptions').classList.toggle('has-filter',sized||sort!=='original'||$('listMode').value!=='tree');
+    $('queueOptionsLabel').textContent=sized?(valid?'大小筛选已应用':'大小范围无效'):'大小与排序';
     if(!state.items.length) {
       $('fileList').innerHTML='<div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div>';
     } else if(!rows.length)$('fileList').innerHTML='<div class="empty-list"><p>没有符合条件的文件</p></div>';
@@ -77,8 +80,9 @@
   function renderDetail() {
     const item=selected();if(!item){resetDetail();return;}
     $('detailEmpty').hidden=true;$('detail').hidden=false;
-    $('detailName').textContent=item.file.name;$('detailType').textContent='FILE INSPECTOR / '+(item.result?.type||'UNKNOWN');
+    $('detailName').textContent=item.file.name;$('detailName').title=item.file.name;$('detailType').textContent='FILE INSPECTOR / '+(item.result?.type||'UNKNOWN');
     $('detailMeta').textContent=item.file.size.toLocaleString()+' 字节 · '+size(item.file.size)+' · '+(item.path||item.file.name)+(item.result?.dimensions?' · '+item.result.dimensions.width+' × '+item.result.dimensions.height:'');
+    $('detailMeta').title=$('detailMeta').textContent;
     $('correctBtn').hidden=item.result?.matches!==false;
     $('findingCount').textContent=item.result?.findings.length||0;
     if(!item.result) {
@@ -273,7 +277,7 @@
     const pane=$(name+'Workspace'),button=$(name==='inspection'?'inspectMode':name+'Mode');
     if(!pane||!button)throw Error('Unknown workspace: '+name);
     for(const item of document.querySelectorAll('main [id$="Workspace"]'))item.hidden=item!==pane;
-    for(const item of document.querySelectorAll('.mode-nav button.mode'))item.classList.toggle('active',item===button);
+    for(const item of document.querySelectorAll('.mode-nav button.mode')){item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));}
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
   window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail};
