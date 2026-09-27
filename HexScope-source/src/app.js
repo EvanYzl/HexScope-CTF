@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const C=window.HexCore,$=id=>document.getElementById(id),MiB=1024*1024;
+  const C=window.HexCore,$=id=>document.getElementById(id),MiB=1024*1024,readFile=window.HexFileIO.read;
   const state={items:[],selected:null,tab:'overview',offset:0,running:false,scanJobs:new Set(),scanCursor:0,generation:0,exporting:false,next:1,closedDirs:new Set(),page:0};
   $('creatorAvatar').src=document.querySelector('link[rel="icon"]').href;
   const workerURL=URL.createObjectURL(new Blob(['coreCode','exifCode','flateCode','ctfCode','stegoCode','audioCode','animationCode','workerCode'].map(id=>$(id).textContent+'\n'),{type:'text/javascript'}));
@@ -17,18 +17,23 @@
   let toastTimer,hexToken=0;
   function toast(message) {$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,6000);}
   function job(payload,timeout=90000) {
-    const worker=new Worker(workerURL);let timer,rejectJob;
+    const worker=new Worker(workerURL),binding=window.HexFileIO.bind(worker,payload);let timer,rejectJob;
+    const close=()=>{clearTimeout(timer);binding.close();worker.terminate();};
     const promise=new Promise((resolve,reject)=>{
-      rejectJob=reject;timer=setTimeout(()=>{worker.terminate();reject(new Error('处理超时，已停止当前文件。可导出原始区间或使用桌面工具继续分析。'));},timeout);
-      worker.onmessage=({data})=>{clearTimeout(timer);worker.terminate();data.ok?resolve(data):reject(new Error(data.error));};
-      worker.onerror=e=>{clearTimeout(timer);worker.terminate();reject(new Error(e.message||'分析线程无法启动，请用新版 Edge / Chrome 打开此文件。'));};
-      worker.postMessage(payload);
+      rejectJob=reject;timer=setTimeout(()=>{close();reject(new Error('处理超时，已停止当前文件。可导出原始区间或使用桌面工具继续分析。'));},timeout);
+      worker.onmessage=({data})=>{if(binding.handle(data))return;close();data.ok?resolve(data):reject(new Error(data.error));};
+      worker.onerror=e=>{close();reject(new Error(e.message||'分析线程无法启动，请用新版 Edge / Chrome 打开此文件。'));};
+      try{worker.postMessage(binding.payload);}catch(error){close();reject(error);}
     });
-    return {promise,cancel:()=>{clearTimeout(timer);worker.terminate();rejectJob(new Error('已停止扫描。'));}};
+    return {promise,cancel:()=>{close();rejectJob(new Error('已停止扫描。'));}};
   }
   function download(data,name,type='application/octet-stream') {
     const url=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));
     const a=document.createElement('a');a.href=url;a.download=C.safeName(name);document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+  async function downloadRange(file,start,end,name){
+    try{download(await readFile(file,start,end),name);return true;}
+    catch(error){toast('导出失败：'+file.name+'：'+error.message);return false;}
   }
   function collectExports() {
     const out=[];
@@ -126,7 +131,7 @@
       return '<article class="candidate"><div class="candidate-head"><label class="candidate-title"><input type="checkbox" data-choice="'+i+'" aria-label="选择候选 '+(i+1)+'" '+(item.chosen.has(i)?'checked':'')+'>'+esc(f.type)+' <span class="muted">#'+String(i+1).padStart(2,'0')+'</span></label><span class="tag '+(f.level==='verified'?'good':f.level==='embedded'?'info':'warn')+'">'+title+'</span></div><p>'+esc(f.evidence)+'</p><div class="offsets">'+C.hex(f.start)+' → '+C.hex(f.end)+' · '+size(f.size)+'</div>'+(f.absoluteOffsets?'<p>导出副本将重定位 ZIP 偏移，原文件保持不变。</p>':'')+'<div class="candidate-actions"><button class="secondary" data-carve="'+i+'">'+(f.exportable?'导出 '+esc(f.type):'导出候选 .bin')+' ↓</button><button class="secondary" data-locate="'+i+'">在十六进制中定位</button>'+(f.entries?'<button class="secondary" data-unzip="'+i+'" '+(state.exporting?'disabled':'')+'>解压全部成员 ↓</button>':'')+'</div>'+archive+'</article>';
     }).join(''):'<div class="empty-list"><h3>未发现可识别的候选文件</h3><p>这不能排除 LSB、加密数据或不受支持的文件格式。</p></div>';
     $('tailExport').innerHTML=r.tail?'<div class="raw-tail"><strong>原始尾部附加数据 · '+size(r.tail.size)+'</strong><p>从容器终点 '+C.hex(r.tail.start)+' 起的全部数据；可能与上方候选重叠。适合保留未识别的数据。</p><button id="rawTailBtn" class="secondary">导出完整尾部 .bin ↓</button></div>':'';
-    if($('rawTailBtn'))$('rawTailBtn').onclick=()=>download(item.file.slice(r.tail.start),item.file.name+'_tail.bin');
+    if($('rawTailBtn'))$('rawTailBtn').onclick=()=>downloadRange(item.file,r.tail.start,window.HexFileIO.size(item.file),item.file.name+'_tail.bin');
   }
   function showTab(name) {
     state.tab=name;
@@ -140,7 +145,7 @@
     const token=++hexToken,offset=Math.max(0,Math.min(Math.floor(state.offset/16)*16,Math.max(0,Math.ceil(item.file.size/16)*16-16)));
     state.offset=offset;
     try {
-      const data=new Uint8Array(await item.file.slice(offset,offset+256).arrayBuffer());if(token!==hexToken)return;
+      const data=await readFile(item.file,offset,offset+256);if(token!==hexToken)return;
       const lines=[];
       for(let i=0;i<data.length;i+=16) {
         let bytes='',ascii='';
@@ -223,14 +228,14 @@
     const f=item.result.findings[index];
     try {
       let blob;
-      if(f.absoluteOffsets)blob=C.carve(new Uint8Array(await item.file.arrayBuffer()),f);
-      else blob=item.file.slice(f.start,f.end);
+      if(f.absoluteOffsets)blob=C.carve(await readFile(item.file),f);
+      else blob=await readFile(item.file,f.start,f.end);
       download(blob,item.file.name+'_offset_'+f.start.toString(16)+'.'+(f.exportable?f.extension:'bin'));
       toast('已发起候选文件下载。');
-    }catch(error){toast(error.message);}
+    }catch(error){toast('导出失败：'+item.file.name+'：'+error.message);}
   }
   async function exportAll() {
-    const exports=collectExports();if(!exports.length)return;
+    const exports=collectExports();if(state.exporting||!exports.length)return;
     if(exports.reduce((n,x)=>n+x.f.size,0)>256*MiB){toast('本次导出超过 256 MiB，请减少勾选数量。');return;}
     state.exporting=true;updateStats();
     try {
@@ -298,10 +303,10 @@
   $('prevHex').onclick=()=>{state.offset-=256;renderHex();};$('nextHex').onclick=()=>{state.offset+=256;renderHex();};
   $('jumpBtn').onclick=()=>{const n=parseOffset($('offsetInput').value),max=selected()?.file.size||0;if(!Number.isFinite(n)||n>=max){toast('请输入文件内的偏移，例如 256 或 0x100。');return;}state.offset=n;renderHex();};
   $('offsetInput').onkeydown=e=>{if(e.key==='Enter')$('jumpBtn').click();};
-  $('rangeBtn').onclick=()=>{const item=selected();if(!item)return;const start=parseOffset($('rangeStart').value),end=parseOffset($('rangeEnd').value);if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||end>item.file.size){toast('区间无效：需要 0 ≤ 开始 < 结束 ≤ 文件大小，结束位置不包含在内。');return;}download(item.file.slice(start,end),item.file.name+'_'+start.toString(16)+'-'+end.toString(16)+'.bin');};
+  $('rangeBtn').onclick=()=>{const item=selected();if(!item)return;const start=parseOffset($('rangeStart').value),end=parseOffset($('rangeEnd').value);if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start||end>item.file.size){toast('区间无效：需要 0 ≤ 开始 < 结束 ≤ 文件大小，结束位置不包含在内。');return;}downloadRange(item.file,start,end,item.file.name+'_'+start.toString(16)+'-'+end.toString(16)+'.bin');};
   $('findings').onchange=e=>{if(e.target.dataset.choice!==undefined){const item=selected(),i=Number(e.target.dataset.choice);e.target.checked?item.chosen.add(i):item.chosen.delete(i);updateStats();}};
   $('findings').onclick=e=>{const btn=e.target.closest('button'),item=selected();if(!btn||!item?.result)return;if(btn.dataset.carve!==undefined)exportCandidate(item,Number(btn.dataset.carve));if(btn.dataset.locate!==undefined){state.offset=item.result.findings[Number(btn.dataset.locate)].start;showTab('hex');}if(btn.dataset.unzip!==undefined)unzip(item,Number(btn.dataset.unzip));};
-  $('correctBtn').onclick=()=>{const item=selected();if(!item?.result?.suggested)return;const name=item.file.name.replace(/\.[^.]+$/,'')+'.'+item.result.suggested;download(item.file,name);toast('已发起正确后缀副本下载，内容逐字节保留。');};
+  $('correctBtn').onclick=async()=>{const item=selected();if(!item?.result?.suggested)return;const name=item.file.name.replace(/\.[^.]+$/,'')+'.'+item.result.suggested;if(await downloadRange(item.file,0,window.HexFileIO.size(item.file),name))toast('已发起正确后缀副本下载，内容逐字节保留。');};
   $('exportBtn').onclick=exportAll;$('reportBtn').onclick=report;$('demoBtn').onclick=loadDemo;
   $('helpBtn').onclick=()=>$('helpDialog').showModal();$('closeHelp').onclick=()=>$('helpDialog').close();
   $('helpDialog').onclick=e=>{if(e.target===$('helpDialog')){const r=$('helpDialog').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('helpDialog').close();}};
@@ -314,5 +319,5 @@
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
   window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();releaseSnapshots();});
-  window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail,performanceSettings};
+  window.HexApp={state,$,C,esc,size,selected,job,download,readFile,toast,addFiles,showTab,showWorkspace,renderList,renderDetail,performanceSettings};
 })();

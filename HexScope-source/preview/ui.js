@@ -10,7 +10,7 @@ function url(blob){const value=URL.createObjectURL(blob);S.urls.add(value);retur
 function terminate(){if(S.worker){S.worker.terminate();S.worker=null;}for(const request of S.pending.values()){clearTimeout(request.timer);request.reject(Error('预览已停止。'));}S.pending.clear();}
 function cleanup(reset=true){
  ++S.token;clearTimeout(S.timer);S.timer=null;S.password=null;$('previewPassword').value='';$('previewPasswordForm').hidden=true;
- for(const requestId of S.reads)window.hexscopeFiles?.cancelPreview(requestId).catch(()=>{});S.reads.clear();
+ for(const controller of S.reads)controller.abort();S.reads.clear();
  S.render?.cancel();S.render=null;S.pdf?.destroy().catch(()=>{});S.pdf=null;terminate();
  for(const media of stage.querySelectorAll('audio,video')){media.pause();media.removeAttribute('src');media.load();}
  for(const image of stage.querySelectorAll('img')){image.onload=null;image.onerror=null;image.removeAttribute('src');}
@@ -29,15 +29,9 @@ function fileReader(file,token){
  return async(end,step='读取文件内容')=>{
   if(token!==S.token)throw Error('预览已停止。');
   const length=Math.min(file.size,end);if(cached&&cached.length>=length)return cached.subarray(0,length);
-  const requestId=++S.serial;let data;
+  const controller=new AbortController();S.reads.add(controller);
   try{
-   if(file._hexSnapshot){
-    if(!window.hexscopeFiles?.readSnapshot)throw Error('镜像预览接口不可用，请从新版便携程序重新推送该文件。');
-    S.reads.add(requestId);data=await window.hexscopeFiles.readSnapshot({snapshotId:file._hexSnapshot.id,offset:0,length,requestId});
-    if(data==null)throw Error('镜像预览副本没有返回内容，请重新推送该文件。');
-   }else if(window.hexscopeFiles?.readPreview){S.reads.add(requestId);data=await window.hexscopeFiles.readPreview(file,{offset:0,length,requestId});}
-   if(token!==S.token)throw Error('预览已停止。');
-   if(data==null)data=await file.slice(0,length).arrayBuffer();
+   const data=await H.readFile(file,0,length,{signal:controller.signal});
    if(token!==S.token)throw Error('预览已停止。');
    cached=new Uint8Array(data);return cached;
   }catch(error){
@@ -45,7 +39,7 @@ function fileReader(file,token){
    if(['NotReadableError','NotFoundError','SecurityError'].includes(error.name)||/requested file could not be read/i.test(message))
     message='原文件引用已无法读取。请确认文件仍在原位置、所在磁盘已连接或挂载，然后重新选择或拖入文件；镜像提取文件可重新推送到文件分析。';
    throw Error(step+'失败：'+message);
-  }finally{S.reads.delete(requestId);}
+  }finally{S.reads.delete(controller);}
  };
 }
 function request(data){
@@ -155,7 +149,7 @@ async function renderPDF(bytes,token){
 async function load(item,force=false){
  if(!item){cleanup();return;}if(!force&&S.id===item.id)return;cleanup();S.id=item.id;S.file=item.file;const token=S.token;
  const file=item.file._hexSnapshot?{name:item.file.name,size:item.file._hexSnapshot.size,_hexSnapshot:item.file._hexSnapshot}:item.file,read=fileReader(file,token);
- $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';$('previewSource').textContent=file._hexSnapshot?'镜像提取快照 · r6':'';bounded(token);
+ $('previewFormat').textContent='';status.textContent='正在识别并载入文件…';note.textContent='本机只读解析中。';$('previewSource').textContent=file._hexSnapshot?'镜像提取快照 · r7':'';bounded(token);
  try{
   const header=await read(65536,'读取文件头');if(token!==S.token)return;const kind=P.classify(header,file.name);$('previewFormat').textContent=kind.label;
   if(kind.kind==='unsupported'){stage.append(el('p',kind.note,{class:'preview-empty'}));note.textContent='可使用其他文件分析标签继续检查。';ready(token,'此格式尚无内容预览。');return;}

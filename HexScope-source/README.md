@@ -91,3 +91,9 @@ Node.js 22.13+；`jsdom` 和 `@napi-rs/canvas` 仅供开发测试。所有解析
 `src/disk.js` 将快照标识关联到队列文件，`preview/ui.js` 优先按快照编号读取并采用快照大小，不再从该文件的浏览器 File 引用读取或获取本机路径。`src/app.js` 分批释放清空队列的快照。新模块已加入正式打包清单；临时磁盘空间不足会作为该文件的推送失败明确记录。
 
 `tests/preview-snapshots.test.cjs` 新增 10 项回归，完整测试为 511 项。测试串联真实 E01、正式 IPC/preload 代码、真实构建页面与 Worker，受控破坏生成 File 的读取方法，确认快照预览、关闭镜像后重载及释放流程；Electron IPC 与窗口本身仍使用模拟。
+
+## 4.1 r7 统一来源读取
+
+`src/file-read.js` 随 `scanPoolCode` 嵌入构建，供分析、导出和预览共用。它以每个任务的临时编号关联原始 File / E01 快照，让 Worker 请求所需字节；不向 Worker 传送路径，也不预读整个队列。`src/worker.js` 保留离线 HTML 的 File 路径，同时处理字节响应；`scan-pool.js` 与 `HexApp.job` 管理请求与取消。桌面原生读取同时最多两项，CPU Worker 仍按用户并发设置运行，原有工作内存预算继续生效。
+
+`tests/export-source.test.cjs` 新增 10 项，使用真实构建页面、真实计算线程、实际六卷 E01 和正式 preload / IPC 代码的模拟传输。覆盖损坏 File 引用下的扫描/预览/导出联动、ZIP 内容和清单、绝对 ZIP 偏移修正、本机只读读取、并发和取消、来源失效时拒绝不完整导出。当前完整回归 521 项；原生 Electron 文件对话框与用户原始故障文件仍未实测。

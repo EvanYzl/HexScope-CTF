@@ -80,7 +80,7 @@ test('native image bytes back the decoder Blob independently of the original Fil
 });
 test('in-memory files retain browser reads and unreadable references explain how to recover',async t=>{
  let calls=0;const p=setup(t,{async readPreview(){calls++;return null;},async cancelPreview(){}});
- await p.open(Buffer.from('flag{memory_file}'),'from-image.txt');assert.equal(p.$('previewStage').textContent,'flag{memory_file}');assert.equal(calls,1);
+ await p.w.HexPreview.load({id:'memory',file:new File(['flag{memory_file}'],'from-image.txt')});assert.equal(p.$('previewStage').textContent,'flag{memory_file}');assert.equal(calls,1);
  await p.w.HexPreview.load({id:'unreadable',file:inaccessible('broken.txt',42)});assert.match(p.$('previewStatus').textContent,/重新选择|重新.*拖入/);assert.doesNotMatch(p.$('previewStatus').textContent,/requested file|permission problems/);assert.equal(p.$('previewStop').disabled,true);
 });
 test('switching or stopping cancels pending native reads and ignores their late results',async t=>{

@@ -6,20 +6,7 @@ const {page,until}=require('./preview-helper.cjs'),{readBuiltHTML,script}=requir
 const fixture=name=>fs.readFileSync(path.join(__dirname,'fixtures/preview',name)),sha=value=>createHash('sha256').update(value).digest('hex');
 const stopError=()=>{throw new DOMException('The requested file could not be read','NotReadableError');};
 function store(t){const value=new PreviewSnapshots();t.after(()=>value.dispose());return value;}
-function bridge(t){
- const root=path.resolve(__dirname,'../desktop'),handlers=new Map(),listeners=[];
- const frame={url:pathToFileURL(path.join(root,'HexScope.html')).href},win={webContents:{mainFrame:frame,isDestroyed:()=>false,send(){}},on(name,fn){if(name==='closed')listeners.push(fn);}};
- const ipcMain={removeHandler:name=>handlers.delete(name),handle:(name,fn)=>handlers.set(name,fn)},event={sender:win.webContents,senderFrame:frame};
- const backend=installDiskIPC({ipcMain,dialog:{showOpenDialog:async()=>({filePaths:[path.join(__dirname,'fixtures/disk/split.E01')]})}},win,root);
- installPreviewIPC({ipcMain},win,root,backend.previewSnapshots);
- const exposed={},calls=[];
- vm.runInNewContext(fs.readFileSync(path.join(root,'preload.cjs'),'utf8'),{require:name=>{
-  assert.equal(name,'electron');return {contextBridge:{exposeInMainWorld:(key,value)=>exposed[key]=value},webUtils:{getPathForFile(){throw Error('E01 previews must not ask the OS path of a generated File');}},
-   ipcRenderer:{async invoke(channel,operation,args){calls.push({channel,operation,args});const result=await handlers.get(channel)(event,operation,args);return structuredClone(result);},on(){},removeListener(){}}};
- }});
- t.after(()=>{for(const fn of listeners)fn();});
- return {backend,calls,api:exposed.hexscopeDisk,files:exposed.hexscopeFiles};
-}
+const {bridge}=require('./disk-bridge.cjs');
 function setup(t,api,files){const p=page(api,files);t.after(()=>{p.close();assert.deepEqual(p.errors,[]);});return p;}
 
 test('snapshots own exact bytes, use opaque tokens and survive the original buffer being reused',async t=>{

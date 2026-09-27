@@ -40,7 +40,7 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "ad5cc2b83127c72c8a99694531a8f08340f55a6eb533901b1bcfdab15e7d1ec5",
+  "htmlSHA256": "b38a392a8b2325f1c31837f0ce92580301de99508d7e44c0715f3a3f69da655e",
   "login": {
     "challengeLength": 21,
     "characterClasses": [
@@ -77,6 +77,11 @@
     "E01snapshot": {
       "read": "actual six-volume E01 extraction; snapshot SHA-256 matches",
       "analysis": "appended ZIP still detected",
+      "export": {
+        "worker": "actual packaged export worker and shared file reader",
+        "input": "E01 extraction snapshot with unusable File methods",
+        "zip": "structure, member CRC, byte hash and source manifest verified"
+      },
       "cleanup": "registered snapshot and session directory removed"
     }
   },

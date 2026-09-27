@@ -73,11 +73,11 @@ test('hex tail reaches exact end, jump handles offsets, manual export is byte-ex
   const {d,$,input,downloads}=app(t);const bytes=C.cat([fixture('normal.png'),C.enc.encode('marker-12345')]);input([new File([bytes],'tail.png')]);await eventually(()=>$('statTotal').textContent==='01');
   d.querySelector('[data-tab="hex"]').click();$('tailBtn').click();await eventually(()=>$('hexRange').textContent.includes(C.hex(bytes.length)),'tail');assert.match($('hexView').textContent,/31 32 33 34 35/);
   $('offsetInput').value='0x20';$('jumpBtn').click();await eventually(()=>$('hexRange').textContent.startsWith(C.hex(32)));
-  $('rangeStart').value='1';$('rangeEnd').value='0xA';$('rangeBtn').click();assert.deepEqual(new Uint8Array(await downloads[0].blob.arrayBuffer()),bytes.slice(1,10));
+  $('rangeStart').value='1';$('rangeEnd').value='0xA';$('rangeBtn').click();await eventually(()=>downloads.length===1);assert.deepEqual(new Uint8Array(await downloads[0].blob.arrayBuffer()),bytes.slice(1,10));
   $('rangeEnd').value='999999';$('rangeBtn').click();assert.equal(downloads.length,1);assert.match($('toast').textContent,/区间无效/);
 });
 test('correct-extension copy preserves source bytes',async t=>{
-  const {input,$,downloads}=app(t),bytes=fixture('normal.png');input([new File([bytes],'wrong.jpg')]);await eventually(()=>$('statTotal').textContent==='01');assert.equal($('correctBtn').hidden,false);$('correctBtn').click();assert.equal(downloads[0].name,'wrong.png');assert.deepEqual(new Uint8Array(await downloads[0].blob.arrayBuffer()),bytes);
+  const {input,$,downloads}=app(t),bytes=fixture('normal.png');input([new File([bytes],'wrong.jpg')]);await eventually(()=>$('statTotal').textContent==='01');assert.equal($('correctBtn').hidden,false);$('correctBtn').click();await eventually(()=>downloads.length===1);assert.equal(downloads[0].name,'wrong.png');assert.deepEqual(new Uint8Array(await downloads[0].blob.arrayBuffer()),bytes);
 });
 test('filename HTML remains text; search and report work',async t=>{
   const {input,w,d,$,downloads}=app(t),name='<img src=x onerror=alert(1)>.png';input([new File([fixture('normal.png')],name)]);await eventually(()=>$('statTotal').textContent==='01');

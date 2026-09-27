@@ -61,7 +61,7 @@ test('stopping a password-protected PDF releases resources and later files still
 test('switching files suppresses a late asynchronous read from the prior selection',async t=>{
  const p=setup(t);let resolve;
  const slow={id:10001,file:{name:'slow.docx',size:1024,slice(){return {arrayBuffer(){return new Promise(r=>{resolve=r;});}}}}};
- const pending=p.w.HexPreview.load(slow);await p.open(new TextEncoder().encode('current file'),'current.txt');resolve(fixture('sample.docx').buffer);await pending;assert.equal(p.$('previewStage').textContent,'current file');
+ const pending=p.w.HexPreview.load(slow);await until(()=>typeof resolve==='function');await p.open(new TextEncoder().encode('current file'),'current.txt');resolve(fixture('sample.docx').buffer);await pending;assert.equal(p.$('previewStage').textContent,'current file');
 });
 test('clear queue and workspace navigation dispose the spreadsheet worker',async t=>{
  const p=setup(t);await p.open(fixture('sample.xlsx'),'sample.xlsx');assert(p.w.HexPreview.state.worker);p.$('clearBtn').click();assert.equal(p.w.HexPreview.state.worker,null);assert.equal(p.w.HexPreview.state.id,null);assert.equal(p.$('previewStage').childElementCount,0);
@@ -77,6 +77,6 @@ test('oversized images are rejected before creating a native decoder element',as
 });
 test('Office and PDF byte caps apply before reading their full contents',async t=>{
  const p=setup(t);for(const [name,size,header]of [['huge.docx',33*1024*1024,new Uint8Array([80,75,3,4])],['huge.pdf',65*1024*1024,new TextEncoder().encode('%PDF-1.7')]]){
-  let read=false;await p.w.HexPreview.load({id:name,file:{name,size,slice(){return new Blob([header]);},arrayBuffer(){read=true;throw Error('must not read');}}});assert.equal(read,false);assert.match(p.$('previewStatus').textContent,/上限/);
+  let read=false;await p.w.HexPreview.load({id:name,file:{name,size,slice(start,end){if(start!==0||end>65536){read=true;throw Error('must not read full file');}const bytes=new Uint8Array(end-start);bytes.set(header);return new Blob([bytes]);},arrayBuffer(){read=true;throw Error('must not read');}}});assert.equal(read,false);assert.match(p.$('previewStatus').textContent,/上限/);
  }
 });

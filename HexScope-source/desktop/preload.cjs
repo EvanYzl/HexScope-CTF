@@ -9,7 +9,8 @@ contextBridge.exposeInMainWorld('hexscopeFiles',{
   releaseSnapshots:ids=>ipcRenderer.invoke('hexscope:preview-read','releaseSnapshots',{ids,requestId:snapshotReleaseRequest--}),
   readPreview:async(file,{offset,length,requestId})=>{
     // Paths come only from a real File selected/dropped by the user, never from
-    // renderer-supplied strings. In-memory E01/crypto files stay in the renderer.
+    // renderer-supplied strings. E01 snapshots use their dedicated token API;
+    // other generated files return null and are read from their in-memory bytes.
     const filename=webUtils.getPathForFile(file);if(!filename)return null;
     const result=await ipcRenderer.invoke('hexscope:preview-read','read',{
       path:filename,size:file.size,lastModified:file.lastModified,offset,length,requestId

@@ -40,6 +40,28 @@ async function cryptoSmoke(html){
   return {toolsExecuted:rows.length,automaticExamples:3,recoveredBytes:'exact match',runtimeWorker:'actual worker_threads running the bundled browser worker in a VM context'};
  }finally{clearTimeout(timer);await worker.terminate();}
 }
+async function exportSnapshotSmoke(html,snapshots,snapshot,data,C){
+ const context={Uint8Array,ArrayBuffer,AbortController,hexscopeFiles:{readSnapshot:args=>snapshots.read(args),cancelPreview:async()=>{}}};
+ vm.createContext(context);vm.runInContext(script(html,'scanPoolCode'),context);
+ const bootstrap=`const {parentPort,workerData}=require('node:worker_threads'),vm=require('node:vm');
+ const r={TextEncoder,TextDecoder,Uint8Array,Uint32Array,DataView,Blob,File,crypto:require('node:crypto').webcrypto};r.self=r;r.globalThis=r;
+ r.postMessage=(value,transfer)=>parentPort.postMessage(value,transfer);vm.createContext(r);vm.runInContext(workerData,r);parentPort.on('message',data=>r.onmessage({data}));`;
+ const worker=new Worker(bootstrap,{eval:true,workerData:script(html,'coreCode')+'\n'+script(html,'workerCode')}),finding=C.analyze(new Uint8Array(data.bytes),data.name).findings.find(x=>x.type==='ZIP'&&x.exportable);
+ const file={name:data.name,size:snapshot.size,_hexSnapshot:snapshot,slice(){throw Error('Stale File must never be read');},arrayBuffer(){throw Error('Stale File must never be read');}};
+ const sourceSHA256=createHash('sha256').update(data.bytes).digest('hex'),binding=context.HexFileIO.bind(worker,{kind:'export',items:[{file,finding,sha256:sourceSHA256,name:'extracted.zip'}]});let timer;
+ try{
+  const response=await new Promise((resolve,reject)=>{
+   timer=setTimeout(()=>reject(Error('Packaged snapshot export timed out')),20000);
+   worker.on('message',value=>{if(!binding.handle(value))value.ok?resolve(value):reject(Error(value.error));});worker.on('error',reject);worker.postMessage(binding.payload);
+  });
+  const bytes=new Uint8Array(response.data),zip=C.parseZip(bytes,0);assert(zip.verified);assert.equal(response.count,1);
+  const member=zip.entries.find(x=>x.name==='extracted.zip'),manifestEntry=zip.entries.find(x=>x.name==='manifest.json');assert(member&&manifestEntry);
+  const recovered=bytes.subarray(member.dataStart,member.dataEnd);assert.equal(C.crc32(recovered),member.crc);
+  assert.equal(createHash('sha256').update(recovered).digest('hex'),createHash('sha256').update(C.carve(new Uint8Array(data.bytes),finding)).digest('hex'));
+  const manifest=JSON.parse(new TextDecoder().decode(bytes.subarray(manifestEntry.dataStart,manifestEntry.dataEnd)));assert.equal(manifest.items[0].sourceSHA256,sourceSHA256);
+  return {worker:'actual packaged export worker and shared file reader',input:'E01 extraction snapshot with unusable File methods',zip:'structure, member CRC, byte hash and source manifest verified'};
+ }finally{clearTimeout(timer);binding.close();await worker.terminate();}
+}
 async function main({directory,scratch,output}){
  const root=path.resolve(directory),app=path.join(root,'resources/app');
  process.env.PATH=path.join(process.env.WINDIR,'System32')+';'+process.env.WINDIR;
@@ -81,8 +103,9 @@ async function main({directory,scratch,output}){
     const snapshot=await snapshots.save(data),bytes=await snapshots.read({snapshotId:snapshot.id,offset:0,length:snapshot.size});
     assert.equal(createHash('sha256').update(bytes).digest('hex'),createHash('sha256').update(data.bytes).digest('hex'));
     assert(core.HexCore.analyze(new Uint8Array(bytes),data.name).findings.some(x=>x.type==='ZIP'&&x.exportable));
+    const exported=await exportSnapshotSmoke(html,snapshots,snapshot,data,core.HexCore);
     const directory=snapshots.directory;snapshots.release([snapshot.id]);assert(!fs.existsSync(directory));
-    preview.E01snapshot={read:'actual six-volume E01 extraction; snapshot SHA-256 matches',analysis:'appended ZIP still detected',cleanup:'registered snapshot and session directory removed'};
+    preview.E01snapshot={read:'actual six-volume E01 extraction; snapshot SHA-256 matches',analysis:'appended ZIP still detected',export:exported,cleanup:'registered snapshot and session directory removed'};
   }finally{snapshots.dispose();}
   const batchRows=[entry,listing.entries.find(x=>x.name==='HELLO.TXT')].filter(Boolean).slice(0,plan.limits.threads);
   const parallel=await f.task(()=>f.analyzeBatch({entryIds:batchRows.map(x=>x.id),threads:batchRows.length}));assert.equal(parallel.results.length,batchRows.length);assert(parallel.results.every(x=>x.ok));assert.deepEqual(parallel.results[0].bytes,data.bytes);

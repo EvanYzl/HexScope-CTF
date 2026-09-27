@@ -14,7 +14,7 @@
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4)
 ![离线](https://img.shields.io/badge/Local-Offline-426B50)
 ![密码工具](https://img.shields.io/badge/Crypto-78%20tools-A77736)
-![回归测试](https://img.shields.io/badge/Local%20tests-511%20passed-2D854B)
+![回归测试](https://img.shields.io/badge/Local%20tests-521%20passed-2D854B)
 
 [下载免安装版](https://github.com/EvanYzl/HexScope-CTF/releases/latest) · [使用说明](使用说明.md) · [功能范围](题型覆盖与限制.md) · [提交问题](https://github.com/EvanYzl/HexScope-CTF/issues)
 
@@ -55,6 +55,10 @@ Get-FileHash -Algorithm SHA256 .\HexScope-CTF-4.1-GitHub-Windows-x64-Portable.zi
 | 哈希校验 | 源盘解码数据流、本机文件、镜像内单个文件的 12 种哈希；HEX/Base64 表示、预期值比对及报告。 |
 | VHD 与盘符 | 将 E01 解码数据转换为固定 VHD，使用 Windows 自带功能选择分区和盘符，只读挂载。 |
 | 文件预览 | DOCX、Excel/CSV、PDF、常见图片、文本和部分音视频；镜像提取及密码恢复的文件共用预览入口。 |
+
+### 文件读取与导出
+
+4.1 r7 将 E01 快照读取接入文件分析与导出：一键打包、单项提取、ZIP 解压、尾部与区间导出、正确后缀副本、十六进制及元数据/字符串/隐写检查共用读取通道。关闭镜像后，已推送文件仍可从会话副本读取。导出中的任意文件读取失败会显示文件名并终止本次打包，不生成内容不全的成功 ZIP；重新推送该文件后可以重试。
 
 ### 文件预览
 
@@ -154,7 +158,7 @@ Windows 回归模板位于 `HexScope-source/desktop/windows-test.example.yml`，
 
 ## 验证情况
 
-本次发行对应 **511/511 项本地自动化测试通过**，包含原有文件/取证/密码能力，以及文件预览、E01 推送快照、读取异常与跨模块联动。另使用包内 Electron，在 PATH 仅包含 Windows 系统目录的情况下复核密码工具、DOCX/Excel/PDF 解析、预览读取与 E01 快照哈希、E01、哈希与 VHD 转换。
+本次发行对应 **521/521 项本地自动化测试通过**，包含原有文件/取证/密码能力，以及文件预览、E01 推送快照、读取异常与跨模块联动。另使用包内 Electron，在 PATH 仅包含 Windows 系统目录的情况下复核密码工具、DOCX/Excel/PDF 解析、预览读取与 E01 快照哈希、E01、哈希与 VHD 转换。
 
 PDF 页面经过原生离屏 Canvas 绘制测试；**真实桌面窗口布局、原生拖放、全部图片/音视频编码、真实 UAC 与盘符挂载尚未完成实测**。这些边界不以 DOM 测试代替，详情见 [验证记录](验证记录.md)。
 

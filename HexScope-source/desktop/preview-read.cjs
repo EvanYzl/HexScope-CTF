@@ -2,11 +2,11 @@
 const fs=require('node:fs/promises'),path=require('node:path'),{pathToFileURL}=require('node:url');
 const MAX_READ=128*1024*1024,CHUNK=1024*1024;
 const messages={
-  CHANGED:'文件在导入后发生了变化，请重新选择或拖入该文件后预览。',
+  CHANGED:'文件在导入后发生了变化，请重新选择或拖入该文件后重试。',
   MISSING:'找不到原文件，请确认文件未被移动、删除，所在磁盘仍已连接或挂载。',
   DENIED:'系统暂时无法读取该文件，请确认当前账户可读取文件，且文件未被其他程序独占。',
-  CANCELLED:'预览已停止。',BUSY:'上一次读取尚未结束，请稍后重新载入。',
-  INVALID:'无效的预览读取请求。',READ_FAILED:'无法完整读取文件，请重新选择文件后重试。'
+  CANCELLED:'文件读取已停止。',BUSY:'上一次读取尚未结束，请稍后重试。',
+  INVALID:'无效的文件读取请求。',READ_FAILED:'无法完整读取文件，请重新选择文件后重试。'
 };
 function failure(code){return Object.assign(Error(messages[code]||messages.READ_FAILED),{code});}
 function check(signal){if(signal?.aborted)throw failure('CANCELLED');}

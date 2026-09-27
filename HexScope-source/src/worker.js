@@ -1,5 +1,14 @@
 'use strict';
+const sourceReads=new Map();let sourceSerial=0;
+async function readSource(file,start=0,end=file.size){
+  if(file._hexReadSource===undefined)return start===0&&end===file.size?file.arrayBuffer():file.slice(start,end).arrayBuffer();
+  const id=++sourceSerial;
+  return new Promise((resolve,reject)=>{sourceReads.set(id,{resolve,reject});self.postMessage({kind:'hexscope-read-source',id,source:file._hexReadSource,start,end});});
+}
 self.onmessage = async ({data:job}) => {
+  if(job.kind==='hexscope-source-bytes'){
+    const request=sourceReads.get(job.id);if(!request)return;sourceReads.delete(job.id);job.ok?request.resolve(job.bytes):request.reject(Error(job.error));return;
+  }
   const C=self.HexCore;
   try {
     if(job.file?.size>C.MAX_FILE)throw new Error('超过单文件 128 MiB 上限，未处理。');
@@ -11,8 +20,8 @@ self.onmessage = async ({data:job}) => {
       if(textModes.includes(job.mode)) {
         if(job.file.size>8*1024*1024)throw new Error('文本隐写文件最多 8 MiB（解码后最多 4 Mi 字符）。');
         if(!['utf-8','utf-16le','utf-16be'].includes(o.encoding||'utf-8'))throw new Error('不支持此文本编码。');
-        input=new TextDecoder(o.encoding||'utf-8',{fatal:true,ignoreBOM:true}).decode(await job.file.arrayBuffer());
-      } else a=new Uint8Array(await job.file.arrayBuffer());
+        input=new TextDecoder(o.encoding||'utf-8',{fatal:true,ignoreBOM:true}).decode(await readSource(job.file));
+      } else a=new Uint8Array(await readSource(job.file));
       let result;
       if(job.mode==='textAudit')result=S.textAudit(input);
       else if(job.mode==='textBits')result=S.textBits(input,o);
@@ -25,7 +34,7 @@ self.onmessage = async ({data:job}) => {
       else if(job.mode==='pngRepair')result=S.pngRepair(a,o);
       else if(job.mode==='pngChunk')result=S.pngChunk(a,o.index);
       else if(job.mode==='pngPalette')result=S.pngPalette(a,o);
-      else if(job.mode==='imageOperation')result=S.imageOperation(a,job.secondFile?new Uint8Array(await job.secondFile.arrayBuffer()):null,o);
+      else if(job.mode==='imageOperation')result=S.imageOperation(a,job.secondFile?new Uint8Array(await readSource(job.secondFile)):null,o);
       else if(job.mode==='audioAnalyze')result=A.analyze(a,o);
       else if(job.mode==='audioLSB')result=A.lsb(a,o);
       else if(job.mode==='audioTransform')result=A.transform(a,o);
@@ -37,23 +46,23 @@ self.onmessage = async ({data:job}) => {
       self.postMessage({ok:true,result});return;
     }
     if(job.kind==='metadata') {
-      const result=await self.CTF.metadata(new Uint8Array(await job.file.arrayBuffer()),job.type);self.postMessage({ok:true,result});return;
+      const result=await self.CTF.metadata(new Uint8Array(await readSource(job.file)),job.type);self.postMessage({ok:true,result});return;
     }
     if(job.kind==='strings') {
-      const result=self.CTF.strings(new Uint8Array(await job.file.arrayBuffer()),job.options);self.postMessage({ok:true,result});return;
+      const result=self.CTF.strings(new Uint8Array(await readSource(job.file)),job.options);self.postMessage({ok:true,result});return;
     }
     if(job.kind==='convert') {
       const result=await self.CTF.convert(job.options);self.postMessage({ok:true,result});return;
     }
     if(job.kind==='pixel') {
-      const image=self.CTF.pixels(new Uint8Array(await job.file.arrayBuffer()));
+      const image=self.CTF.pixels(new Uint8Array(await readSource(job.file)));
       if(job.mode==='auto'){self.postMessage({ok:true,result:{hits:self.CTF.autoLSB(image),note:image.note}});return;}
       if(job.mode==='lsb'){const data=self.CTF.lsb(image,job.options);self.postMessage({ok:true,result:{data,note:image.note,type:C.detect(data),width:image.width,height:image.height}},[data.buffer]);return;}
       const data=self.CTF.plane(image,job.options);self.postMessage({ok:true,result:{data,width:image.width,height:image.height,note:image.note}},[data.buffer]);return;
     }
     if(job.kind==='analyze') {
       if(job.file.size>C.MAX_FILE)throw new Error('超过单文件 128 MiB 上限，未扫描。');
-      const bytes=new Uint8Array(await job.file.arrayBuffer()),result=C.analyze(bytes,job.file.name);
+      const bytes=new Uint8Array(await readSource(job.file)),result=C.analyze(bytes,job.file.name);
       try {const hash=await crypto.subtle.digest('SHA-256',bytes);result.sha256=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('');}catch{result.sha256=null;}
       self.postMessage({ok:true,result});
     } else if(job.kind==='export') {
@@ -63,15 +72,15 @@ self.onmessage = async ({data:job}) => {
         if((total+=item.finding.size)>256*1024*1024)throw new Error('本次导出超过 256 MiB，请减少勾选数量。');
         const f=item.finding;
         let bytes;
-        if(f.absoluteOffsets)bytes=C.carve(new Uint8Array(await item.file.arrayBuffer()),f);
-        else bytes=new Uint8Array(await item.file.slice(f.start,f.end).arrayBuffer());
+        if(f.absoluteOffsets)bytes=C.carve(new Uint8Array(await readSource(item.file)),f);
+        else bytes=new Uint8Array(await readSource(item.file,f.start,f.end));
         const name=C.safeName(item.name);files.push({name,data:bytes});
         manifest.items.push({output:name,source:item.file.name,sourceSHA256:item.sha256,format:f.type,start:f.start,endExclusive:f.end,confidence:f.level,evidence:f.evidence,modifiedZipOffsets:!!f.absoluteOffsets});
       }
       files.push({name:'manifest.json',data:C.enc.encode(JSON.stringify(manifest,null,2))});
       const data=C.makeZip(files);self.postMessage({ok:true,data:data.buffer,count:job.items.length},[data.buffer]);
     } else if(job.kind==='unzip') {
-      const f=job.finding,a=new Uint8Array(await job.file.arrayBuffer());
+      const f=job.finding,a=new Uint8Array(await readSource(job.file));
       const zip=C.parseZip(a,f.start,f.end);
       if(!zip.verified)throw new Error('ZIP 结构未通过检查。');
       const members=zip.entries.filter(e=>!e.name.endsWith('/'));
@@ -85,5 +94,8 @@ self.onmessage = async ({data:job}) => {
       files.push({name:C.uniqueName('_extraction_manifest.json',used),data:C.enc.encode(JSON.stringify(manifest,null,2))});
       const data=C.makeZip(files);self.postMessage({ok:true,data:data.buffer,count:members.length},[data.buffer]);
     }
-  } catch(error) {self.postMessage({ok:false,error:error?.message||String(error)});}
+  } catch(error) {
+    const unreadable=['NotReadableError','NotFoundError','SecurityError'].includes(error?.name)||/requested file could not be read/i.test(error?.message||'');
+    self.postMessage({ok:false,error:unreadable?'原文件引用已无法读取，请重新选择或拖入；镜像提取文件请重新推送到文件分析。':error?.message||String(error)});
+  }
 };
