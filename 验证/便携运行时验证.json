@@ -40,7 +40,7 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "cea4cbca8106ec3c4a36a77e90a0b9f02d224acc4edf515984afb1b72128f9b2",
+  "htmlSHA256": "e25cd3e9c5c07cdad94b390ac1a0d09c3354b48c32dfa3458db1799ef4186037",
   "login": {
     "challengeLength": 21,
     "characterClasses": [
@@ -86,6 +86,11 @@
   "singleFileHashAlgorithms": 12,
   "sourceHashes": "all match independent Python RAW vectors",
   "fileHandoffZIP": "detected using bundled file-analysis code",
+  "parallelImageReads": {
+    "readers": 2,
+    "allEntryHashes": "matched",
+    "maximumThreads": 28
+  },
   "fileWithinImageHash": "matched",
   "VHDdecodedSHA256": "matched",
   "WindowsVHDRecognition": "correct media size, detached",

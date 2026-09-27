@@ -69,3 +69,11 @@ Node.js 22.13+；`jsdom` 和 `@napi-rs/canvas` 仅供开发测试。所有解析
 ## 4.1 r3 桌面布局
 
 `src/shell.css` 是最后载入的工作台布局层，统一视口、工作区、列表和详情的滚动边界。`src/template.html` 采用紧凑导入与统计栏，并把队列大小/排序设置放入可展开区；相关筛选状态由 `src/app.js` 更新。窗口尺寸由 `desktop/main.cjs` 使用当前显示器工作区计算。布局测试采用 DOM 状态与桌面 API 模拟，没有声称真实窗口像素验收。
+
+## 4.1 r4 队列与并发
+
+`src/scan-pool.js` 是分析 Worker 复用池，`src/app.js` 按逻辑处理器数量与活动数据内存预算调度队列，并将列表限定为每页 200 项 DOM，不限制队列条目数。刷新合并为约 150 毫秒一次；停止、重试和清空使用代次隔离，防止旧结果写回。
+
+`desktop/forensics.cjs` 的 `analyzeBatch` 在同一个服务任务锁内并行启动只读 icat 进程；`children` 集合让取消覆盖全部进程。`src/disk.js` 按并发数和单批活动字节预算连续提交，没有单次推送的总量截断。IPC 和 preload 明确暴露此操作，不增加任意文件读取或命令执行接口。
+
+新增 `scan-pool.test.cjs`、`queue-performance.test.cjs` 与 `transfer-performance.test.cjs` 共 15 项验证。完整 `test-all.cjs` 当前为 487 项；打包入口仍校验全部源码输入和正式 HTML，并在包内运行时复核并行 E01 读取。运行依赖和许可保持内置。

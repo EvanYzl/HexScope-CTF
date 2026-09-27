@@ -2,6 +2,14 @@
   'use strict';
   const H=window.HexApp,{$,esc,size,toast}=H,api=window.hexscopeDisk;
   const S={image:null,offset:0,sectorSize:512,directory:null,rows:[],all:new Map(),lists:new Map(),parents:new Map(),selected:new Set(),page:0,busy:false,externalBusy:false,indexed:false,statusChecked:false,cancelRequested:false};
+  let maxThreads=H.performanceSettings.cpuCount,transferThreads=maxThreads,batchBytes=256*1024*1024;
+  function transferSettings(limits){
+    if(limits){const full=transferThreads===maxThreads;maxThreads=Math.max(1,limits.threads);transferThreads=full?maxThreads:Math.min(transferThreads,maxThreads);batchBytes=limits.batchBytes;}
+    $('diskThreads').max=String(maxThreads);$('diskThreads').value=String(transferThreads);$('diskThreadHint').textContent='最多 '+maxThreads+' 路并行读取 · 推送与扫描同时进行';
+  }
+  transferSettings();
+  $('diskThreads').onchange=()=>{transferThreads=Math.max(1,Math.min(maxThreads,Math.floor(Number($('diskThreads').value)||maxThreads)));transferSettings();};
+  $('diskFullSpeed').onclick=()=>{transferThreads=maxThreads;transferSettings();};
   function mode(){H.showWorkspace('disk');}
   const status=message=>$('diskStatus').textContent=message;
   function controls(){const locked=S.busy||S.externalBusy||S.mountBusy;for(const element of $('diskWorkspace').querySelectorAll('[data-disk-task]'))element.disabled=!api||locked;for(const id of ['diskClose','diskLoad','diskInfo','diskIndex','diskHashImage','diskPushFiltered'])$(id).disabled=!api||locked||!S.image;for(const id of ['diskAnalyze','diskExport'])$(id).disabled=!api||locked||!S.selected.size;$('diskHashEntry').disabled=!api||locked||S.selected.size!==1||S.all.get([...S.selected][0])?.directory;$('diskCancel').disabled=!S.busy;$('diskSelected').textContent='已选 '+S.selected.size+' 项';window.dispatchEvent(new CustomEvent('hexscope-disk-state',{detail:{image:S.image,busy:S.busy}}));}
@@ -36,7 +44,7 @@
   }
   function resetPartition(){S.offset=Number($('diskOffset').value);S.sectorSize=Number($('diskSector').value);if(!Number.isSafeInteger(S.offset)||S.offset<0)throw Error('请输入非负整数起始扇区。');S.all.clear();S.lists.clear();S.parents.clear();S.selected.clear();S.rows=[];S.directory=null;S.indexed=false;$('diskDetails').textContent='';render();renderTree();}
   async function opened(image){if(!image)return;S.image=image;$('diskTransferBox').hidden=true;$('diskContent').hidden=false;$('diskName').textContent=image.name;$('diskSummary').textContent='容器文件 '+size(image.containerBytes)+' · '+(image.segmentCount||1)+' 个分卷 · '+image.partitions.length+' 个分区入口';$('diskImageInfo').textContent=image.info+'\n'+(image.layout||image.layoutError||'未检测到分区表');$('diskPartition').innerHTML=image.partitions.map((part,index)=>'<option value="'+index+'">'+esc(part.description)+' · 起始 '+part.offset+'</option>').join('');const first=image.partitions[0];$('diskOffset').value=first.offset;$('diskSector').value=first.sectorSize;resetPartition();await loadDirectory();}
-  $('diskMode').onclick=()=>{mode();if(api&&!S.statusChecked)busy(async()=>{const result=await api.status();S.statusChecked=true;$('diskEngine').textContent=result.version+' · libewf '+result.libewf+' · 只读浏览与提取';});};
+  $('diskMode').onclick=()=>{mode();if(api&&!S.statusChecked)busy(async()=>{const result=await api.status();S.statusChecked=true;if(result.analysisLimits)transferSettings(result.analysisLimits);$('diskEngine').textContent=result.version+' · libewf '+result.libewf+' · 只读浏览与提取';});};
   $('diskOpen').onclick=()=>busy(async()=>{status('正在打开镜像…');const result=await api.open();if(result)await opened(result);else status(S.image?'已取消打开，保留当前镜像。':'尚未打开镜像。');});
   $('diskClose').onclick=()=>busy(async()=>{await api.close();S.image=null;S.rows=[];S.all.clear();S.lists.clear();S.selected.clear();$('diskContent').hidden=true;status('镜像已关闭。');});
   $('diskCancel').onclick=()=>{S.cancelRequested=true;api?.cancel().catch(error=>toast(error.message));status('正在停止任务…');};
@@ -56,9 +64,28 @@
   $('diskPrev').onclick=()=>{S.page--;render();};$('diskNext').onclick=()=>{S.page++;render();};
   $('diskExport').onclick=()=>busy(async()=>{status('正在提取选中项…');const result=await api.exportFiles({...context(),entryIds:[...S.selected]});if(!result){status('已取消选择导出位置。');return;}status((result.cancelled?'任务已停止；':'')+'已导出 '+result.count+' 个文件（'+size(result.bytes)+'），失败 '+result.errors.length+' 项。位置：'+result.directory+'；详情见 manifest.json。');});
   async function pushAnalysis(ids){
-    status('正在整理文件与目录…');const plan=await api.planAnalysis({...context(),entryIds:ids,capacity:Math.max(0,1000-H.state.items.length)}),failures=[...plan.skipped];let done=0,attempted=0;
-    try{for(const row of plan.entries){if(S.cancelRequested)break;attempted++;status('正在送入文件分析 '+attempted+' / '+plan.entries.length+'：'+row.path);try{const result=await api.analyze({entryId:row.id});const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});if(H.state.items.length>=1000)throw Error('分析队列已满');H.addFiles([file]);done++;}catch(error){failures.push({path:row.path,reason:error.message});if(S.cancelRequested)break;}}}
-    finally{const report={source:S.image.name,createdAt:new Date().toISOString(),added:done,planned:plan.entries.length,cancelled:S.cancelRequested,skipped:failures,notProcessed:plan.entries.slice(attempted).map(x=>({path:x.path,size:x.size})),note:plan.note};$('diskTransferInfo').textContent=JSON.stringify(report,null,2);$('diskTransferBox').hidden=false;$('diskTransferBox').open=failures.length>0||S.cancelRequested;$('diskTransferSave').onclick=()=>H.download(JSON.stringify(report,null,2),'HexScope_transfer.json','application/json');const message=(S.cancelRequested?'已停止；':'')+'已送入 '+done+' 个文件，跳过 / 失败 '+failures.length+' 项；明细见镜像工作台的推送记录。';status(message);toast(message);if(done)$('inspectMode').click();}
+    status('正在整理文件与目录…');const plan=await api.planAnalysis({...context(),entryIds:ids}),failures=[...plan.skipped];let done=0,attempted=0;
+    if(plan.limits)transferSettings(plan.limits);const threads=transferThreads;let nextYield=performance.now()+40;
+    try{
+      while(attempted<plan.entries.length&&!S.cancelRequested){
+        const batch=[];let bytes=0;
+        while(attempted<plan.entries.length&&batch.length<threads){const row=plan.entries[attempted];if(batch.length&&bytes+row.size>batchBytes)break;batch.push(row);bytes+=row.size;attempted++;}
+        status('正在并行送入文件分析 · 已加入 '+done+' / '+plan.entries.length+' 项 · '+batch.length+' 路读取');
+        try{
+          const response=await api.analyzeBatch({entryIds:batch.map(row=>row.id),threads}),results=new Map(response.results.map(result=>[result.entryId,result])),files=[];
+          for(const row of batch){
+            const result=results.get(row.id);
+            if(!result?.ok){failures.push({path:row.path,size:row.size,reason:result?.error||'读取未返回完整结果'});continue;}
+            const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});files.push(file);
+          }
+          done+=H.addFiles(files);if(response.cancelled)S.cancelRequested=true;
+        }catch(error){for(const row of batch)failures.push({path:row.path,size:row.size,reason:error.message});}
+        // IPC already yields; force an extra event-loop turn only when a run of
+        // very small batches could otherwise delay paints or cancellation.
+        if(performance.now()>=nextYield){await new Promise(resolve=>setTimeout(resolve,0));nextYield=performance.now()+40;}
+      }
+    }
+    finally{const report={source:S.image.name,createdAt:new Date().toISOString(),added:done,planned:plan.entries.length,threads,cancelled:S.cancelRequested,skipped:failures,notProcessed:plan.entries.slice(attempted).map(x=>({path:x.path,size:x.size})),note:plan.note};$('diskTransferInfo').textContent=JSON.stringify(report,null,2);$('diskTransferBox').hidden=false;$('diskTransferBox').open=failures.length>0||S.cancelRequested;$('diskTransferSave').onclick=()=>H.download(JSON.stringify(report,null,2),'HexScope_transfer.json','application/json');const message=(S.cancelRequested?'已停止；':'')+'已送入 '+done+' 个文件，跳过 / 失败 '+failures.length+' 项；明细见镜像工作台的推送记录。';status(message);toast(message);if(done)$('inspectMode').click();}
   }
   $('diskAnalyze').onclick=()=>busy(()=>pushAnalysis([...S.selected]));
   $('diskPushFiltered').onclick=()=>busy(()=>pushAnalysis(filtered().map(row=>row.id)));

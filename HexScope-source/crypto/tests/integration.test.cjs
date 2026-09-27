@@ -14,7 +14,7 @@ function native(t){
  const progress=value=>listeners.forEach(fn=>fn(value));t.after(()=>f.dispose());
  const api={status:()=>f.task(()=>f.status()),open:()=>f.task(()=>f.open(path.join(fixture,'recorded/good.E01'))),
   openDropped:()=>f.task(()=>f.open(path.join(fixture,'recorded/good.E01'))),list:a=>f.task(()=>f.list(a)),
-  details:a=>f.task(()=>f.details(a)),analyze:a=>f.task(()=>f.analyze(a)),planAnalysis:a=>f.task(()=>f.planAnalysis(a)),
+  details:a=>f.task(()=>f.details(a)),analyze:a=>f.task(()=>f.analyze(a)),analyzeBatch:a=>f.task(()=>f.analyzeBatch(a)),planAnalysis:a=>f.task(()=>f.planAnalysis(a)),
   hashCapabilities:async()=>f.hashCapabilities(),hashImage:a=>f.task(()=>f.hashImage(a,progress)),hashEntry:a=>f.task(()=>f.hashEntry(a,progress)),
   cancel:async()=>f.cancel(),close:async()=>{f.current=null;f.entryMap.clear();},onProgress:fn=>listeners.push(fn)};
  return {api,f};
@@ -86,9 +86,10 @@ test('crypto stopped after workspace changes can restart without accepting an ol
  }finally{p.close();}
 });
 
-test('full file queue keeps recoverable bytes available and reports that no item was added',async()=>{
- const p=page();try{p.$('cryptoMode').click();choose(p,'convert');await execute(p);p.w.HexApp.state.items.length=1000;
-  p.$('cryptoToAnalysis').click();visible(p,'crypto');assert.equal(p.w.HexApp.state.items.length,1000);assert.match(p.$('toast').textContent,/队列已满/);
+test('recovered bytes enter analysis even when the queue already contains 1000 files',async()=>{
+ const p=page();try{p.$('cryptoMode').click();choose(p,'convert');await execute(p);
+  const H=p.w.HexApp;H.state.items=Array.from({length:1000},(_,i)=>({id:i+1,file:new File(['x'],'existing-'+i+'.txt'),path:'existing-'+i+'.txt',status:'cancelled',result:null,chosen:new Set()}));H.state.next=1001;
+  p.$('cryptoToAnalysis').click();visible(p,'inspection');assert.equal(H.state.items.length,1001);await until(()=>H.state.items.at(-1).result);assert.equal(await H.state.items.at(-1).file.text(),'flag{hello}');
   p.$('cryptoSaveBytes').click();assert.equal(await p.downloads.at(-1).blob.text(),'flag{hello}');assert.deepEqual(p.errors,[]);
  }finally{p.close();}
 });

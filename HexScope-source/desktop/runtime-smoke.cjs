@@ -67,15 +67,18 @@ async function main({directory,scratch,output}){
   const context={imageId:image.id,offset:image.partitions[0].offset,sectorSize:image.sectorSize};
   const listing=await f.task(()=>f.list({...context,recursive:true}));assert(listing.entries.some(x=>x.name==='中文 线索.png'));
   const entry=listing.entries.find(x=>x.path==='/PICTURES/HIDDEN.PNG');assert(entry);
-  const plan=await f.task(()=>f.planAnalysis({...context,entryIds:[entry.id],capacity:1000}));assert.equal(plan.entries.length,1);
+  const plan=await f.task(()=>f.planAnalysis({...context,entryIds:[entry.id]}));assert.equal(plan.entries.length,1);
   const data=await f.task(()=>f.analyze({entryId:entry.id}));assert(core.HexCore.analyze(new Uint8Array(data.bytes),data.name).findings.some(x=>x.type==='ZIP'&&x.exportable));
+  const batchRows=[entry,listing.entries.find(x=>x.name==='HELLO.TXT')].filter(Boolean).slice(0,plan.limits.threads);
+  const parallel=await f.task(()=>f.analyzeBatch({entryIds:batchRows.map(x=>x.id),threads:batchRows.length}));assert.equal(parallel.results.length,batchRows.length);assert(parallel.results.every(x=>x.ok));assert.deepEqual(parallel.results[0].bytes,data.bytes);
+  for(const result of parallel.results){const check=await f.task(()=>f.hashEntry({entryId:result.entryId,algorithms:['sha256']}));assert.equal(check.hashes[0].hex,createHash('sha256').update(result.bytes).digest('hex'));}
   const entryHash=await f.task(()=>f.hashEntry({entryId:entry.id,algorithms:['sha256']}));assert.equal(entryHash.hashes[0].hex,createHash('sha256').update(data.bytes).digest('hex'));
   fs.mkdirSync(scratch,{recursive:true});const converted=await f.task(()=>convertVhd(f,image.id,scratch));assert.equal(converted.manifest.decodedSHA256,expected.hashes.sha256);
   const mounts=new WindowsMount(app),chosen=await mounts.select(converted.filename),status=await mounts.execute('status',{vhdId:chosen.id});
   assert.equal(status.attached,false);assert.equal(status.mediaBytes,expected.bytes);
   const result={application:'HexScope CTF 4.1 + Crypto + Preview',branding:{author:branding.author,credit:branding.credit,repository:branding.repository,HTMLCredits:3},runtime:process.versions,PATH:'Windows system directories only',htmlSHA256:createHash('sha256').update(html).digest('hex'),login,cryptography,preview,icon:{sizes:icon.sizes,sourceSHA256:icon.files['icon-source.jpg'],assets:'all hashes match',offlineFavicon:'matches bundled PNG'},
    E01segments:6,E01sourceHashAlgorithms:sourceHash.hashes.length,singleFileHashAlgorithms:localHash.hashes.length,sourceHashes:'all match independent Python RAW vectors',
-   fileHandoffZIP:'detected using bundled file-analysis code',fileWithinImageHash:'matched',VHDdecodedSHA256:'matched',WindowsVHDRecognition:'correct media size, detached',actualDriveMount:'not performed',nativeGUI:'not launched or tested'};
+   fileHandoffZIP:'detected using bundled file-analysis code',parallelImageReads:{readers:batchRows.length,allEntryHashes:'matched',maximumThreads:plan.limits.threads},fileWithinImageHash:'matched',VHDdecodedSHA256:'matched',WindowsVHDRecognition:'correct media size, detached',actualDriveMount:'not performed',nativeGUI:'not launched or tested'};
   fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));
   return result;
  }finally{f.dispose();}

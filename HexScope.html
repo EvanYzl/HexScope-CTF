@@ -109,6 +109,13 @@ html,body{height:100%;overflow:hidden}
 #appShell .empty-list p{font-size:11px}
 #appShell .queue-footer{flex-shrink:0;min-height:30px;padding:5px 9px;font-size:9px}
 #appShell .queue-footer .quiet{font-size:10px;padding:4px}
+#appShell .queue-performance,#appShell .queue-paging{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 10px;font-size:10px;border-top:1px solid var(--line);flex-wrap:wrap}
+#appShell .queue-performance label,#appShell .queue-paging label,#appShell .disk-performance label{display:flex;align-items:center;gap:5px;white-space:nowrap}
+#appShell .queue-performance input,#appShell .queue-paging input,#appShell .disk-performance input{width:52px;padding:3px 4px;font-size:11px}
+#appShell .queue-performance>span{color:var(--muted);font-size:9px}
+#appShell .queue-paging small{margin-left:auto;color:var(--muted);font-size:9px}
+#appShell .disk-performance{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;margin-top:12px}
+#appShell .disk-performance>span{font-size:10px;color:var(--muted)}
 #appShell .detail-pane{min-height:0;overflow:hidden;display:flex;flex-direction:column}
 #appShell .detail-empty{flex:1;min-height:0;height:auto;padding:18px;overflow:auto}
 #appShell .hex-decoration{font-size:17px;letter-spacing:5px;padding:15px 19px;margin-bottom:18px;border-radius:7px}
@@ -310,7 +317,9 @@ html,body{height:100%;overflow:hidden}
       <div class="file-controls"><select id="listMode" aria-label="列表或文件树"><option value="tree">文件树</option><option value="list">平铺列表</option></select><select id="sortSelect" aria-label="文件排序"><option value="original">导入顺序</option><option value="sizeDesc">大小 ↓</option><option value="sizeAsc">大小 ↑</option><option value="name">文件名 A—Z</option></select></div>
       <div class="size-filters"><label>大小范围<input id="minSize" type="number" min="0" step="any" placeholder="最小" aria-label="最小文件大小"></label><span>—</span><label>含边界<input id="maxSize" type="number" min="0" step="any" placeholder="最大" aria-label="最大文件大小"></label><select id="sizeUnit" aria-label="大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option></select><button id="resetSize" class="quiet" title="重置大小筛选">重置</button></div></details>
       <div id="sizeFilterHint" class="size-hint" role="status"></div>
+      <div class="queue-performance"><label>分析并发 <input id="scanThreads" type="number" min="1" value="1" aria-label="文件分析并发线程数"></label><button id="scanFullSpeed" class="quiet">全速</button><span id="scanThreadHint"></span></div>
       <div id="fileList" class="file-list"><div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div></div>
+      <div id="queuePaging" class="queue-paging" hidden><button id="queuePrev" class="quiet">←</button><label>页 <input id="queuePage" type="number" min="1" value="1" aria-label="文件队列页码"></label><span id="queuePages"></span><button id="queueNext" class="quiet">→</button><small>每页 200 项</small></div>
       <div class="queue-footer"><span id="queueStatus">所有分析均在本地进行</span><button id="reportBtn" class="quiet" disabled>导出报告 ↓</button></div>
     </div>
     <div class="detail-pane">
@@ -415,7 +424,8 @@ html,body{height:100%;overflow:hidden}
       <details class="manual"><summary>镜像头信息与分区表</summary><pre id="diskImageInfo" class="code-preview"></pre></details>
       <details id="diskDetailsBox" class="manual"><summary>文件系统 / 条目详情</summary><pre id="diskDetails" class="code-preview"></pre></details>
       <details id="diskTransferBox" class="manual" hidden><summary>推送到文件分析的记录</summary><button id="diskTransferSave" class="quiet">保存推送清单</button><pre id="diskTransferInfo" class="code-preview"></pre></details>
-      <p class="disk-note">大小筛选作用于当前目录；点击「索引整个分区」可递归筛选。导出目录会递归提取；已删除目录需单独打开。已删除数据可能被覆盖。送入隐写分析限单文件 128 MiB、每次合计 256 MiB；大文件可流式导出。</p>
+      <div class="disk-performance"><label>提取并发 <input id="diskThreads" type="number" min="1" value="1" data-disk-task aria-label="镜像推送并发读取数"></label><button id="diskFullSpeed" class="quiet" data-disk-task>全速</button><span id="diskThreadHint"></span></div>
+      <p class="disk-note">大小筛选作用于当前目录；点击「索引整个分区」可递归筛选。文件队列不设条目数量上限，推送自动分批并与分析同时进行；单文件分析上限 128 MiB，大文件可流式导出。SSD 可使用较高并发，机械硬盘可调低提取并发。导出目录会递归提取；已删除目录需单独打开，已删除数据可能被覆盖。</p>
     </div>
     <section id="mountPanel" class="mount-panel">
       <div class="disk-heading"><div><div class="eyebrow">WINDOWS / READ ONLY</div><h2>用资源管理器打开镜像</h2><p id="mountSpace" class="muted">先打开镜像，再转换为固定 VHD。</p></div></div>
@@ -453,7 +463,7 @@ html,body{height:100%;overflow:hidden}
 <p>2. 在队列中选择文件。「十六进制」可以查看头尾、跳转偏移和手动切片；「提取文件」可以选择、导出候选文件。</p>
 <p>3. 点击「一键导出检出文件」打包已勾选的候选，并生成 manifest.json。ZIP 候选还可以列出和解压成员；RAR、加密包等请导出后用本机工具打开。</p>
 <h3>如何理解结果</h3><p><b>结构通过：</b>已根据容器结构确定边界。ZIP 压缩成员的内容 CRC 在解压时校验；结构通过不代表不存在其他损坏，也不证明有人故意隐藏。</p><p><b>元数据 / 内嵌：</b>可能为 EXIF 缩略图等合法内容，默认不选入批量导出。</p><p><b>仅签名：</b>不能确认完整性和结束位置，导出为 .bin；可手工调整区间。</p><p><b>未见异常：</b>批量队列仅检查文件结构。EXIF、字符串、像素与 LSB 在相应标签页单独运行；未运行不表示未检出。不覆盖 JPEG DCT、碎片重组、密码破解或所有文件格式。</p>
-<h3>取证镜像（桌面版）</h3><p>打开 E01 首卷或 DD / RAW 镜像，按分区浏览目录树、筛选大小、提取文件或送入隐写分析。分卷须保持完整和原始命名。选择目录导出会递归提取，结果含原路径、inode、时间字段和 SHA-256 清单。镜像按需读取，不受普通文件 128 MiB 限制；送入隐写分析的单个文件仍受此限制。镜像引擎仅在 Windows 便携版可用。</p><h3>哈希、推送与盘符（4.1）</h3><p>「哈希校验」支持本机文件；镜像工作台可计算解码后的完整源盘数据及镜像内单个文件。支持 12 种算法、HEX / Base64 表示、预期值比对、TXT / JSON 导出。镜像内文件或目录可以一键送入文件分析；跳过和失败内容有推送清单。</p><p>E01 可先转固定 VHD，再用 Windows 自带功能选择分区、盘符并只读挂载。转换需要接近源盘容量的空间；挂载和卸载请求管理员授权。固定 VHD 限 512 字节逻辑扇区、2040 GiB；资源管理器仅支持 Windows 可读文件系统。关闭软件不会自动卸载。</p><h3>文件预览</h3><p>选择文件后打开「文件预览」：DOCX 正文、表格和内嵌图片；Excel / CSV 工作表、分页与搜索；PDF 翻页与缩放；图片旋转与缩放，以及文本、部分音视频和 ZIP 目录。镜像送入的文件也可预览。全部离线，只读显示；Office 上限 32 MiB、PDF 64 MiB，表格限前 2,000 行 / 100 列。格式覆盖与限制见随包文件预览说明.md。</p><h3>密码分析（78 个工具入口）</h3><p>自动分析支持有限预算的多层编码、部分古典密码、压缩和 XOR 尝试，显示候选排序、转换路径和停止原因。题型工具提供古典密码、现代密码、RSA / ECC、签名、哈希及数论等参数化运算。计算在本机 Worker 运行，可以停止、导出报告或把恢复字节送入文件分析。</p><p>候选分不是正确率，未命中不表示无解；现代密码一般需要密钥，侧信道和高级题型需要样本或额外条件。自动输入上限 32 KiB、8 层，单任务总上限 40 秒。完整适用范围见密码分析内的「覆盖范围」与随附题型说明。</p><h3>CTF 工具</h3><p>EXIF / GPS 标签页支持元数据搜索、原始标签值、经纬度及 JSON 导出。文件树可以按 B / KiB / MiB 大小区间筛选和排序。字符串标签页可定位偏移并将文本送到编码工作台。</p><p>像素 / LSB 支持 8 位非交错 PNG、24/32 位未压缩 BMP。可查看位平面、选择通道与读取顺序、扫描 32 种常见 LSB 组合、导出并继续分析提取结果。不能覆盖所有隐写方式。</p><h3>专项隐写</h3><p>新增 ZIP 伪加密验证与副本修复、PNG CRC / 宽高恢复与调色板低位、零宽字符 / 空格 Tab / Base64 填充位、整数 PCM WAV 波形 / 频谱 / LSB / DTMF / 倒放与声道差、双图 XOR / 差异 / RGB 奇偶 / 边框，以及 GIF / APNG 原始局部帧导出。专项工具需手动运行，结果可保存、加入队列继续分析或导出报告。</p><p>WAV 每段分析最长 120 秒，支持 8/16/24/32 位整数 PCM；动图最多 1,000 帧，不合成前帧；PNG 宽高恢复验证非交错扫描行。真实加密、JPEG DCT、音频压缩格式和特定隐写工具算法不在这些模块范围内。</p><h3>范围与限制</h3><p>边界解析：PNG、JPEG、GIF、WebP、BMP、普通单卷 ZIP、7z。RAR、PDF、GZIP 候选仅签名提示。ZIP64、多卷 ZIP 不做可靠提取。</p><p>单文件 128 MiB，单批最多 1,000 个文件，批量导出 256 MiB，ZIP 解压单成员 32 MiB、合计 128 MiB，像素分析上限约 8 百万像素。超过限制会明确提示。</p><p>开源组件：exifr 7.1.3（MIT），fflate 0.8.3（MIT），均内置在此文件中，许可见源码包 vendor 目录。专有 MakerNote 不保证可解释，EXIF 时间不擅自转换时区，GPS 来自元数据而非实际位置验证。</p><p>推荐使用新版 Edge / Chrome。应用不联网、不上传、不自动打开导出的文件。刷新或关闭页面会清空内存中的队列，请及时导出报告。</p>
+<h3>取证镜像（桌面版）</h3><p>打开 E01 首卷或 DD / RAW 镜像，按分区浏览目录树、筛选大小、提取文件或送入隐写分析。分卷须保持完整和原始命名。选择目录导出会递归提取，结果含原路径、inode、时间字段和 SHA-256 清单。镜像按需读取，不受普通文件 128 MiB 限制；送入隐写分析的单个文件仍受此限制。镜像引擎仅在 Windows 便携版可用。</p><h3>哈希、推送与盘符（4.1）</h3><p>「哈希校验」支持本机文件；镜像工作台可计算解码后的完整源盘数据及镜像内单个文件。支持 12 种算法、HEX / Base64 表示、预期值比对、TXT / JSON 导出。镜像内文件或目录可以一键送入文件分析；跳过和失败内容有推送清单。</p><p>E01 可先转固定 VHD，再用 Windows 自带功能选择分区、盘符并只读挂载。转换需要接近源盘容量的空间；挂载和卸载请求管理员授权。固定 VHD 限 512 字节逻辑扇区、2040 GiB；资源管理器仅支持 Windows 可读文件系统。关闭软件不会自动卸载。</p><h3>文件预览</h3><p>选择文件后打开「文件预览」：DOCX 正文、表格和内嵌图片；Excel / CSV 工作表、分页与搜索；PDF 翻页与缩放；图片旋转与缩放，以及文本、部分音视频和 ZIP 目录。镜像送入的文件也可预览。全部离线，只读显示；Office 上限 32 MiB、PDF 64 MiB，表格限前 2,000 行 / 100 列。格式覆盖与限制见随包文件预览说明.md。</p><h3>密码分析（78 个工具入口）</h3><p>自动分析支持有限预算的多层编码、部分古典密码、压缩和 XOR 尝试，显示候选排序、转换路径和停止原因。题型工具提供古典密码、现代密码、RSA / ECC、签名、哈希及数论等参数化运算。计算在本机 Worker 运行，可以停止、导出报告或把恢复字节送入文件分析。</p><p>候选分不是正确率，未命中不表示无解；现代密码一般需要密钥，侧信道和高级题型需要样本或额外条件。自动输入上限 32 KiB、8 层，单任务总上限 40 秒。完整适用范围见密码分析内的「覆盖范围」与随附题型说明。</p><h3>CTF 工具</h3><p>EXIF / GPS 标签页支持元数据搜索、原始标签值、经纬度及 JSON 导出。文件树可以按 B / KiB / MiB 大小区间筛选和排序。字符串标签页可定位偏移并将文本送到编码工作台。</p><p>像素 / LSB 支持 8 位非交错 PNG、24/32 位未压缩 BMP。可查看位平面、选择通道与读取顺序、扫描 32 种常见 LSB 组合、导出并继续分析提取结果。不能覆盖所有隐写方式。</p><h3>专项隐写</h3><p>新增 ZIP 伪加密验证与副本修复、PNG CRC / 宽高恢复与调色板低位、零宽字符 / 空格 Tab / Base64 填充位、整数 PCM WAV 波形 / 频谱 / LSB / DTMF / 倒放与声道差、双图 XOR / 差异 / RGB 奇偶 / 边框，以及 GIF / APNG 原始局部帧导出。专项工具需手动运行，结果可保存、加入队列继续分析或导出报告。</p><p>WAV 每段分析最长 120 秒，支持 8/16/24/32 位整数 PCM；动图最多 1,000 帧，不合成前帧；PNG 宽高恢复验证非交错扫描行。真实加密、JPEG DCT、音频压缩格式和特定隐写工具算法不在这些模块范围内。</p><h3>范围与限制</h3><p>边界解析：PNG、JPEG、GIF、WebP、BMP、普通单卷 ZIP、7z。RAR、PDF、GZIP 候选仅签名提示。ZIP64、多卷 ZIP 不做可靠提取。</p><p>文件队列不设条目数量上限，按页显示全部条目；分析默认按逻辑处理器数并行，活动数据量过大时自动排队。单文件 128 MiB，批量导出 256 MiB，ZIP 解压单成员 32 MiB、合计 128 MiB，像素分析上限约 8 百万像素。超过限制会明确提示。</p><p>开源组件：exifr 7.1.3（MIT），fflate 0.8.3（MIT），均内置在此文件中，许可见源码包 vendor 目录。专有 MakerNote 不保证可解释，EXIF 时间不擅自转换时区，GPS 来自元数据而非实际位置验证。</p><p>推荐使用新版 Edge / Chrome。应用不联网、不上传、不自动打开导出的文件。刷新或关闭页面会清空内存中的队列，请及时导出报告。</p>
 </div></dialog>
 </div>
 <script id="coreCode">/* HexScope CTF 2.0 — binary inspection core. Offsets are [start, end). */
@@ -1394,12 +1404,53 @@ self.onmessage = async ({data:job}) => {
   } catch(error) {self.postMessage({ok:false,error:error?.message||String(error)});}
 };
 </script>
+<script id="scanPoolCode">(function(root){
+  'use strict';
+  // A worker handles one file at a time and is reused after its reply. Failed,
+  // timed-out or cancelled workers are retired so late replies cannot leak.
+  class ScanPool {
+    constructor(createWorker){this.createWorker=createWorker;this.idle=[];this.active=new Set();this.closed=false;}
+    run(payload,timeout=90000){
+      let worker,finish,timer,settled=false;
+      const promise=new Promise((resolve,reject)=>{
+        finish=(error,value,retire=false)=>{
+          if(settled)return;settled=true;clearTimeout(timer);
+          if(worker){worker.onmessage=null;worker.onerror=null;this.active.delete(handle);if(retire||this.closed)worker.terminate();else this.idle.push(worker);}
+          error?reject(error):resolve(value);
+        };
+        // Start in a microtask so the cancellation handle exists even when a
+        // Worker constructor or test transport replies synchronously.
+        Promise.resolve().then(()=>{
+          if(settled)return;if(this.closed){finish(Error('已停止扫描。'));return;}
+          try{
+            worker=this.idle.pop()||this.createWorker();this.active.add(handle);
+            worker.onmessage=({data})=>finish(data.ok?null:Error(data.error),data);
+            worker.onerror=e=>finish(Error(e.message||'分析线程无法启动。'),null,true);
+            timer=setTimeout(()=>finish(Error('处理超时，当前文件已停止。'),null,true),timeout);
+            worker.postMessage(payload);
+          }catch(error){finish(error,null,true);}
+        });
+      });
+      const handle={promise,cancel:()=>finish(Error('已停止扫描。'),null,true)};
+      return handle;
+    }
+    trim(limit){while(this.idle.length+this.active.size>limit&&this.idle.length)this.idle.pop().terminate();}
+    close(){this.closed=true;for(const handle of [...this.active])handle.cancel();for(const worker of this.idle)worker.terminate();this.idle=[];}
+  }
+  if(typeof module==='object'&&module.exports)module.exports=ScanPool;else root.HexScanPool=ScanPool;
+})(typeof globalThis==='object'?globalThis:this);
+</script>
 <script type="text/plain" data-hexscope-startup>(function () {
   'use strict';
   const C=window.HexCore,$=id=>document.getElementById(id),MiB=1024*1024;
-  const state={items:[],selected:null,tab:'overview',offset:0,running:false,scanJob:null,generation:0,exporting:false,next:1,closedDirs:new Set()};
+  const state={items:[],selected:null,tab:'overview',offset:0,running:false,scanJobs:new Set(),scanCursor:0,generation:0,exporting:false,next:1,closedDirs:new Set(),page:0};
   $('creatorAvatar').src=document.querySelector('link[rel="icon"]').href;
   const workerURL=URL.createObjectURL(new Blob(['coreCode','exifCode','flateCode','ctfCode','stegoCode','audioCode','animationCode','workerCode'].map(id=>$(id).textContent+'\n'),{type:'text/javascript'}));
+  const cpuCount=Math.max(1,Math.floor(Number(navigator.hardwareConcurrency)||4));
+  const performanceSettings={cpuCount,scanThreads:cpuCount,scanMemory:Math.max(256*MiB,Math.min(1024*MiB,(Number(navigator.deviceMemory)||4)*256*MiB))};
+  let scanPool=new window.HexScanPool(()=>new Worker(workerURL)),pumpScan=null,refreshTimer=null,detailDirty=false;
+  function flushQueueUI(){clearTimeout(refreshTimer);refreshTimer=null;renderList();if(detailDirty){detailDirty=false;renderDetail();}}
+  function scheduleQueueUI(detail=false){detailDirty=detailDirty||detail;if(!refreshTimer)refreshTimer=setTimeout(flushQueueUI,150);}
   const labels={clean:'未见结构异常',suspect:'发现附加 / 可疑数据',mismatch:'后缀与格式不匹配',damaged:'结构损坏 / 不完整',limited:'检测范围受限'};
   const badgeClass={clean:'good',suspect:'warn',mismatch:'error',damaged:'error',limited:'info'};
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -1451,6 +1502,10 @@ self.onmessage = async ({data:job}) => {
     const sized=$('minSize').value!==''||$('maxSize').value!=='';
     $('queueOptions').classList.toggle('has-filter',sized||sort!=='original'||$('listMode').value!=='tree');
     $('queueOptionsLabel').textContent=sized?(valid?'大小筛选已应用':'大小范围无效'):'大小与排序';
+    const pages=Math.max(1,Math.ceil(rows.length/200));state.page=Math.min(state.page,pages-1);
+    $('queuePaging').hidden=rows.length<=200;$('queuePrev').disabled=state.page===0;$('queueNext').disabled=state.page+1>=pages;
+    $('queuePage').max=String(pages);$('queuePage').value=String(state.page+1);$('queuePages').textContent='/ '+pages;
+    const visible=rows.slice(state.page*200,state.page*200+200);
     if(!state.items.length) {
       $('fileList').innerHTML='<div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div>';
     } else if(!rows.length)$('fileList').innerHTML='<div class="empty-list"><p>没有符合条件的文件</p></div>';
@@ -1461,10 +1516,11 @@ self.onmessage = async ({data:job}) => {
       else tag='<span class="tag '+(x.status==='error'?'error':'')+'">'+esc(({queued:'等待扫描',scanning:'扫描中…',cancelled:'已停止',error:'无法分析'})[x.status])+'</span>';
       return '<button class="file-row '+(x.id===state.selected?'selected':'')+'" data-id="'+x.id+'" title="'+esc(x.path)+' · '+x.file.size.toLocaleString()+' 字节" aria-label="查看 '+esc(x.file.name)+'" aria-pressed="'+(x.id===state.selected)+'"><span class="file-icon">'+esc(r?.type||'FILE')+'</span><span class="file-content"><strong>'+esc(x.file.name)+'</strong><span class="file-sub"><span>'+size(x.file.size)+'</span><span>'+esc(r?.type||'待识别')+'</span></span>'+tag+'</span></button>';
       };
-      if($('listMode').value==='list')$('fileList').innerHTML=rows.map(renderRow).join('');
+      if($('listMode').value==='list')$('fileList').innerHTML=visible.map(renderRow).join('');
       else {
         const tree={dirs:new Map(),files:[],size:0,count:0};
-        for(const item of rows){let node=tree,path='';const parts=item.path.split('/').filter(x=>x&&x!=='.'&&x!=='..');for(const name of parts.slice(0,-1)){path+=(path?'/':'')+name;if(!node.dirs.has(name))node.dirs.set(name,{dirs:new Map(),files:[],size:0,count:0,path});node=node.dirs.get(name);node.size+=item.file.size;node.count++;}node.files.push(item);}
+        const totals=new Map();for(const item of rows){let path='';for(const name of item.path.split('/').filter(x=>x&&x!=='.'&&x!=='..').slice(0,-1)){path+=(path?'/':'')+name;const total=totals.get(path)||{size:0,count:0};total.size+=item.file.size;total.count++;totals.set(path,total);}}
+        for(const item of visible){let node=tree,path='';const parts=item.path.split('/').filter(x=>x&&x!=='.'&&x!=='..');for(const name of parts.slice(0,-1)){path+=(path?'/':'')+name;if(!node.dirs.has(name))node.dirs.set(name,{dirs:new Map(),files:[],...totals.get(path),path});node=node.dirs.get(name);}node.files.push(item);}
         const renderTree=node=>Array.from(node.dirs,([name,child])=>'<details class="tree-directory" data-path="'+esc(child.path)+'" '+(state.closedDirs.has(child.path)?'':'open')+'><summary><span>'+esc(name)+'</span><small>'+child.count+' 项 · '+size(child.size)+'</small></summary><div class="tree-children">'+renderTree(child)+'</div></details>').join('')+node.files.map(renderRow).join('');
         $('fileList').innerHTML=renderTree(tree);
       }
@@ -1483,7 +1539,7 @@ self.onmessage = async ({data:job}) => {
     $('findingCount').textContent=item.result?.findings.length||0;
     if(!item.result) {
       $('overviewPanel').innerHTML='<div class="verdict"><strong>'+esc(item.status==='scanning'?'正在分析文件…':item.status==='queued'?'等待扫描':item.error||'扫描已停止')+'</strong><p>当前文件尚无检测结论。</p></div>'+(['cancelled','error'].includes(item.status)?'<button id="retryBtn" class="secondary">重新扫描未完成文件</button>':'');
-      const retry=$('retryBtn');if(retry)retry.onclick=()=>{for(const x of state.items)if(['cancelled','error'].includes(x.status)){x.status='queued';x.error=null;}runQueue();};
+      const retry=$('retryBtn');if(retry)retry.onclick=()=>{for(const x of state.items)if(['cancelled','error'].includes(x.status)){x.status='queued';x.error=null;}state.scanCursor=0;runQueue();};
       $('findings').textContent='扫描完成后显示候选文件。';$('tailExport').textContent='';
     } else {renderOverview(item);renderFindings(item);}
     showTab(state.tab);
@@ -1545,52 +1601,64 @@ self.onmessage = async ({data:job}) => {
       $('rangeStart').placeholder=C.hex(offset);$('rangeEnd').placeholder=C.hex(item.file.size);
     } catch(error) {if(token===hexToken)$('hexView').textContent='读取失败：'+error.message;}
   }
-  async function runQueue() {
-    if(state.running)return;
-    state.running=true;const generation=state.generation;
+  function runQueue() {
+    if(state.running){pumpScan?.();return;}
+    state.running=true;const generation=state.generation;let activeBytes=0;
     $('progressArea').hidden=false;
-    while(generation===state.generation) {
-      const item=state.items.find(x=>x.status==='queued');if(!item)break;
-      item.status='scanning';renderList();if(item.id===state.selected)renderDetail();
-      $('progressText').textContent='正在扫描 '+item.file.name;$('progressBar').max=state.items.length;
-      $('progressBar').value=state.items.filter(x=>x.status!=='queued'&&x.status!=='scanning').length;
-      try {
-        state.scanJob=job({kind:'analyze',file:item.file});
-        const response=await state.scanJob.promise;if(generation!==state.generation)break;
-        item.result=response.result;item.status='done';
-        item.chosen=new Set(item.result.findings.map((f,i)=>f.level==='verified'?i:-1).filter(i=>i>=0));
-      } catch(error) {if(generation!==state.generation)break;item.status='error';item.error=error.message;}
-      state.scanJob=null;renderList();if(item.id===state.selected)renderDetail();
-    }
-    if(generation===state.generation){state.running=false;$('progressArea').hidden=true;renderList();}
+    pumpScan=()=>{
+      if(generation!==state.generation)return;
+      while(state.scanJobs.size<performanceSettings.scanThreads&&state.scanCursor<state.items.length){
+        const item=state.items[state.scanCursor];
+        if(item.status!=='queued'){state.scanCursor++;continue;}
+        const weight=Math.min(item.file.size,C.MAX_FILE)*3+8*MiB;
+        // Backpressure controls working buffers, never the number of queued files.
+        if(state.scanJobs.size&&activeBytes+weight>performanceSettings.scanMemory)break;
+        state.scanCursor++;item.status='scanning';activeBytes+=weight;
+        const task=scanPool.run({kind:'analyze',file:item.file});state.scanJobs.add(task);
+        scheduleQueueUI(item.id===state.selected);
+        task.promise.then(response=>{
+          if(generation!==state.generation)return;
+          item.result=response.result;item.status='done';item.error=null;
+          item.chosen=new Set(item.result.findings.map((f,i)=>f.level==='verified'?i:-1).filter(i=>i>=0));
+        },error=>{if(generation===state.generation){item.status='error';item.error=error.message;}}).finally(()=>{
+          if(generation!==state.generation)return;
+          state.scanJobs.delete(task);activeBytes-=weight;scanPool.trim(performanceSettings.scanThreads);
+          scheduleQueueUI(item.id===state.selected);pumpScan();
+        });
+      }
+      $('progressText').textContent='并行扫描 · '+state.scanJobs.size+' / '+performanceSettings.scanThreads+' 个分析线程';
+      $('progressBar').max=state.items.length;$('progressBar').value=state.scanCursor-state.scanJobs.size;
+      if(!state.scanJobs.size&&state.scanCursor>=state.items.length){state.running=false;pumpScan=null;$('progressArea').hidden=true;flushQueueUI();}
+    };
+    pumpScan();
   }
   function stopScan() {
-    state.generation++;if(state.scanJob)state.scanJob.cancel();state.scanJob=null;state.running=false;
+    state.generation++;for(const task of state.scanJobs)task.cancel();state.scanJobs.clear();scanPool.close();scanPool=new window.HexScanPool(()=>new Worker(workerURL));pumpScan=null;state.scanCursor=0;state.running=false;
     for(const x of state.items)if(['queued','scanning'].includes(x.status)){x.status='cancelled';x.error='已停止扫描。';}
-    $('progressArea').hidden=true;renderList();renderDetail();
+    $('progressArea').hidden=true;detailDirty=true;flushQueueUI();
   }
   function addFiles(files) {
-    const free=Math.max(0,1000-state.items.length),allowed=Array.from(files).slice(0,free);
-    if(files.length>free)toast('队列最多 1,000 个文件，已跳过 '+(files.length-free)+' 个文件。');
-    for(const file of allowed)state.items.push({id:state.next++,file,path:(file.webkitRelativePath||file._hexPath||file.name).replace(/\\/g,'/'),status:'queued',result:null,chosen:new Set()});
-    if(!state.selected&&allowed.length)state.selected=state.items[0].id;
-    renderList();renderDetail();runQueue();
-    return allowed.length;
+    let added=0;const wasEmpty=!state.items.length;
+    for(const file of files){state.items.push({id:state.next++,file,path:(file.webkitRelativePath||file._hexPath||file.name).replace(/\\/g,'/'),status:'queued',result:null,chosen:new Set()});added++;}
+    if(!state.selected&&added)state.selected=state.items[0].id;
+    if(wasEmpty){detailDirty=true;flushQueueUI();}else scheduleQueueUI();
+    if(added)runQueue();return added;
   }
   async function readDrop(transfer) {
     const fallback=Array.from(transfer.files),entries=Array.from(transfer.items||[]).map(x=>x.webkitGetAsEntry?.()).filter(Boolean);
     if(!entries.length){addFiles(fallback);return;}
-    const files=[];let limited=false;
+    let files=[];
+    function flush(){if(files.length){addFiles(files);files=[];}}
     async function visit(entry,parent='') {
-      if(files.length>=1000){limited=true;return;}
       if(entry.isFile){const file=await new Promise((resolve,reject)=>entry.file(resolve,reject));Object.defineProperty(file,'_hexPath',{value:parent+file.name,configurable:true});files.push(file);}
       else if(entry.isDirectory) {
         const reader=entry.createReader();let batch;
-        do{batch=await new Promise((resolve,reject)=>reader.readEntries(resolve,reject));for(const e of batch){await visit(e,parent+(entry.name?entry.name+'/':''));if(limited)break;}}while(batch.length&&!limited);
+        do{batch=await new Promise((resolve,reject)=>reader.readEntries(resolve,reject));for(const e of batch)await visit(e,parent+(entry.name?entry.name+'/':''));}while(batch.length);
       }
+      if(files.length>=256){flush();await new Promise(resolve=>setTimeout(resolve,0));}
     }
-    try{for(const entry of entries){await visit(entry);if(limited)break;}addFiles(files);if(limited)toast('文件夹较大：仅加入前 1,000 个文件。');}
-    catch(error){if(files.length)addFiles(files);toast('部分拖入项读取失败：'+error.message);}
+    try{for(const entry of entries)await visit(entry);flush();}
+    catch(error){flush();toast('部分拖入项读取失败：'+error.message);}
   }
   function parseOffset(value) {const s=value.trim();if(!/^(?:0x[0-9a-f]+|\d+)$/i.test(s))return NaN;const n=Number(s);return Number.isSafeInteger(n)?n:NaN;}
   async function exportCandidate(item,index) {
@@ -1648,13 +1716,20 @@ self.onmessage = async ({data:job}) => {
   document.addEventListener('drop',e=>{e.preventDefault();$('dropzone').classList.remove('dragging');if(e.dataTransfer)readDrop(e.dataTransfer);});
   $('dropzone').addEventListener('click',e=>{if(e.target.closest('button,input'))return;$('fileInput').click();});
   $('fileList').onclick=e=>{const row=e.target.closest('[data-id]');if(row)selectItem(Number(row.dataset.id));};
-  $('searchInput').oninput=renderList;$('filterSelect').onchange=renderList;
-  for(const id of ['minSize','maxSize'])$(id).oninput=renderList;
-  for(const id of ['sizeUnit','sortSelect','listMode'])$(id).onchange=renderList;
-  $('resetSize').onclick=()=>{$('minSize').value='';$('maxSize').value='';renderList();};
+  const filterChanged=()=>{state.page=0;renderList();};
+  $('searchInput').oninput=filterChanged;$('filterSelect').onchange=filterChanged;
+  for(const id of ['minSize','maxSize'])$(id).oninput=filterChanged;
+  for(const id of ['sizeUnit','sortSelect','listMode'])$(id).onchange=filterChanged;
+  $('resetSize').onclick=()=>{$('minSize').value='';$('maxSize').value='';filterChanged();};
+  $('queuePrev').onclick=()=>{state.page=Math.max(0,state.page-1);renderList();$('fileList').scrollTop=0;};
+  $('queueNext').onclick=()=>{state.page++;renderList();$('fileList').scrollTop=0;};
+  $('queuePage').onchange=()=>{const value=Number($('queuePage').value);state.page=Number.isSafeInteger(value)?Math.max(0,value-1):0;renderList();$('fileList').scrollTop=0;};
+  $('scanThreads').max=String(cpuCount);$('scanThreads').value=String(cpuCount);$('scanThreadHint').textContent='检测到 '+cpuCount+' 个逻辑处理器';
+  function changeThreads(value){performanceSettings.scanThreads=Math.max(1,Math.min(cpuCount,Math.floor(Number(value)||cpuCount)));$('scanThreads').value=String(performanceSettings.scanThreads);scanPool.trim(performanceSettings.scanThreads);pumpScan?.();}
+  $('scanThreads').onchange=()=>changeThreads($('scanThreads').value);$('scanFullSpeed').onclick=()=>changeThreads(cpuCount);
   $('fileList').addEventListener('toggle',e=>{if(e.target.dataset.path!==undefined){const path=e.target.dataset.path;e.target.open?state.closedDirs.delete(path):state.closedDirs.add(path);}},true);
   $('cancelBtn').onclick=()=>{stopScan();toast('已停止。已完成的结果保留，未完成项可以重新扫描。');};
-  $('clearBtn').onclick=()=>{stopScan();state.items=[];state.selected=null;state.offset=0;$('demoBtn').disabled=false;renderList();resetDetail();};
+  $('clearBtn').onclick=()=>{stopScan();state.items=[];state.selected=null;state.offset=0;state.page=0;state.closedDirs.clear();$('demoBtn').disabled=false;renderList();resetDetail();};
   for(const btn of document.querySelectorAll('[data-tab]'))btn.onclick=()=>showTab(btn.dataset.tab);
   $('headBtn').onclick=()=>{state.offset=0;renderHex();};$('tailBtn').onclick=()=>{state.offset=Math.max(0,Math.ceil((selected()?.file.size||0)/16)*16-256);renderHex();};
   $('boundaryBtn').onclick=()=>{state.offset=Math.max(0,(selected()?.result?.end||0)-32);renderHex();};
@@ -1676,7 +1751,8 @@ self.onmessage = async ({data:job}) => {
     for(const item of document.querySelectorAll('.mode-nav button.mode')){item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));}
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
-  window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail};
+  window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();});
+  window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail,performanceSettings};
 })();
 </script>
 <script type="text/plain" data-hexscope-startup>(function(){
@@ -1816,6 +1892,14 @@ self.onmessage = async ({data:job}) => {
   'use strict';
   const H=window.HexApp,{$,esc,size,toast}=H,api=window.hexscopeDisk;
   const S={image:null,offset:0,sectorSize:512,directory:null,rows:[],all:new Map(),lists:new Map(),parents:new Map(),selected:new Set(),page:0,busy:false,externalBusy:false,indexed:false,statusChecked:false,cancelRequested:false};
+  let maxThreads=H.performanceSettings.cpuCount,transferThreads=maxThreads,batchBytes=256*1024*1024;
+  function transferSettings(limits){
+    if(limits){const full=transferThreads===maxThreads;maxThreads=Math.max(1,limits.threads);transferThreads=full?maxThreads:Math.min(transferThreads,maxThreads);batchBytes=limits.batchBytes;}
+    $('diskThreads').max=String(maxThreads);$('diskThreads').value=String(transferThreads);$('diskThreadHint').textContent='最多 '+maxThreads+' 路并行读取 · 推送与扫描同时进行';
+  }
+  transferSettings();
+  $('diskThreads').onchange=()=>{transferThreads=Math.max(1,Math.min(maxThreads,Math.floor(Number($('diskThreads').value)||maxThreads)));transferSettings();};
+  $('diskFullSpeed').onclick=()=>{transferThreads=maxThreads;transferSettings();};
   function mode(){H.showWorkspace('disk');}
   const status=message=>$('diskStatus').textContent=message;
   function controls(){const locked=S.busy||S.externalBusy||S.mountBusy;for(const element of $('diskWorkspace').querySelectorAll('[data-disk-task]'))element.disabled=!api||locked;for(const id of ['diskClose','diskLoad','diskInfo','diskIndex','diskHashImage','diskPushFiltered'])$(id).disabled=!api||locked||!S.image;for(const id of ['diskAnalyze','diskExport'])$(id).disabled=!api||locked||!S.selected.size;$('diskHashEntry').disabled=!api||locked||S.selected.size!==1||S.all.get([...S.selected][0])?.directory;$('diskCancel').disabled=!S.busy;$('diskSelected').textContent='已选 '+S.selected.size+' 项';window.dispatchEvent(new CustomEvent('hexscope-disk-state',{detail:{image:S.image,busy:S.busy}}));}
@@ -1850,7 +1934,7 @@ self.onmessage = async ({data:job}) => {
   }
   function resetPartition(){S.offset=Number($('diskOffset').value);S.sectorSize=Number($('diskSector').value);if(!Number.isSafeInteger(S.offset)||S.offset<0)throw Error('请输入非负整数起始扇区。');S.all.clear();S.lists.clear();S.parents.clear();S.selected.clear();S.rows=[];S.directory=null;S.indexed=false;$('diskDetails').textContent='';render();renderTree();}
   async function opened(image){if(!image)return;S.image=image;$('diskTransferBox').hidden=true;$('diskContent').hidden=false;$('diskName').textContent=image.name;$('diskSummary').textContent='容器文件 '+size(image.containerBytes)+' · '+(image.segmentCount||1)+' 个分卷 · '+image.partitions.length+' 个分区入口';$('diskImageInfo').textContent=image.info+'\n'+(image.layout||image.layoutError||'未检测到分区表');$('diskPartition').innerHTML=image.partitions.map((part,index)=>'<option value="'+index+'">'+esc(part.description)+' · 起始 '+part.offset+'</option>').join('');const first=image.partitions[0];$('diskOffset').value=first.offset;$('diskSector').value=first.sectorSize;resetPartition();await loadDirectory();}
-  $('diskMode').onclick=()=>{mode();if(api&&!S.statusChecked)busy(async()=>{const result=await api.status();S.statusChecked=true;$('diskEngine').textContent=result.version+' · libewf '+result.libewf+' · 只读浏览与提取';});};
+  $('diskMode').onclick=()=>{mode();if(api&&!S.statusChecked)busy(async()=>{const result=await api.status();S.statusChecked=true;if(result.analysisLimits)transferSettings(result.analysisLimits);$('diskEngine').textContent=result.version+' · libewf '+result.libewf+' · 只读浏览与提取';});};
   $('diskOpen').onclick=()=>busy(async()=>{status('正在打开镜像…');const result=await api.open();if(result)await opened(result);else status(S.image?'已取消打开，保留当前镜像。':'尚未打开镜像。');});
   $('diskClose').onclick=()=>busy(async()=>{await api.close();S.image=null;S.rows=[];S.all.clear();S.lists.clear();S.selected.clear();$('diskContent').hidden=true;status('镜像已关闭。');});
   $('diskCancel').onclick=()=>{S.cancelRequested=true;api?.cancel().catch(error=>toast(error.message));status('正在停止任务…');};
@@ -1870,9 +1954,28 @@ self.onmessage = async ({data:job}) => {
   $('diskPrev').onclick=()=>{S.page--;render();};$('diskNext').onclick=()=>{S.page++;render();};
   $('diskExport').onclick=()=>busy(async()=>{status('正在提取选中项…');const result=await api.exportFiles({...context(),entryIds:[...S.selected]});if(!result){status('已取消选择导出位置。');return;}status((result.cancelled?'任务已停止；':'')+'已导出 '+result.count+' 个文件（'+size(result.bytes)+'），失败 '+result.errors.length+' 项。位置：'+result.directory+'；详情见 manifest.json。');});
   async function pushAnalysis(ids){
-    status('正在整理文件与目录…');const plan=await api.planAnalysis({...context(),entryIds:ids,capacity:Math.max(0,1000-H.state.items.length)}),failures=[...plan.skipped];let done=0,attempted=0;
-    try{for(const row of plan.entries){if(S.cancelRequested)break;attempted++;status('正在送入文件分析 '+attempted+' / '+plan.entries.length+'：'+row.path);try{const result=await api.analyze({entryId:row.id});const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});if(H.state.items.length>=1000)throw Error('分析队列已满');H.addFiles([file]);done++;}catch(error){failures.push({path:row.path,reason:error.message});if(S.cancelRequested)break;}}}
-    finally{const report={source:S.image.name,createdAt:new Date().toISOString(),added:done,planned:plan.entries.length,cancelled:S.cancelRequested,skipped:failures,notProcessed:plan.entries.slice(attempted).map(x=>({path:x.path,size:x.size})),note:plan.note};$('diskTransferInfo').textContent=JSON.stringify(report,null,2);$('diskTransferBox').hidden=false;$('diskTransferBox').open=failures.length>0||S.cancelRequested;$('diskTransferSave').onclick=()=>H.download(JSON.stringify(report,null,2),'HexScope_transfer.json','application/json');const message=(S.cancelRequested?'已停止；':'')+'已送入 '+done+' 个文件，跳过 / 失败 '+failures.length+' 项；明细见镜像工作台的推送记录。';status(message);toast(message);if(done)$('inspectMode').click();}
+    status('正在整理文件与目录…');const plan=await api.planAnalysis({...context(),entryIds:ids}),failures=[...plan.skipped];let done=0,attempted=0;
+    if(plan.limits)transferSettings(plan.limits);const threads=transferThreads;let nextYield=performance.now()+40;
+    try{
+      while(attempted<plan.entries.length&&!S.cancelRequested){
+        const batch=[];let bytes=0;
+        while(attempted<plan.entries.length&&batch.length<threads){const row=plan.entries[attempted];if(batch.length&&bytes+row.size>batchBytes)break;batch.push(row);bytes+=row.size;attempted++;}
+        status('正在并行送入文件分析 · 已加入 '+done+' / '+plan.entries.length+' 项 · '+batch.length+' 路读取');
+        try{
+          const response=await api.analyzeBatch({entryIds:batch.map(row=>row.id),threads}),results=new Map(response.results.map(result=>[result.entryId,result])),files=[];
+          for(const row of batch){
+            const result=results.get(row.id);
+            if(!result?.ok){failures.push({path:row.path,size:row.size,reason:result?.error||'读取未返回完整结果'});continue;}
+            const file=new File([result.bytes],result.name);Object.defineProperty(file,'_hexPath',{value:result.path});files.push(file);
+          }
+          done+=H.addFiles(files);if(response.cancelled)S.cancelRequested=true;
+        }catch(error){for(const row of batch)failures.push({path:row.path,size:row.size,reason:error.message});}
+        // IPC already yields; force an extra event-loop turn only when a run of
+        // very small batches could otherwise delay paints or cancellation.
+        if(performance.now()>=nextYield){await new Promise(resolve=>setTimeout(resolve,0));nextYield=performance.now()+40;}
+      }
+    }
+    finally{const report={source:S.image.name,createdAt:new Date().toISOString(),added:done,planned:plan.entries.length,threads,cancelled:S.cancelRequested,skipped:failures,notProcessed:plan.entries.slice(attempted).map(x=>({path:x.path,size:x.size})),note:plan.note};$('diskTransferInfo').textContent=JSON.stringify(report,null,2);$('diskTransferBox').hidden=false;$('diskTransferBox').open=failures.length>0||S.cancelRequested;$('diskTransferSave').onclick=()=>H.download(JSON.stringify(report,null,2),'HexScope_transfer.json','application/json');const message=(S.cancelRequested?'已停止；':'')+'已送入 '+done+' 个文件，跳过 / 失败 '+failures.length+' 项；明细见镜像工作台的推送记录。';status(message);toast(message);if(done)$('inspectMode').click();}
   }
   $('diskAnalyze').onclick=()=>busy(()=>pushAnalysis([...S.selected]));
   $('diskPushFiltered').onclick=()=>busy(()=>pushAnalysis(filtered().map(row=>row.id)));
@@ -9644,7 +9747,7 @@ $('cryptoRun').onclick=()=>{
 };
 $('cryptoStop').onclick=()=>{stop();clear();};$('cryptoInput').onkeydown=e=>{if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();$('cryptoRun').click();}};
 $('cryptoUseResult').onclick=()=>{if(!current?.data)return;const bytes=current.data.slice();let textValue;try{if(mode==='manual'&&textActions.has(tools.get($('cryptoTool').value).action))textValue=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch{toast('此工具需要文本；请用自动分析的 Hex 输入处理二进制结果。');return;}invalidate();if(mode==='auto'){$('cryptoInput').value=window.CTF.encode('hex',bytes);$('cryptoFrom').value='hex';}else if(textValue!==undefined){$('cryptoInput').value=textValue;}else{options.from='hex';renderParameters();$('cryptoInput').value=window.CTF.encode('hex',bytes);}};
-$('cryptoToAnalysis').onclick=()=>{if(!current?.data)return;if(H.state.items.length>=1000){toast('文件分析队列已满，未加入候选；请先清理队列或保存原始字节。');return;}const extensions={PNG:'png',JPEG:'jpg',GIF:'gif',ZIP:'zip',PDF:'pdf',GZIP:'gz','7z':'7z',RAR:'rar'},name='crypto_result.'+(extensions[current.format||H.C.detect(current.data)]||'bin');H.addFiles([new File([current.data],name)]);$('inspectMode').click();toast('候选原始字节已加入文件分析队列。');};
+$('cryptoToAnalysis').onclick=()=>{if(!current?.data)return;const extensions={PNG:'png',JPEG:'jpg',GIF:'gif',ZIP:'zip',PDF:'pdf',GZIP:'gz','7z':'7z',RAR:'rar'},name='crypto_result.'+(extensions[current.format||H.C.detect(current.data)]||'bin');H.addFiles([new File([current.data],name)]);$('inspectMode').click();toast('候选原始字节已加入文件分析队列。');};
 $('cryptoSaveBytes').onclick=()=>{if(current?.data)download(current.data,'HexScope_crypto_result.bin');};$('cryptoSaveReport').onclick=()=>{if(result)download(pretty({application:'HexScope CTF 4.1',module:'HexScope Crypto 1.0 (integrated)',created:new Date().toISOString(),mode,result}),'HexScope_crypto_report.json','application/json');};
 $('cryptoImportCodec').onclick=()=>{invalidate();$('cryptoInput').value=$('codecInput')?.value||'';if(mode==='auto')$('cryptoFrom').value=$('codecFrom')?.value==='hex'?'hex':'utf8';};
 async function importFile(file){if(!file)return;try{if(file.size>(mode==='auto'?32768:1048576))throw Error(mode==='auto'?'自动分析文件上限 32 KiB，请先切片或切到题型工具。':'题型工具载入文件上限 1 MiB。');invalidate();const token=serial,bytes=new Uint8Array(await file.arrayBuffer());if(token!==serial)return;if(mode==='manual'&&textActions.has(tools.get($('cryptoTool').value).action)){$('cryptoInput').value=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}else{$('cryptoInput').value=window.CTF.encode('hex',bytes);if(mode==='auto')$('cryptoFrom').value='hex';else{options.from='hex';renderParameters();}}$('cryptoStatus').textContent='已载入 '+file.name+' · '+file.size+' 字节。';}catch(e){toast(e.message);}}

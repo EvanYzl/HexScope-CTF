@@ -2,6 +2,7 @@
 // Only fixed, bundled TSK tools are executable. Images are opened read-only.
 const fs=require('node:fs'),fsp=fs.promises,path=require('node:path');
 const {spawn}=require('node:child_process');
+const os=require('node:os');
 const {randomUUID,createHash}=require('node:crypto');
 const {capabilities,parseImageHashes,snapshot,sameFile,hashStream}=require('./hashing.cjs');
 const TOOLS=new Set(['img_stat','img_cat','mmls','fls','icat','fsstat','istat']);
@@ -50,8 +51,8 @@ async function ewfSegments(filename,firstHead){
   return segments;
 }
 class Forensics {
-  constructor(engineDir){this.engineDir=path.resolve(engineDir);this.child=null;this.busy=false;this.cancelled=false;this.current=null;this.hashFileSource=null;this.entryMap=new Map();this.engineStatus=null;}
-  cancel(){this.cancelled=true;this.child?.kill();}
+  constructor(engineDir){this.engineDir=path.resolve(engineDir);this.child=null;this.children=new Set();this.busy=false;this.cancelled=false;this.current=null;this.hashFileSource=null;this.entryMap=new Map();this.engineStatus=null;}
+  cancel(){this.cancelled=true;for(const child of this.children)child.kill();}
   dispose(){this.cancel();this.current=null;this.hashFileSource=null;this.entryMap.clear();}
   async task(fn){if(this.busy)throw Error('镜像任务仍在运行，请等待或点击停止。');this.busy=true;this.cancelled=false;try{return await fn();}finally{this.busy=false;this.child=null;}}
   check(){if(this.cancelled)throw Error('镜像任务已停止。');}
@@ -61,13 +62,13 @@ class Forensics {
     if(!fs.existsSync(executable))throw Error('缺少镜像组件 '+tool+'.exe，请解压完整便携包。');
     return new Promise((resolve,reject)=>{
       const child=spawn(executable,args.map(String),{cwd:this.engineDir,windowsHide:true,shell:false,env:{...process.env,TZ:'UTC',LC_ALL:'C'},stdio:['ignore','pipe','pipe']});
-      this.child=child;let size=0,stderr='',buffers=[],fault=null;
+      this.child=child;this.children.add(child);let size=0,stderr='',buffers=[],fault=null;
       const timer=timeout>0?setTimeout(()=>{fault=Error('镜像操作超时，可缩小目录范围后重试。');child.kill();},timeout):null;
       let idle=null;const touch=()=>{if(!idleTimeout)return;clearTimeout(idle);idle=setTimeout(()=>{fault=Error('镜像组件连续 5 分钟没有返回数据，任务已停止，未生成完整结果。');child.kill();},idleTimeout);};touch();
       child.stdout.on('data',chunk=>{if(fault||this.cancelled)return;touch();size+=chunk.length;if(size>maxBytes){fault=Error('输出超过限制，请缩小目录范围或改为逐目录浏览。');child.kill();return;}try{if(onChunk)onChunk(chunk);else buffers.push(chunk);}catch(e){fault=e;child.kill();}});
       child.stderr.on('data',chunk=>{if(stderr.length<16000)stderr+=chunk.toString('utf8');});
       child.on('error',error=>{fault=Error('无法启动镜像组件：'+error.message);});
-      child.on('close',code=>{clearTimeout(timer);clearTimeout(idle);if(this.child===child)this.child=null;if(this.cancelled)return reject(Error('镜像任务已停止。'));if(fault)return reject(fault);if(code!==0)return reject(Error((stderr.trim()||('组件退出码 '+code)).slice(0,6000)));resolve({data:Buffer.concat(buffers),stderr,size});});
+      child.on('close',code=>{clearTimeout(timer);clearTimeout(idle);this.children.delete(child);if(this.child===child)this.child=null;if(this.cancelled)return reject(Error('镜像任务已停止。'));if(fault)return reject(fault);if(code!==0)return reject(Error((stderr.trim()||('组件退出码 '+code)).slice(0,6000)));resolve({data:Buffer.concat(buffers),stderr,size});});
     });
   }
   async status(){
@@ -77,7 +78,7 @@ class Forensics {
     let formats='';try{const result=await this.run('img_stat',['-i','list']);formats=result.data.toString()+result.stderr;}catch(e){formats=e.message;}
     if(!/ewf/i.test(formats))throw Error('此 TSK 构建未启用 libewf，不能读取 E01。');
     let manifest={};try{manifest=JSON.parse(await fsp.readFile(path.join(this.engineDir,'../ENGINE_INFO.json'),'utf8'));}catch{}
-    return this.engineStatus={version:(version.data.toString()+version.stderr).trim(),formats,libewf:manifest.libewf||'内置（EWF 支持已确认）'};
+    return this.engineStatus={version:(version.data.toString()+version.stderr).trim(),formats,libewf:manifest.libewf||'内置（EWF 支持已确认）',analysisLimits:this.analysisLimits()};
   }
   async open(filename){
     await this.status();this.check();
@@ -164,15 +165,29 @@ class Forensics {
     const context={offset:entry.offset,sectorSize:entry.sectorSize};
     const result=await this.run('icat',[...this.fsArgs(context),...(entry.deleted?['-r']:[]),this.current.filename,entry.inode],{maxBytes:entry.size,timeout:1800000,...options,onChunk});
     if(result.size!==entry.size)throw Error('提取字节数与目录记录不一致，可能已损坏或被覆盖（'+result.size+' / '+entry.size+'）。');
-    return result;
+    await this.unchanged();return result;
   }
   async analyze(args){const entry=this.entry(args.entryId);if(entry.size>MAX_ANALYZE)throw Error('隐写分析单文件上限为 128 MiB；大文件可直接导出。');const result=await this.read(entry);return {name:entry.name,path:this.current.name+entry.path,bytes:result.data,deleted:entry.deleted};}
+  analysisLimits(){return {threads:Math.max(1,os.availableParallelism?.()||os.cpus().length),batchBytes:256*1024*1024};}
+  async analyzeBatch(args){
+    const limits=this.analysisLimits(),threads=integer(args.threads??limits.threads,'提取并发',limits.threads);
+    if(!threads||!Array.isArray(args.entryIds)||!args.entryIds.length||args.entryIds.length>threads)throw Error('无效的并发提取批次。');
+    const entries=args.entryIds.map(id=>this.entry(id));
+    if(entries.some(row=>row.size>MAX_ANALYZE)||entries.reduce((n,row)=>n+row.size,0)>limits.batchBytes)throw Error('并发读取的数据过大，请分批提取。');
+    // All children belong to this one exclusive service task. Cancellation
+    // kills every reader and the task stays locked until every child settles.
+    const results=await Promise.all(entries.map(async row=>{
+      try{this.check();return {entryId:row.id,ok:true,...await this.analyze({entryId:row.id})};}
+      catch(error){return {entryId:row.id,ok:false,error:error.message};}
+    }));
+    return {results,cancelled:this.cancelled};
+  }
   async planAnalysis(args){
     this.image(args.imageId);if(!Array.isArray(args.entryIds)||!args.entryIds.length||args.entryIds.length>MAX_ENTRIES)throw Error('当前没有可以送入分析的文件或目录。');
-    const capacity=integer(args.capacity,'队列剩余容量',1000),seen=new Set(),entries=[],skipped=[];let bytes=0;
-    const add=item=>{const key=item.offset+':'+item.inode+':'+item.path;if(seen.has(key)||item.directory)return;seen.add(key);let reason='';if(item.mode.startsWith('l'))reason='符号链接不跟随';else if(item.size>MAX_ANALYZE)reason='单文件超过 128 MiB';else if(entries.length>=capacity)reason='分析队列已满（最多 1,000 项）';else if(bytes+item.size>256*1024*1024)reason='本次累计超过 256 MiB';if(reason)skipped.push({path:item.path,size:item.size,reason});else{entries.push(item);bytes+=item.size;}};
+    const seen=new Set(),entries=[],skipped=[];let bytes=0;
+    const add=item=>{const key=item.offset+':'+item.inode+':'+item.path;if(seen.has(key)||item.directory)return;seen.add(key);let reason='';if(item.mode.startsWith('l'))reason='符号链接不跟随';else if(item.size>MAX_ANALYZE)reason='单文件超过 128 MiB';if(reason)skipped.push({path:item.path,size:item.size,reason});else{entries.push(item);bytes+=item.size;}};
     for(const id of args.entryIds){this.check();const item=this.entry(id);if(item.directory){try{const nested=await this.list({imageId:item.imageId,offset:item.offset,sectorSize:item.sectorSize,directoryId:item.id,recursive:true});for(const child of nested.entries)add(child);if(nested.skipped)skipped.push({path:item.path,reason:nested.skipped+' 条目录记录无法解析'});}catch(error){this.check();skipped.push({path:item.path,reason:error.message});}}else add(item);}
-    return {entries,skipped,bytes,note:'目录递归不会自动进入已删除目录；已删除目录需要单独选择。'};
+    return {entries,skipped,bytes,limits:this.analysisLimits(),note:'文件队列不限制条目数量；按并发数和活动数据量自动分批。目录递归不会自动进入已删除目录；已删除目录需要单独选择。'};
   }
   async exportFiles(args,destination,notify=()=>{}){
     this.image(args.imageId);if(!Array.isArray(args.entryIds)||!args.entryIds.length||args.entryIds.length>MAX_ENTRIES)throw Error('请选择需要导出的文件或目录。');

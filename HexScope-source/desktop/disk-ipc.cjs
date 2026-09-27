@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url');
 const {Forensics,parsePartitions}=require('./forensics.cjs');
 const {WindowsMount}=require('./windows-mount.cjs'),{convertVhd,validateSize}=require('./vhd.cjs');
-const OPERATIONS=new Set(['status','open','openDropped','list','details','analyze','planAnalysis','exportFiles','close','cancel','hashCapabilities','selectHashFile','selectHashDropped','hashImage','hashFile','hashEntry']);
+const OPERATIONS=new Set(['status','open','openDropped','list','details','analyze','analyzeBatch','planAnalysis','exportFiles','close','cancel','hashCapabilities','selectHashFile','selectHashDropped','hashImage','hashFile','hashEntry']);
 for(const name of ['convertVhd','selectVhd','mountVhd','unmountVhd','mountStatus','openMounted','driveLetters'])OPERATIONS.add(name);
 function trusted(event,win,html){return event.sender===win.webContents&&event.senderFrame===win.webContents.mainFrame&&event.senderFrame?.url===pathToFileURL(html).href;}
 function installDiskIPC({ipcMain,dialog,shell},win,root){
@@ -61,6 +61,7 @@ function installDiskIPC({ipcMain,dialog,shell},win,root){
           case 'list':return service.list(args);
           case 'details':return service.details(args);
           case 'analyze':return service.analyze(args);
+          case 'analyzeBatch':return service.analyzeBatch(args);
           case 'planAnalysis':return service.planAnalysis(args);
           case 'exportFiles':{
             service.image(args.imageId);

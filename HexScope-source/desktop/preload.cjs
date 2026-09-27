@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('hexscopeDisk',{
   list:args=>invoke('list',args),
   details:args=>invoke('details',args),
   analyze:args=>invoke('analyze',args),
+  analyzeBatch:args=>invoke('analyzeBatch',args),
   planAnalysis:args=>invoke('planAnalysis',args),
   exportFiles:args=>invoke('exportFiles',args),
   close:()=>invoke('close'),

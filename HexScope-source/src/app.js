@@ -1,9 +1,14 @@
 (function () {
   'use strict';
   const C=window.HexCore,$=id=>document.getElementById(id),MiB=1024*1024;
-  const state={items:[],selected:null,tab:'overview',offset:0,running:false,scanJob:null,generation:0,exporting:false,next:1,closedDirs:new Set()};
+  const state={items:[],selected:null,tab:'overview',offset:0,running:false,scanJobs:new Set(),scanCursor:0,generation:0,exporting:false,next:1,closedDirs:new Set(),page:0};
   $('creatorAvatar').src=document.querySelector('link[rel="icon"]').href;
   const workerURL=URL.createObjectURL(new Blob(['coreCode','exifCode','flateCode','ctfCode','stegoCode','audioCode','animationCode','workerCode'].map(id=>$(id).textContent+'\n'),{type:'text/javascript'}));
+  const cpuCount=Math.max(1,Math.floor(Number(navigator.hardwareConcurrency)||4));
+  const performanceSettings={cpuCount,scanThreads:cpuCount,scanMemory:Math.max(256*MiB,Math.min(1024*MiB,(Number(navigator.deviceMemory)||4)*256*MiB))};
+  let scanPool=new window.HexScanPool(()=>new Worker(workerURL)),pumpScan=null,refreshTimer=null,detailDirty=false;
+  function flushQueueUI(){clearTimeout(refreshTimer);refreshTimer=null;renderList();if(detailDirty){detailDirty=false;renderDetail();}}
+  function scheduleQueueUI(detail=false){detailDirty=detailDirty||detail;if(!refreshTimer)refreshTimer=setTimeout(flushQueueUI,150);}
   const labels={clean:'未见结构异常',suspect:'发现附加 / 可疑数据',mismatch:'后缀与格式不匹配',damaged:'结构损坏 / 不完整',limited:'检测范围受限'};
   const badgeClass={clean:'good',suspect:'warn',mismatch:'error',damaged:'error',limited:'info'};
   const esc=v=>String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -55,6 +60,10 @@
     const sized=$('minSize').value!==''||$('maxSize').value!=='';
     $('queueOptions').classList.toggle('has-filter',sized||sort!=='original'||$('listMode').value!=='tree');
     $('queueOptionsLabel').textContent=sized?(valid?'大小筛选已应用':'大小范围无效'):'大小与排序';
+    const pages=Math.max(1,Math.ceil(rows.length/200));state.page=Math.min(state.page,pages-1);
+    $('queuePaging').hidden=rows.length<=200;$('queuePrev').disabled=state.page===0;$('queueNext').disabled=state.page+1>=pages;
+    $('queuePage').max=String(pages);$('queuePage').value=String(state.page+1);$('queuePages').textContent='/ '+pages;
+    const visible=rows.slice(state.page*200,state.page*200+200);
     if(!state.items.length) {
       $('fileList').innerHTML='<div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div>';
     } else if(!rows.length)$('fileList').innerHTML='<div class="empty-list"><p>没有符合条件的文件</p></div>';
@@ -65,10 +74,11 @@
       else tag='<span class="tag '+(x.status==='error'?'error':'')+'">'+esc(({queued:'等待扫描',scanning:'扫描中…',cancelled:'已停止',error:'无法分析'})[x.status])+'</span>';
       return '<button class="file-row '+(x.id===state.selected?'selected':'')+'" data-id="'+x.id+'" title="'+esc(x.path)+' · '+x.file.size.toLocaleString()+' 字节" aria-label="查看 '+esc(x.file.name)+'" aria-pressed="'+(x.id===state.selected)+'"><span class="file-icon">'+esc(r?.type||'FILE')+'</span><span class="file-content"><strong>'+esc(x.file.name)+'</strong><span class="file-sub"><span>'+size(x.file.size)+'</span><span>'+esc(r?.type||'待识别')+'</span></span>'+tag+'</span></button>';
       };
-      if($('listMode').value==='list')$('fileList').innerHTML=rows.map(renderRow).join('');
+      if($('listMode').value==='list')$('fileList').innerHTML=visible.map(renderRow).join('');
       else {
         const tree={dirs:new Map(),files:[],size:0,count:0};
-        for(const item of rows){let node=tree,path='';const parts=item.path.split('/').filter(x=>x&&x!=='.'&&x!=='..');for(const name of parts.slice(0,-1)){path+=(path?'/':'')+name;if(!node.dirs.has(name))node.dirs.set(name,{dirs:new Map(),files:[],size:0,count:0,path});node=node.dirs.get(name);node.size+=item.file.size;node.count++;}node.files.push(item);}
+        const totals=new Map();for(const item of rows){let path='';for(const name of item.path.split('/').filter(x=>x&&x!=='.'&&x!=='..').slice(0,-1)){path+=(path?'/':'')+name;const total=totals.get(path)||{size:0,count:0};total.size+=item.file.size;total.count++;totals.set(path,total);}}
+        for(const item of visible){let node=tree,path='';const parts=item.path.split('/').filter(x=>x&&x!=='.'&&x!=='..');for(const name of parts.slice(0,-1)){path+=(path?'/':'')+name;if(!node.dirs.has(name))node.dirs.set(name,{dirs:new Map(),files:[],...totals.get(path),path});node=node.dirs.get(name);}node.files.push(item);}
         const renderTree=node=>Array.from(node.dirs,([name,child])=>'<details class="tree-directory" data-path="'+esc(child.path)+'" '+(state.closedDirs.has(child.path)?'':'open')+'><summary><span>'+esc(name)+'</span><small>'+child.count+' 项 · '+size(child.size)+'</small></summary><div class="tree-children">'+renderTree(child)+'</div></details>').join('')+node.files.map(renderRow).join('');
         $('fileList').innerHTML=renderTree(tree);
       }
@@ -87,7 +97,7 @@
     $('findingCount').textContent=item.result?.findings.length||0;
     if(!item.result) {
       $('overviewPanel').innerHTML='<div class="verdict"><strong>'+esc(item.status==='scanning'?'正在分析文件…':item.status==='queued'?'等待扫描':item.error||'扫描已停止')+'</strong><p>当前文件尚无检测结论。</p></div>'+(['cancelled','error'].includes(item.status)?'<button id="retryBtn" class="secondary">重新扫描未完成文件</button>':'');
-      const retry=$('retryBtn');if(retry)retry.onclick=()=>{for(const x of state.items)if(['cancelled','error'].includes(x.status)){x.status='queued';x.error=null;}runQueue();};
+      const retry=$('retryBtn');if(retry)retry.onclick=()=>{for(const x of state.items)if(['cancelled','error'].includes(x.status)){x.status='queued';x.error=null;}state.scanCursor=0;runQueue();};
       $('findings').textContent='扫描完成后显示候选文件。';$('tailExport').textContent='';
     } else {renderOverview(item);renderFindings(item);}
     showTab(state.tab);
@@ -149,52 +159,64 @@
       $('rangeStart').placeholder=C.hex(offset);$('rangeEnd').placeholder=C.hex(item.file.size);
     } catch(error) {if(token===hexToken)$('hexView').textContent='读取失败：'+error.message;}
   }
-  async function runQueue() {
-    if(state.running)return;
-    state.running=true;const generation=state.generation;
+  function runQueue() {
+    if(state.running){pumpScan?.();return;}
+    state.running=true;const generation=state.generation;let activeBytes=0;
     $('progressArea').hidden=false;
-    while(generation===state.generation) {
-      const item=state.items.find(x=>x.status==='queued');if(!item)break;
-      item.status='scanning';renderList();if(item.id===state.selected)renderDetail();
-      $('progressText').textContent='正在扫描 '+item.file.name;$('progressBar').max=state.items.length;
-      $('progressBar').value=state.items.filter(x=>x.status!=='queued'&&x.status!=='scanning').length;
-      try {
-        state.scanJob=job({kind:'analyze',file:item.file});
-        const response=await state.scanJob.promise;if(generation!==state.generation)break;
-        item.result=response.result;item.status='done';
-        item.chosen=new Set(item.result.findings.map((f,i)=>f.level==='verified'?i:-1).filter(i=>i>=0));
-      } catch(error) {if(generation!==state.generation)break;item.status='error';item.error=error.message;}
-      state.scanJob=null;renderList();if(item.id===state.selected)renderDetail();
-    }
-    if(generation===state.generation){state.running=false;$('progressArea').hidden=true;renderList();}
+    pumpScan=()=>{
+      if(generation!==state.generation)return;
+      while(state.scanJobs.size<performanceSettings.scanThreads&&state.scanCursor<state.items.length){
+        const item=state.items[state.scanCursor];
+        if(item.status!=='queued'){state.scanCursor++;continue;}
+        const weight=Math.min(item.file.size,C.MAX_FILE)*3+8*MiB;
+        // Backpressure controls working buffers, never the number of queued files.
+        if(state.scanJobs.size&&activeBytes+weight>performanceSettings.scanMemory)break;
+        state.scanCursor++;item.status='scanning';activeBytes+=weight;
+        const task=scanPool.run({kind:'analyze',file:item.file});state.scanJobs.add(task);
+        scheduleQueueUI(item.id===state.selected);
+        task.promise.then(response=>{
+          if(generation!==state.generation)return;
+          item.result=response.result;item.status='done';item.error=null;
+          item.chosen=new Set(item.result.findings.map((f,i)=>f.level==='verified'?i:-1).filter(i=>i>=0));
+        },error=>{if(generation===state.generation){item.status='error';item.error=error.message;}}).finally(()=>{
+          if(generation!==state.generation)return;
+          state.scanJobs.delete(task);activeBytes-=weight;scanPool.trim(performanceSettings.scanThreads);
+          scheduleQueueUI(item.id===state.selected);pumpScan();
+        });
+      }
+      $('progressText').textContent='并行扫描 · '+state.scanJobs.size+' / '+performanceSettings.scanThreads+' 个分析线程';
+      $('progressBar').max=state.items.length;$('progressBar').value=state.scanCursor-state.scanJobs.size;
+      if(!state.scanJobs.size&&state.scanCursor>=state.items.length){state.running=false;pumpScan=null;$('progressArea').hidden=true;flushQueueUI();}
+    };
+    pumpScan();
   }
   function stopScan() {
-    state.generation++;if(state.scanJob)state.scanJob.cancel();state.scanJob=null;state.running=false;
+    state.generation++;for(const task of state.scanJobs)task.cancel();state.scanJobs.clear();scanPool.close();scanPool=new window.HexScanPool(()=>new Worker(workerURL));pumpScan=null;state.scanCursor=0;state.running=false;
     for(const x of state.items)if(['queued','scanning'].includes(x.status)){x.status='cancelled';x.error='已停止扫描。';}
-    $('progressArea').hidden=true;renderList();renderDetail();
+    $('progressArea').hidden=true;detailDirty=true;flushQueueUI();
   }
   function addFiles(files) {
-    const free=Math.max(0,1000-state.items.length),allowed=Array.from(files).slice(0,free);
-    if(files.length>free)toast('队列最多 1,000 个文件，已跳过 '+(files.length-free)+' 个文件。');
-    for(const file of allowed)state.items.push({id:state.next++,file,path:(file.webkitRelativePath||file._hexPath||file.name).replace(/\\/g,'/'),status:'queued',result:null,chosen:new Set()});
-    if(!state.selected&&allowed.length)state.selected=state.items[0].id;
-    renderList();renderDetail();runQueue();
-    return allowed.length;
+    let added=0;const wasEmpty=!state.items.length;
+    for(const file of files){state.items.push({id:state.next++,file,path:(file.webkitRelativePath||file._hexPath||file.name).replace(/\\/g,'/'),status:'queued',result:null,chosen:new Set()});added++;}
+    if(!state.selected&&added)state.selected=state.items[0].id;
+    if(wasEmpty){detailDirty=true;flushQueueUI();}else scheduleQueueUI();
+    if(added)runQueue();return added;
   }
   async function readDrop(transfer) {
     const fallback=Array.from(transfer.files),entries=Array.from(transfer.items||[]).map(x=>x.webkitGetAsEntry?.()).filter(Boolean);
     if(!entries.length){addFiles(fallback);return;}
-    const files=[];let limited=false;
+    let files=[];
+    function flush(){if(files.length){addFiles(files);files=[];}}
     async function visit(entry,parent='') {
-      if(files.length>=1000){limited=true;return;}
       if(entry.isFile){const file=await new Promise((resolve,reject)=>entry.file(resolve,reject));Object.defineProperty(file,'_hexPath',{value:parent+file.name,configurable:true});files.push(file);}
       else if(entry.isDirectory) {
         const reader=entry.createReader();let batch;
-        do{batch=await new Promise((resolve,reject)=>reader.readEntries(resolve,reject));for(const e of batch){await visit(e,parent+(entry.name?entry.name+'/':''));if(limited)break;}}while(batch.length&&!limited);
+        do{batch=await new Promise((resolve,reject)=>reader.readEntries(resolve,reject));for(const e of batch)await visit(e,parent+(entry.name?entry.name+'/':''));}while(batch.length);
       }
+      if(files.length>=256){flush();await new Promise(resolve=>setTimeout(resolve,0));}
     }
-    try{for(const entry of entries){await visit(entry);if(limited)break;}addFiles(files);if(limited)toast('文件夹较大：仅加入前 1,000 个文件。');}
-    catch(error){if(files.length)addFiles(files);toast('部分拖入项读取失败：'+error.message);}
+    try{for(const entry of entries)await visit(entry);flush();}
+    catch(error){flush();toast('部分拖入项读取失败：'+error.message);}
   }
   function parseOffset(value) {const s=value.trim();if(!/^(?:0x[0-9a-f]+|\d+)$/i.test(s))return NaN;const n=Number(s);return Number.isSafeInteger(n)?n:NaN;}
   async function exportCandidate(item,index) {
@@ -252,13 +274,20 @@
   document.addEventListener('drop',e=>{e.preventDefault();$('dropzone').classList.remove('dragging');if(e.dataTransfer)readDrop(e.dataTransfer);});
   $('dropzone').addEventListener('click',e=>{if(e.target.closest('button,input'))return;$('fileInput').click();});
   $('fileList').onclick=e=>{const row=e.target.closest('[data-id]');if(row)selectItem(Number(row.dataset.id));};
-  $('searchInput').oninput=renderList;$('filterSelect').onchange=renderList;
-  for(const id of ['minSize','maxSize'])$(id).oninput=renderList;
-  for(const id of ['sizeUnit','sortSelect','listMode'])$(id).onchange=renderList;
-  $('resetSize').onclick=()=>{$('minSize').value='';$('maxSize').value='';renderList();};
+  const filterChanged=()=>{state.page=0;renderList();};
+  $('searchInput').oninput=filterChanged;$('filterSelect').onchange=filterChanged;
+  for(const id of ['minSize','maxSize'])$(id).oninput=filterChanged;
+  for(const id of ['sizeUnit','sortSelect','listMode'])$(id).onchange=filterChanged;
+  $('resetSize').onclick=()=>{$('minSize').value='';$('maxSize').value='';filterChanged();};
+  $('queuePrev').onclick=()=>{state.page=Math.max(0,state.page-1);renderList();$('fileList').scrollTop=0;};
+  $('queueNext').onclick=()=>{state.page++;renderList();$('fileList').scrollTop=0;};
+  $('queuePage').onchange=()=>{const value=Number($('queuePage').value);state.page=Number.isSafeInteger(value)?Math.max(0,value-1):0;renderList();$('fileList').scrollTop=0;};
+  $('scanThreads').max=String(cpuCount);$('scanThreads').value=String(cpuCount);$('scanThreadHint').textContent='检测到 '+cpuCount+' 个逻辑处理器';
+  function changeThreads(value){performanceSettings.scanThreads=Math.max(1,Math.min(cpuCount,Math.floor(Number(value)||cpuCount)));$('scanThreads').value=String(performanceSettings.scanThreads);scanPool.trim(performanceSettings.scanThreads);pumpScan?.();}
+  $('scanThreads').onchange=()=>changeThreads($('scanThreads').value);$('scanFullSpeed').onclick=()=>changeThreads(cpuCount);
   $('fileList').addEventListener('toggle',e=>{if(e.target.dataset.path!==undefined){const path=e.target.dataset.path;e.target.open?state.closedDirs.delete(path):state.closedDirs.add(path);}},true);
   $('cancelBtn').onclick=()=>{stopScan();toast('已停止。已完成的结果保留，未完成项可以重新扫描。');};
-  $('clearBtn').onclick=()=>{stopScan();state.items=[];state.selected=null;state.offset=0;$('demoBtn').disabled=false;renderList();resetDetail();};
+  $('clearBtn').onclick=()=>{stopScan();state.items=[];state.selected=null;state.offset=0;state.page=0;state.closedDirs.clear();$('demoBtn').disabled=false;renderList();resetDetail();};
   for(const btn of document.querySelectorAll('[data-tab]'))btn.onclick=()=>showTab(btn.dataset.tab);
   $('headBtn').onclick=()=>{state.offset=0;renderHex();};$('tailBtn').onclick=()=>{state.offset=Math.max(0,Math.ceil((selected()?.file.size||0)/16)*16-256);renderHex();};
   $('boundaryBtn').onclick=()=>{state.offset=Math.max(0,(selected()?.result?.end||0)-32);renderHex();};
@@ -280,5 +309,6 @@
     for(const item of document.querySelectorAll('.mode-nav button.mode')){item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));}
     window.dispatchEvent(new CustomEvent('hexscope-workspace',{detail:{name}}));
   }
-  window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail};
+  window.addEventListener('pagehide',()=>{state.generation++;clearTimeout(refreshTimer);scanPool.close();});
+  window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail,performanceSettings};
 })();

@@ -67,6 +67,13 @@ html,body{height:100%;overflow:hidden}
 #appShell .empty-list p{font-size:11px}
 #appShell .queue-footer{flex-shrink:0;min-height:30px;padding:5px 9px;font-size:9px}
 #appShell .queue-footer .quiet{font-size:10px;padding:4px}
+#appShell .queue-performance,#appShell .queue-paging{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 10px;font-size:10px;border-top:1px solid var(--line);flex-wrap:wrap}
+#appShell .queue-performance label,#appShell .queue-paging label,#appShell .disk-performance label{display:flex;align-items:center;gap:5px;white-space:nowrap}
+#appShell .queue-performance input,#appShell .queue-paging input,#appShell .disk-performance input{width:52px;padding:3px 4px;font-size:11px}
+#appShell .queue-performance>span{color:var(--muted);font-size:9px}
+#appShell .queue-paging small{margin-left:auto;color:var(--muted);font-size:9px}
+#appShell .disk-performance{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;margin-top:12px}
+#appShell .disk-performance>span{font-size:10px;color:var(--muted)}
 #appShell .detail-pane{min-height:0;overflow:hidden;display:flex;flex-direction:column}
 #appShell .detail-empty{flex:1;min-height:0;height:auto;padding:18px;overflow:auto}
 #appShell .hex-decoration{font-size:17px;letter-spacing:5px;padding:15px 19px;margin-bottom:18px;border-radius:7px}
