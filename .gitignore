@@ -1,0 +1,25 @@
+# 本机开发依赖与运行数据
+**/node_modules/
+**/portable-data/
+work/
+build-inputs/
+build-work/
+**/__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# 发行归档通过 Releases 提供；不忽略源码内必要的第三方归档
+/HexScope-CTF-*-Portable.zip
+/HexScope-CTF-*-Source-and-Offline.zip
+
+# 测试报告由 npm test 重新生成，发布摘要另存于验证目录
+/集成验证/
+
+# 不提交放在仓库根目录的个人镜像（测试/示例目录不受影响）
+/*.E01
+/*.e01
+/*.dd
+/*.raw
+/*.vhd
+/*.vhdx

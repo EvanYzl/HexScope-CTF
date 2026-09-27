@@ -1,0 +1,12 @@
+# 保持供应商文件和构建输入的原始字节，避免 CRLF 转换破坏完整性清单。
+* -text
+*.png binary
+*.jpg binary
+*.ico binary
+*.dll binary
+*.exe binary
+*.zip binary
+*.tgz binary
+*.wasm binary
+*.E01 binary
+*.dd binary

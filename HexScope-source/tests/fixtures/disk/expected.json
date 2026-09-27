@@ -1,0 +1,15 @@
+{
+  "offset": 2048,
+  "HELLO.TXT": {
+    "bytes": "flag{portable_e01_and_sleuthkit}\n",
+    "sha256": "5cf1a2fee77bd1de20d15ac8d71ca1dae95a9136f51248a991911c71d54aa37a"
+  },
+  "_EMOVED.TXT": {
+    "bytes": "flag{deleted_but_not_overwritten}\n",
+    "sha256": "3dad208c2b6300cca508e44728e2b5f6204336764b9dfbf67658ee31e70005d5"
+  },
+  "PICTURES/HIDDEN.PNG": {
+    "sha256": "4a6eef6b3eba92216df50d67ec861afa4615a0c2725a4ff999bb4036a2952b83",
+    "size": 613
+  }
+}

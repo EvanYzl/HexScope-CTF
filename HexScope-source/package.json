@@ -1,0 +1,32 @@
+{
+  "name": "hexscope-offline",
+  "version": "4.1.0",
+  "private": true,
+  "description": "Portable offline CTF steganography, forensics, hashing and cryptanalysis workbench",
+  "scripts": {
+    "build": "node build.cjs",
+    "test": "node test-all.cjs",
+    "test:ui": "node build.cjs && node --test tests/ui.test.cjs tests/disk-ui.test.cjs tests/hash-mount-ui.test.cjs",
+    "test:legacy": "node --test tests/core.test.cjs tests/ctf.test.cjs tests/stego.test.cjs tests/desktop.test.cjs tests/forensics.test.cjs tests/hash.test.cjs tests/vhd.test.cjs",
+    "test:crypto": "node build.cjs && node --test crypto/tests/*.test.cjs",
+    "test:all": "npm test",
+    "package:portable": "python desktop/package-portable.py",
+    "test:preview": "node build.cjs && node --test tests/preview*.test.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "@napi-rs/canvas": "1.0.9"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "author": {
+    "name": "是羊羊羊呀",
+    "url": "https://github.com/EvanYzl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EvanYzl/HexScope-CTF.git"
+  },
+  "homepage": "https://github.com/EvanYzl/HexScope-CTF"
+}

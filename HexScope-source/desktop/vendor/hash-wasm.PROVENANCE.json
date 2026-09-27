@@ -1,0 +1,10 @@
+{
+  "name": "hash-wasm",
+  "version": "4.12.0",
+  "url": "https://registry.npmjs.org/hash-wasm/-/hash-wasm-4.12.0.tgz",
+  "integrity": "sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==",
+  "upstreamSHA256": "1db32a125fb46177932ec8ac438d3cd8214ebdfaccb5d6611b657d88eb586f92",
+  "vendoredFile": "package/dist/index.umd.js",
+  "vendoredSHA256": "4c623029dcde56c12ae2dc290f90e616cfeb4734e23575bb08c01cdeac3acbe3",
+  "modifications": "none; UMD distribution renamed with .cjs extension"
+}

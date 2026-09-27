@@ -1,0 +1,32 @@
+name: 问题反馈
+description: 提供复现步骤，帮助定位文件分析、密码或取证功能的问题。
+title: "[问题] "
+body:
+  - type: markdown
+    attributes:
+      value: "感谢反馈。请勿上传真实案件镜像、私人文件、密钥或其他敏感数据。优先使用可以公开的最小合成样本。"
+  - type: input
+    id: environment
+    attributes:
+      label: 软件与系统版本
+      placeholder: "HexScope 4.1 便携版；Windows 11 x64"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: "说明在哪个模块、输入了什么公开样本、执行了哪些操作。"
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: 预期结果与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: 补充信息
+      description: "可附脱敏截图、错误文本或合成样本；文件较大时先提供格式、大小及 SHA-256。"

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="author" content="/*__BRAND_AUTHOR_HTML__*/">
+<meta name="description" content="HexScope CTF：本地离线的隐写检查、密码分析、取证镜像与文件预览工作台。">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src blob:; style-src 'unsafe-inline'; img-src blob: data:; media-src blob: data:; font-src blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>HexScope CTF 4.1 · /*__TITLE_AUTHOR_HTML__*/</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,/*__APP_ICON__*/">
+<style>/*__CSS__*/</style>
+<style>/*__CRYPTO_CSS__*/</style>
+<style>/*__PREVIEW_CSS__*/</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brandmark" aria-hidden="true">H<span>›</span></span><div>HexScope <small>CTF 隐写与密码分析</small></div><span class="version">4.1</span></div>
+  <div class="top-actions"><span class="local"><i></i> 完全离线 · 文件留在本机</span><button id="helpBtn" class="quiet">使用说明 <span>↗</span></button></div>
+</header>
+<main>
+  <section class="intro"><div><div class="eyebrow">CTF FORENSICS WORKSPACE</div><h1>让每一条隐藏线索，浮出表面<span>。</span></h1><p>文件透视 · 隐写检查 · 取证镜像 · 哈希校验 · 编码与密码分析</p><div class="creator-line"><span class="creator-badge"><span class="creator-spark" aria-hidden="true">✦</span><span>/*__HEADER_CREDIT_HTML__*/</span></span><span class="creator-edition">4.1 · 本地离线 · 免安装便携版</span></div></div><button id="demoBtn" class="secondary">试试演示文件 <span>↗</span></button></section>
+  <nav class="mode-nav" aria-label="工作台"><button id="inspectMode" class="mode active">文件分析</button><button id="diskMode" class="mode">取证镜像</button><button id="hashMode" class="mode">哈希校验</button><button id="codecMode" class="mode">编码工作台</button><span>LOCAL / OFFLINE</span></nav>
+  <div id="inspectionWorkspace">
+  <section id="dropzone" class="dropzone" aria-label="拖放文件区域">
+    <div class="drop-icon" aria-hidden="true"><svg width="28" height="32" viewBox="0 0 28 32" fill="none"><path d="M5 1H17L25 9V30H5V1Z" stroke="currentColor" stroke-width="1.5"/><path d="M17 1V9H25M10 18H20M15 13V23" stroke="currentColor" stroke-width="1.5"/></svg></div>
+    <div class="drop-copy"><h2>拖入一批文件，开始透视</h2><p>支持文件与文件夹 · 图片、压缩包及任意二进制文件 · 单文件 ≤ 128 MiB</p></div>
+    <div class="drop-buttons"><button id="addBtn" class="primary">＋ 选择文件</button><button id="folderBtn" class="secondary">选择文件夹</button></div>
+    <input id="fileInput" type="file" multiple hidden><input id="folderInput" type="file" webkitdirectory multiple hidden>
+  </section>
+  <div id="progressArea" class="progress-area" hidden><div class="progress-line"><span id="progressText" role="status"></span><button id="cancelBtn" class="quiet">停止扫描</button></div><progress id="progressBar" value="0" max="1" aria-label="批量扫描进度"></progress></div>
+  <section class="stats" aria-label="扫描统计">
+    <div><span class="stat-label">已分析文件</span><strong id="statTotal">00</strong><small>FILES SCANNED</small></div>
+    <div><span class="stat-label">附加 / 可疑数据</span><strong id="statSuspect" class="amber">00</strong><small>REQUIRES REVIEW</small></div>
+    <div><span class="stat-label">后缀不匹配</span><strong id="statMismatch" class="red">00</strong><small>TYPE MISMATCH</small></div>
+    <div><span class="stat-label">可导出附加文件</span><strong id="statExtract" class="teal">00</strong><small>STRUCTURE VERIFIED</small></div>
+  </section>
+  <section class="workspace">
+    <div class="file-pane">
+      <div class="panel-title"><h2>文件队列 <span id="fileCount">0</span></h2><button id="clearBtn" class="quiet" disabled>清空</button></div>
+      <div class="filters"><input id="searchInput" type="search" placeholder="搜索文件名…" aria-label="搜索文件名"><select id="filterSelect" aria-label="筛选结果"><option value="all">全部结果</option><option value="suspect">附加 / 可疑</option><option value="mismatch">后缀不匹配</option><option value="damaged">结构损坏</option><option value="limited">检测受限</option><option value="clean">未见异常</option></select></div>
+      <div class="file-controls"><select id="listMode" aria-label="列表或文件树"><option value="tree">文件树</option><option value="list">平铺列表</option></select><select id="sortSelect" aria-label="文件排序"><option value="original">导入顺序</option><option value="sizeDesc">大小 ↓</option><option value="sizeAsc">大小 ↑</option><option value="name">文件名 A—Z</option></select></div>
+      <div class="size-filters"><label>大小范围<input id="minSize" type="number" min="0" step="any" placeholder="最小" aria-label="最小文件大小"></label><span>—</span><label>含边界<input id="maxSize" type="number" min="0" step="any" placeholder="最大" aria-label="最大文件大小"></label><select id="sizeUnit" aria-label="大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option></select><button id="resetSize" class="quiet" title="重置大小筛选">重置</button></div><div id="sizeFilterHint" class="size-hint" role="status"></div>
+      <div id="fileList" class="file-list"><div class="empty-list"><span class="empty-symbol">⌁</span><h3>等待第一批文件</h3><p>拖入文件或载入演示，<br>这里将列出逐个检测结果。</p></div></div>
+      <div class="queue-footer"><span id="queueStatus">所有分析均在本地进行</span><button id="reportBtn" class="quiet" disabled>导出报告 ↓</button></div>
+    </div>
+    <div class="detail-pane">
+      <div id="detailEmpty" class="detail-empty"><div class="hex-decoration" aria-hidden="true">89 50 4E 47<br>0D 0A 1A 0A<br><b>·· ·· ·· ··</b></div><h2>每个字节，都有线索</h2><p>选择一个文件，查看真实格式、文件边界与可提取的数据。</p><div class="legend-inline"><span><i class="dot teal-bg"></i> 容器数据</span><span><i class="dot amber-bg"></i> 附加数据</span><span><i class="dot red-bg"></i> 格式异常</span></div></div>
+      <div id="detail" hidden>
+        <div class="detail-head"><div><div id="detailType" class="eyebrow">FILE INSPECTOR</div><h2 id="detailName"></h2><div id="detailMeta" class="muted"></div></div><button id="correctBtn" class="secondary" hidden>导出正确后缀副本</button></div>
+        <div class="tabs" role="tablist" aria-label="文件详情"><button class="tab active" role="tab" aria-selected="true" data-tab="overview">概览</button><button class="tab" role="tab" aria-selected="false" data-tab="preview">文件预览</button><button class="tab" role="tab" aria-selected="false" data-tab="hex">十六进制</button><button class="tab" role="tab" aria-selected="false" data-tab="extract">提取文件 <span id="findingCount">0</span></button><button class="tab" role="tab" aria-selected="false" data-tab="exif">EXIF / GPS</button><button class="tab" role="tab" aria-selected="false" data-tab="strings">字符串</button><button class="tab" role="tab" aria-selected="false" data-tab="pixels">像素 / LSB</button><button class="tab" role="tab" aria-selected="false" data-tab="lab">专项隐写 <span>NEW</span></button></div>
+        <div id="overviewPanel" class="tab-panel" role="tabpanel"></div>
+/*__PREVIEW_HTML__*/
+        <div id="hexPanel" class="tab-panel" role="tabpanel" hidden>
+          <div class="hex-tools"><div class="button-group"><button id="headBtn" class="secondary">文件头</button><button id="tailBtn" class="secondary">文件尾</button><button id="boundaryBtn" class="secondary">容器终点</button></div><div class="jump"><input id="offsetInput" placeholder="0x00000000" aria-label="十六进制或十进制偏移"><button id="jumpBtn" class="secondary">跳转</button></div></div>
+          <div class="hex-legend">偏移地址 <span>十六进制字节</span><span>ASCII</span><small>橙色：容器外数据</small></div>
+          <div class="hex-scroll"><pre id="hexView" aria-label="十六进制数据"></pre></div>
+          <div class="hex-footer"><span id="hexRange"></span><div><button id="prevHex" class="quiet">← 上一页</button><button id="nextHex" class="quiet">下一页 →</button></div></div>
+          <details class="manual"><summary>手动导出指定字节区间</summary><div class="range-form"><label>开始（含）<input id="rangeStart" placeholder="0x0"></label><label>结束（不含）<input id="rangeEnd" placeholder="十进制或 0x 十六进制"></label><button id="rangeBtn" class="secondary">导出 .bin</button></div></details>
+        </div>
+        <div id="extractPanel" class="tab-panel" role="tabpanel" hidden><p class="panel-intro">默认选中结构通过检查的尾部附加文件。元数据中的图像可能是正常缩略图；仅签名命中需要人工判断。</p><div id="findings"></div><div id="tailExport"></div></div>
+        <div id="exifPanel" class="tab-panel" role="tabpanel" hidden>
+          <div class="section-toolbar"><input id="exifSearch" type="search" placeholder="查找相机、日期、坐标、注释等字段…" aria-label="搜索 EXIF 字段"><label><input id="exifRaw" type="checkbox"> 原始标签值</label><button id="exifExport" class="secondary" disabled>导出 JSON</button></div>
+          <div id="gpsSummary"></div><div id="exifStatus" class="panel-intro">选择图片后读取完整可识别元数据。</div><div id="exifTable" class="metadata-scroll"></div><button id="metadataBlocks" class="secondary" disabled>导出原始元数据块</button>
+        </div>
+        <div id="stringsPanel" class="tab-panel" role="tabpanel" hidden>
+          <div class="section-toolbar"><label>最短长度<input id="stringMin" type="number" min="2" max="256" value="4"></label><select id="stringEncoding" aria-label="字符串编码"><option value="ascii">ASCII 可打印</option><option value="utf16le">UTF-16LE（ASCII 范围）</option><option value="utf16be">UTF-16BE（ASCII 范围）</option></select><input id="stringNeedle" placeholder="包含关键词，如 flag 或 base64" aria-label="字符串关键词"><button id="stringScan" class="primary">提取字符串</button></div><div class="section-toolbar"><span id="stringStatus" class="muted">保留字节偏移，可定位或送到编码工作台。</span><button id="stringExport" class="quiet" disabled>导出结果 ↓</button></div><div id="stringResults" class="strings-results"></div>
+        </div>
+        <div id="pixelsPanel" class="tab-panel" role="tabpanel" hidden>
+          <p class="panel-intro">原始像素解析：8 位非交错 PNG、24/32 位未压缩 BMP。位平面使用原始通道；JPEG DCT 隐写不在此检查范围。</p>
+          <div class="section-toolbar"><label>视图<select id="planeChannel"><option value="original">原图（透明通道强制可见）</option><option value="rgb">RGB 位平面</option><option value="r">R 位平面</option><option value="g">G 位平面</option><option value="b">B 位平面</option><option value="a">Alpha 位平面</option><option value="invert">反色</option></select></label><label>位（0=最低位）<input id="planeBit" type="number" min="0" max="7" value="0"></label><button id="planeRun" class="secondary">显示图像</button><button id="planeSave" class="quiet" disabled>保存 PNG ↓</button></div>
+          <div class="pixel-stage"><canvas id="pixelCanvas" hidden></canvas><span id="pixelPlaceholder">载入位平面，观察通道中的图案与异常</span></div><div id="pixelStatus" class="muted"></div>
+          <div class="subhead">LSB 字节提取 <small>RAW PIXEL STREAM</small></div><div class="lsb-options"><label>通道顺序<select id="lsbChannels"><option>rgb</option><option>bgr</option><option>rgba</option><option>bgra</option><option>r</option><option>g</option><option>b</option><option>a</option></select></label><label>每通道低位<select id="lsbBits"><option value="1">1 bit</option><option value="2">2 bits</option><option value="4">4 bits</option><option value="8">8 bits</option></select></label><label>装字节顺序<select id="lsbPacking"><option value="msb">先读位 → 字节高位</option><option value="lsb">先读位 → 字节低位</option></select></label><label>遍历<select id="lsbOrder"><option value="xy">逐行 XY</option><option value="yx">逐列 YX</option></select></label><label>跳过位数<input id="lsbSkip" type="number" min="0" value="0"></label></div>
+          <div class="section-toolbar"><button id="lsbRun" class="primary">提取当前组合</button><button id="lsbAuto" class="secondary">扫描 32 种组合</button><button id="lsbSave" class="quiet" disabled>导出字节 ↓</button><button id="lsbReanalyze" class="quiet" disabled>作为新文件分析 ↗</button></div><p class="muted">通道内从最低位向上读取；不足一字节的尾位丢弃。自动扫描逐行、1/2 低位、两种装字节顺序，每种检查前 256 KiB，命中签名或 flag 仅作线索。</p><pre id="lsbPreview" class="code-preview"></pre><div id="lsbHits"></div>
+        </div>
+        <div id="labPanel" class="tab-panel" role="tabpanel" hidden>
+          <div class="lab-heading"><div class="eyebrow">STEGO FIELD KIT</div><h3>从一个异常，追到隐藏内容</h3><p>选择题型后运行专项分析。操作当前队列文件，结果可保存或继续分析。</p></div>
+          <div class="lab-nav" aria-label="专项工具"><button data-lab="zip" class="active">01 压缩包</button><button data-lab="png">02 PNG 修复</button><button data-lab="text">03 文本隐写</button><button data-lab="audio">04 音频隐写</button><button data-lab="image">05 图像运算</button><button data-lab="animation">06 动图分帧</button></div>
+          <article id="lab-zip" class="lab-card">
+            <h3>ZIP 伪加密与注释</h3><p class="panel-intro">核对中央目录 / 本地文件头的加密 bit 0，并尝试无需密码解压验证 CRC。支持 STORE / Deflate，最多 1,000 成员；真实加密不会自动解除。</p>
+            <div class="section-toolbar"><button id="zipAudit" data-lab-run class="primary">检查加密标志与内容</button><button id="zipRepair" data-lab-run class="secondary" disabled>生成伪加密修复副本</button></div>
+            <div id="zipResults" class="lab-scroll"></div>
+          </article>
+          <article id="lab-png" class="lab-card" hidden>
+            <h3>PNG 尺寸、CRC 与调色板</h3><p class="panel-intro">逐块检查 CRC、导出数据块。宽高搜索假设仅一个尺寸字段被改且原 CRC 保留；行长度推测用于非交错 PNG。</p>
+            <div class="section-toolbar"><button id="pngAudit" data-lab-run class="primary">检查数据块 / CRC</button><button id="pngCRC" data-lab-run class="secondary">生成 CRC 重算副本</button></div>
+            <div class="lab-options"><label>搜索字段<select id="pngField"><option value="height">高度</option><option value="width">宽度</option></select></label><label>搜索上限<input id="pngMax" type="number" min="1" max="1000000" value="65535"></label><button id="pngSearch" data-lab-run class="secondary">搜索原始尺寸</button></div>
+            <div class="lab-options"><label>副本宽度<input id="pngWidth" type="number" min="1" max="1000000" placeholder="先检查 PNG"></label><label>副本高度<input id="pngHeight" type="number" min="1" max="1000000" placeholder="先检查 PNG"></label><button id="pngDimensions" data-lab-run class="secondary">验证尺寸并生成副本</button></div>
+            <div id="pngCandidates"></div><div id="pngResults" class="lab-scroll"></div>
+            <div class="subhead">调色板隐写 <small>PLTE BYTE ORDER</small></div><div class="lab-options"><label>每颜色分量低位<select id="paletteBits"><option>1</option><option>2</option><option>4</option><option>8</option></select></label><button id="pngPalette" data-lab-run class="secondary">提取调色板低位</button></div><div id="paletteColors" class="palette-colors"></div>
+          </article>
+          <article id="lab-text" class="lab-card" hidden>
+            <h3>零宽字符、空白字符与 Base64 填充位</h3><p class="panel-intro">把 TXT 等文件拖入队列。高亮不可见字符，或将指定两种字符映射为二进制。支持 UTF-8 / UTF-16，文件最多 8 MiB。</p>
+            <div class="section-toolbar"><label>文件文字编码<select id="textEncoding"><option value="utf-8">UTF-8</option><option value="utf-16le">UTF-16LE</option><option value="utf-16be">UTF-16BE</option></select></label><button id="textAudit" data-lab-run class="primary">检查不可见字符</button><button id="textCandidates" data-lab-run class="secondary">尝试常见编码</button></div>
+            <div class="lab-options"><label>字符方案<select id="textPreset"><option value="zero">零宽 U+200B / U+200C</option><option value="joiner">零宽 U+200C / U+200D</option><option value="space">空格 / Tab</option><option value="custom">自定义码点</option></select></label><label>代表 0 的码点<input id="textZero" value="200B" maxlength="6" aria-label="0 字符十六进制码点"></label><label>代表 1 的码点<input id="textOne" value="200C" maxlength="6" aria-label="1 字符十六进制码点"></label><button id="textSwap" class="quiet">交换 0 / 1</button></div>
+            <div class="lab-options"><label>提取范围<select id="textScope"><option value="all">全文指定字符</option><option value="line-end">仅行尾空格 / Tab</option></select></label><label>装字节顺序<select id="textPacking"><option value="msb">先读位 → 高位</option><option value="lsb">先读位 → 低位</option></select></label><label>跳过位数<input id="textSkip" type="number" min="0" value="0"></label></div>
+            <div class="section-toolbar"><button id="textBits" data-lab-run class="secondary">提取字符二进制</button><button id="base64Padding" data-lab-run class="secondary">提取 Base64 填充位</button></div><p class="muted">Base64 模式每行一个完整编码值，读取 = / == 前的未使用位；其结果使用上方装字节顺序和跳过位数。</p><div id="textResults" class="lab-scroll"></div>
+          </article>
+          <article id="lab-audio" class="lab-card" hidden>
+            <h3>WAV 波形、声道与频谱隐写</h3><p class="panel-intro">支持整数 PCM 8/16/24/32 位 WAV，1—8 声道。每次分析选定区间，最长 120 秒；可分段查看长录音。采样 LSB 直接读取原始字节。</p>
+            <div class="lab-options"><label>开始 / 秒<input id="audioStart" type="number" min="0" step="0.01" value="0"></label><label>时长 / 秒<input id="audioDuration" type="number" min="0.01" max="120" step="0.01" value="10"></label><label>分析声道<select id="audioChannel"><option value="mix">平均混音</option><option value="0">第 1 声道 / 左</option><option value="1">第 2 声道 / 右</option><option value="difference">(左 − 右) / 2</option><option value="2">第 3 声道</option><option value="3">第 4 声道</option><option value="4">第 5 声道</option><option value="5">第 6 声道</option><option value="6">第 7 声道</option><option value="7">第 8 声道</option></select></label></div>
+            <div class="lab-options"><label>FFT 长度<select id="audioFFT"><option>512</option><option>1024</option><option selected>2048</option><option>4096</option><option>8192</option></select></label><label>最低频率 / Hz<input id="audioMinHz" type="number" min="0" value="0"></label><label>最高频率 / Hz<input id="audioMaxHz" type="number" min="1" placeholder="留空 = 采样率 ÷ 2"></label></div>
+            <div class="section-toolbar"><button id="audioAnalyze" data-lab-run class="primary">绘制波形与频谱</button><button id="audioDTMF" data-lab-run class="secondary">识别 DTMF 双音</button><button id="spectrogramSave" class="quiet" disabled>保存频谱 PNG ↓</button></div>
+            <div id="audioInfo" class="muted"></div><div class="audio-plots"><canvas id="waveCanvas" width="768" height="140" hidden aria-label="选定区间的音频波形"></canvas><div id="waveAxis" class="plot-axis"></div><canvas id="spectrogramCanvas" hidden aria-label="时间与频率频谱图"></canvas><div id="spectrogramAxis" class="plot-axis"></div></div><div id="dtmfResults"></div>
+            <div class="subhead">采样 LSB 与声音变换 <small>PCM SAMPLE STREAM</small></div><div class="lab-options"><label>LSB 声道<select id="audioLSBChannel"><option value="all">全部声道（交错）</option><option value="0">第 1 声道 / 左</option><option value="1">第 2 声道 / 右</option><option value="2">第 3 声道</option><option value="3">第 4 声道</option><option value="4">第 5 声道</option><option value="5">第 6 声道</option><option value="6">第 7 声道</option><option value="7">第 8 声道</option></select></label><label>每采样低位<select id="audioBits"><option>1</option><option>2</option><option>4</option><option>8</option></select></label><label>装字节顺序<select id="audioPacking"><option value="msb">先读位 → 高位</option><option value="lsb">先读位 → 低位</option></select></label><label>跳过位数<input id="audioSkip" type="number" min="0" value="0"></label></div>
+            <div class="section-toolbar"><button id="audioLSB" data-lab-run class="secondary">提取所选区间 LSB</button><button id="audioReverse" data-lab-run class="secondary">生成整段倒放副本</button><button id="audioSplit" data-lab-run class="secondary">生成单声道副本</button><button id="audioDifference" data-lab-run class="secondary">生成整段声道差</button></div><p class="muted">单声道导出使用「分析声道」的数字选项；倒放 / 声道变换处理整个文件。声道差输出 16 位 PCM。</p>
+          </article>
+          <article id="lab-image" class="lab-card" hidden>
+            <h3>双图 XOR、差异与边框隐写</h3><p class="panel-intro">主图为队列中当前文件。双图运算要求宽高一致；支持 8 位非交错 PNG、24/32 位未压缩 BMP，保留透明像素中的 RGB 值。</p>
+            <div class="section-toolbar"><button id="imageReferenceBtn" class="secondary">选择参考图片</button><input id="imageReference" type="file" accept=".png,.bmp" hidden><span id="imageReferenceName" class="muted">尚未选择</span></div>
+            <div class="lab-options"><label>运算<select id="imageOperation"><option value="parity">RGB 总和奇偶图</option><option value="xor">双图 XOR</option><option value="difference">双图绝对差异</option><option value="mask">任一 RGBA 通道差异掩膜</option></select></label><label>差异增益<input id="imageGain" type="number" min="1" max="64" value="8"></label><button id="imageRun" data-lab-run class="primary">显示结果</button><button id="imageSave" class="quiet" disabled>保存 PNG ↓</button></div><div class="pixel-stage"><canvas id="compareCanvas" hidden></canvas><span id="comparePlaceholder">对照图片，寻找被改动的像素</span></div>
+            <div class="subhead">最外层边框提取 <small>CLOCKWISE BORDER</small></div><div class="lab-options"><label>通道顺序<select id="borderChannels"><option>rgb</option><option>bgr</option><option>r</option><option>g</option><option>b</option><option>a</option></select></label><label>每通道低位<select id="borderBits"><option>1</option><option>2</option><option>4</option><option>8</option></select></label><label>装字节顺序<select id="borderPacking"><option value="msb">先读位 → 高位</option><option value="lsb">先读位 → 低位</option></select></label><label>跳过位数<input id="borderSkip" type="number" min="0" value="0"></label><button id="borderRun" data-lab-run class="secondary">顺时针提取边框</button></div>
+          </article>
+          <article id="lab-animation" class="lab-card" hidden><h3>GIF / APNG 帧与延时</h3><p class="panel-intro">检查每帧位置、尺寸、延时与合成规则；支持预览、单帧导出或打包全部原始帧。局部帧不叠加前帧，导出清单保留布局。最多 1,000 帧，每帧最多 8 百万像素。</p><div class="section-toolbar"><button id="animationInspect" data-lab-run class="primary">检查动画帧</button><button id="animationExport" data-lab-run class="secondary">打包全部原始帧</button></div><div id="animationResults" class="lab-scroll"></div><div id="animationStage" class="pixel-stage"><span>选择清单中的帧，查看隐藏瞬间</span></div></article>
+          <div class="lab-output"><div class="section-toolbar"><strong>本次结果</strong><button id="labCancel" class="quiet" hidden>停止本次分析</button><button id="labReport" class="quiet" disabled>保存专项报告</button><button id="labSave" class="secondary" disabled>保存提取 / 修复文件 ↓</button><button id="labReanalyze" class="quiet" disabled>加入队列继续分析 ↗</button></div><div id="labStatus" class="muted" role="status">选择适合当前文件的专项工具。</div><pre id="labPreview" class="code-preview" hidden></pre></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="export-bar"><div><strong id="exportCount">0 个文件待导出</strong><span>打包所有文件中已勾选的候选，并附检测清单</span></div><button id="exportBtn" class="primary" disabled>一键导出检出文件 <span>↓</span></button></section>
+  </div>
+  <section id="diskWorkspace" class="disk-workspace" hidden>
+    <div class="disk-heading"><div><div class="eyebrow">DISK IMAGE / EWF</div><h2>从镜像，追到文件</h2><p id="diskEngine" class="muted">内置 libewf + The Sleuth Kit · 只读浏览与提取</p></div><div class="button-group"><button id="diskOpen" class="primary" data-disk-task>打开镜像</button><button id="diskClose" class="secondary" data-disk-task disabled>关闭镜像</button></div></div>
+    <div id="diskUnavailable" class="overview-warning" hidden>镜像读取需要 Windows 便携版自带的本地组件。请解压完整便携包并运行 HexScope-CTF.exe；单独的 HTML 保留文件隐写与编码功能。</div>
+    <div id="diskDrop" class="disk-drop">拖入首个 E01 / DD / RAW / IMG / 001 / VHD / VMDK 镜像。分卷保持同目录、原始命名；文件按需读取，无须整盘解压。</div>
+    <div class="disk-state"><span id="diskStatus" role="status">尚未打开镜像。</span><button id="diskCancel" class="quiet" disabled>停止任务</button></div>
+    <div id="diskContent" hidden>
+      <div class="disk-image"><strong id="diskName"></strong><span id="diskSummary" class="muted"></span><div class="button-group"><button id="diskHashImage" class="secondary" data-disk-task>计算源盘哈希</button></div></div>
+      <div class="disk-partition"><label>分区<select id="diskPartition" data-disk-task></select></label><label>扇区大小<select id="diskSector" data-disk-task><option>512</option><option>1024</option><option>2048</option><option>4096</option><option>8192</option></select></label><label>起始扇区<input id="diskOffset" type="number" min="0" value="0" data-disk-task></label><button id="diskLoad" class="secondary" data-disk-task>载入目录</button><button id="diskInfo" class="quiet" data-disk-task>分区详情</button></div>
+      <div class="disk-browser"><aside><div class="panel-title"><h3>目录树</h3></div><div id="diskTree" class="disk-tree"></div><p>点击文件夹展开。目录内容按需读取。</p></aside><div class="disk-files">
+        <div class="disk-path"><button id="diskUp" class="quiet" data-disk-task>↑ 上一级</button><span id="diskPath">/</span><button id="diskIndex" class="secondary" data-disk-task>索引整个分区</button></div>
+        <div class="disk-filters"><input id="diskSearch" type="search" placeholder="搜索路径或后缀，如 .png" aria-label="镜像路径搜索"><select id="diskDeleted" aria-label="删除状态"><option value="all">全部状态</option><option value="live">未删除</option><option value="deleted">已删除</option></select><select id="diskSort" aria-label="镜像文件排序"><option value="name">目录优先 / 名称</option><option value="sizeDown">大小 ↓</option><option value="sizeUp">大小 ↑</option></select></div>
+        <div class="disk-filters"><label>大小<input id="diskMin" type="number" min="0" step="any" placeholder="最小" aria-label="镜像最小大小"></label><span>—</span><label><input id="diskMax" type="number" min="0" step="any" placeholder="最大" aria-label="镜像最大大小"></label><select id="diskUnit" aria-label="镜像大小单位"><option value="1">B</option><option value="1024" selected>KiB</option><option value="1048576">MiB</option><option value="1073741824">GiB</option></select><button id="diskResetFilter" class="quiet">重置筛选</button><span id="diskCount" class="muted"></span></div>
+        <div class="disk-table-scroll"><table class="disk-table"><thead><tr><th><input id="diskCheckPage" type="checkbox" aria-label="勾选本页" data-disk-task></th><th>名称 / 路径</th><th>大小</th><th>状态</th><th>元数据</th></tr></thead><tbody id="diskRows"></tbody></table></div>
+        <div class="disk-pagination"><button id="diskPrev" class="quiet">← 上页</button><span id="diskPage"></span><button id="diskNext" class="quiet">下页 →</button></div>
+        <div class="disk-actions"><span id="diskSelected">已选 0 项</span><button id="diskHashEntry" class="quiet" data-disk-task disabled>单文件哈希</button><button id="diskPushFiltered" class="secondary" data-disk-task>一键分析筛选结果</button><button id="diskAnalyze" class="secondary" data-disk-task disabled>送入文件分析</button><button id="diskExport" class="primary" data-disk-task disabled>导出选中项 ↓</button></div>
+      </div></div>
+      <details class="manual"><summary>镜像头信息与分区表</summary><pre id="diskImageInfo" class="code-preview"></pre></details>
+      <details id="diskDetailsBox" class="manual"><summary>文件系统 / 条目详情</summary><pre id="diskDetails" class="code-preview"></pre></details>
+      <details id="diskTransferBox" class="manual" hidden><summary>推送到文件分析的记录</summary><button id="diskTransferSave" class="quiet">保存推送清单</button><pre id="diskTransferInfo" class="code-preview"></pre></details>
+      <p class="disk-note">大小筛选作用于当前目录；点击「索引整个分区」可递归筛选。导出目录会递归提取；已删除目录需单独打开。已删除数据可能被覆盖。送入隐写分析限单文件 128 MiB、每次合计 256 MiB；大文件可流式导出。</p>
+    </div>
+    <section id="mountPanel" class="mount-panel">
+      <div class="disk-heading"><div><div class="eyebrow">WINDOWS / READ ONLY</div><h2>用资源管理器打开镜像</h2><p id="mountSpace" class="muted">先打开镜像，再转换为固定 VHD。</p></div></div>
+      <div id="mountUnavailable" class="overview-warning" hidden>盘符挂载需要 Windows 便携版。</div>
+      <p class="hash-note">E01 先转换为 VHD，使用 Windows 自带功能只读挂载，无需额外驱动。转换需要接近源盘容量的磁盘空间；挂载和卸载会请求管理员授权。支持 512 字节逻辑扇区、最大 2040 GiB；资源管理器只能读取 Windows 支持的文件系统。遇到初始化或格式化提示请选择取消。</p>
+      <div class="hash-actions"><button id="mountConvert" class="primary" data-mount-task>将当前镜像转为 VHD</button><button id="mountSelect" class="secondary" data-mount-task>选择已有固定 VHD</button><button id="mountCancel" class="quiet" disabled>停止转换</button></div>
+      <p id="mountTarget" class="mount-target">尚未准备 VHD。</p>
+      <div class="disk-partition"><label>VHD 中的分区<select id="mountPartitions" data-mount-task></select></label><label>系统盘符<select id="mountLetter" data-mount-task><option>Z</option></select></label><button id="mountAttach" class="primary" data-mount-task disabled>只读挂载并分配盘符</button><button id="mountExplorer" class="secondary" data-mount-task disabled>打开资源管理器</button><button id="mountRefresh" class="quiet" data-mount-task disabled>刷新状态</button><button id="mountDetach" class="quiet" data-mount-task disabled>卸载</button></div>
+      <div class="disk-state"><span id="mountStatus" role="status">尚未挂载。关闭软件不会自动卸载；重新打开后可选择同一 VHD 再卸载。</span></div><progress id="mountProgress" value="0" max="1" aria-label="VHD 转换进度"></progress>
+    </section>
+  </section>
+  <section id="hashWorkspace" class="hash-workspace" hidden>
+    <div class="disk-heading"><div><div class="eyebrow">INTEGRITY / HASH</div><h2>同一份字节，同一个答案</h2><p class="muted">一次完整读取，同时计算多种摘要。支持大文件、E01 源盘以及镜像内单个文件。</p></div><div class="button-group"><button id="hashPick" class="primary" data-hash-task>选择单个文件</button><button id="hashUseImage" class="secondary" data-hash-task disabled>当前镜像源盘</button></div></div>
+    <div id="hashUnavailable" class="overview-warning" hidden>请使用 Windows 便携版的「哈希校验」。无需安装环境；单独 HTML 的文件概览仍提供 SHA-256。</div>
+    <div id="hashDrop" class="hash-target"><small id="hashTargetType">选择计算对象</small><strong id="hashTargetName">拖入一个本机文件，或选择当前镜像源盘</strong><small id="hashTargetSize"></small><p id="hashTargetScope">普通文件与 E01 解码数据流分别计算，避免混淆容器哈希、分区哈希和源盘哈希。</p></div>
+    <div class="hash-algo-head"><strong>计算算法</strong><button id="hashCommon" class="quiet" data-hash-task>常用四项</button><button id="hashAll" class="quiet" data-hash-task>全部算法</button></div><div id="hashAlgorithms" class="hash-algorithms"></div>
+    <div class="hash-actions"><button id="hashRun" class="primary" data-hash-task disabled>开始完整计算</button><button id="hashCancel" class="quiet" disabled>停止计算</button><p class="hash-note">分块读取，无须把整个文件放入内存。中止或读取失败时不保留半成品摘要。</p></div>
+    <div class="disk-state"><span id="hashStatus" role="status">尚未选择对象。</span></div><progress id="hashProgress" value="0" max="1" aria-label="哈希计算进度"></progress>
+    <div id="hashResults" hidden><div class="hash-results-head"><strong id="hashComplete"></strong><label>表示方式 <select id="hashFormat"><option value="hex">小写 HEX</option><option value="upper">大写 HEX</option><option value="base64">Base64</option></select></label><button id="hashTXT" class="secondary" disabled>导出 TXT</button><button id="hashJSON" class="secondary" disabled>导出 JSON</button></div><table class="hash-table"><tbody id="hashRows"></tbody></table><p id="hashStored" class="hash-note"></p><div class="hash-compare"><label>比对算法 <select id="hashCompareAlgorithm"></select></label><select id="hashCompareFormat" aria-label="预期值格式"><option value="hex">HEX（大小写均可）</option><option value="base64">Base64</option></select><input id="hashExpected" placeholder="粘贴预期哈希值…" aria-label="预期哈希值" spellcheck="false"></div><p id="hashCompareStatus" role="status"></p></div>
+    <p class="hash-note">源盘哈希只代表镜像实际采集到的字节范围。仅采集分区的 E01 无法重建未采集的整盘扇区；Windows 挂载卷与整盘读取范围也可能不同。CRC-32 为校验和。</p>
+  </section>
+  <section id="codecWorkspace" class="codec-workspace" hidden>
+    <div class="codec-title"><div><div class="eyebrow">ENCODING LAB</div><h2>在字节与线索之间转换</h2><p class="muted">组合输入格式、附加操作与输出格式。支持将结果继续转换；二进制结果可无损下载。</p></div><button id="codecFileBtn" class="secondary">载入文件字节</button><input id="codecFile" type="file" hidden></div>
+    <div class="codec-controls"><label>输入格式<select id="codecFrom"></select></label><button id="codecSwap" class="quiet" title="交换输入输出">⇄</button><label>附加操作<select id="codecOperation"><option value="none">仅转换格式</option><option value="rot13">ROT13</option><option value="rot47">ROT47</option><option value="caesar">Caesar 位移</option><option value="caesar-all">Caesar 全 26 位移</option><option value="atbash">Atbash</option><option value="xor">XOR 循环密钥</option><option value="reverse">字节倒序</option><option value="inflate">自动解压 GZIP / Zlib / Deflate</option><option value="gzip">GZIP 压缩</option><option value="zlib">Zlib 压缩</option><option value="md5">MD5 摘要</option><option value="sha1">SHA-1 摘要</option><option value="sha256">SHA-256 摘要</option><option value="sha512">SHA-512 摘要</option><option value="crc32">CRC-32</option></select></label><label>输出格式<select id="codecTo"></select></label><button id="codecRun" class="primary">执行转换 →</button></div>
+    <div class="codec-parameters"><label>XOR 密钥<input id="codecKey" placeholder="文本密钥，或 hex:ff01"></label><label>Caesar 位移<input id="codecShift" type="number" value="13"></label><span>默认文本为 UTF-8，URL 按百分号转义（+ 保持原样）。</span></div>
+    <div class="codec-editors"><label>输入<textarea id="codecInput" spellcheck="false" placeholder="在这里粘贴编码文本，例如 ZmxhZ3toZWxsb30="></textarea></label><label>输出<textarea id="codecOutput" spellcheck="false" readonly placeholder="转换结果"></textarea></label></div>
+    <div class="section-toolbar"><span id="codecStatus" role="status" class="muted">全部运算在本机执行。</span><button id="codecNext" class="secondary" disabled>结果作为下一步输入</button><button id="codecTextSave" class="quiet" disabled>保存输出文本</button><button id="codecBytesSave" class="quiet" disabled>保存原始字节</button></div><details class="manual"><summary>本次转换历史（最近 20 步）</summary><ol id="codecHistory"></ol></details>
+  </section>
+  <footer><span class="footer-identity"><span>HEXSCOPE CTF <b>/</b> LOCAL BINARY LAB</span><small class="footer-credit">/*__FOOTER_CREDIT_HTML__*/</small></span><p>文件结构、元数据与六类专项隐写工具。未检出不等于无隐写；不含 DCT 隐写、密码破解与所有格式变体。</p></footer>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+<dialog id="helpDialog"><div class="modal-head"><h2>使用说明与关于</h2><button id="closeHelp" class="quiet" aria-label="关闭说明">✕</button></div><div class="help-body">
+<section class="creator-about" aria-label="关于 HexScope"><img id="creatorAvatar" alt="HexScope 软件图标" width="72" height="72"><div><h3>HexScope CTF <small>4.1</small></h3><p class="creator-credit">/*__ABOUT_CREDIT_HTML__*/</p><p class="creator-tagline">让每一条隐藏线索，浮出表面。</p><div class="creator-tags"><span>本地离线</span><span>免安装便携</span><span>CTF · 数字取证</span></div></div><div class="creator-repo"><strong>GitHub 项目</strong>/*__BRAND_REPOSITORY_HTML__*/</div></section>
+<p>1. 拖入文件或文件夹，或点击「选择文件」。程序逐个分析；可以随时停止，已完成的结果会保留。</p>
+<p>2. 在队列中选择文件。「十六进制」可以查看头尾、跳转偏移和手动切片；「提取文件」可以选择、导出候选文件。</p>
+<p>3. 点击「一键导出检出文件」打包已勾选的候选，并生成 manifest.json。ZIP 候选还可以列出和解压成员；RAR、加密包等请导出后用本机工具打开。</p>
+<h3>如何理解结果</h3><p><b>结构通过：</b>已根据容器结构确定边界。ZIP 压缩成员的内容 CRC 在解压时校验；结构通过不代表不存在其他损坏，也不证明有人故意隐藏。</p><p><b>元数据 / 内嵌：</b>可能为 EXIF 缩略图等合法内容，默认不选入批量导出。</p><p><b>仅签名：</b>不能确认完整性和结束位置，导出为 .bin；可手工调整区间。</p><p><b>未见异常：</b>批量队列仅检查文件结构。EXIF、字符串、像素与 LSB 在相应标签页单独运行；未运行不表示未检出。不覆盖 JPEG DCT、碎片重组、密码破解或所有文件格式。</p>
+<h3>取证镜像（桌面版）</h3><p>打开 E01 首卷或 DD / RAW 镜像，按分区浏览目录树、筛选大小、提取文件或送入隐写分析。分卷须保持完整和原始命名。选择目录导出会递归提取，结果含原路径、inode、时间字段和 SHA-256 清单。镜像按需读取，不受普通文件 128 MiB 限制；送入隐写分析的单个文件仍受此限制。镜像引擎仅在 Windows 便携版可用。</p><h3>哈希、推送与盘符（4.1）</h3><p>「哈希校验」支持本机文件；镜像工作台可计算解码后的完整源盘数据及镜像内单个文件。支持 12 种算法、HEX / Base64 表示、预期值比对、TXT / JSON 导出。镜像内文件或目录可以一键送入文件分析；跳过和失败内容有推送清单。</p><p>E01 可先转固定 VHD，再用 Windows 自带功能选择分区、盘符并只读挂载。转换需要接近源盘容量的空间；挂载和卸载请求管理员授权。固定 VHD 限 512 字节逻辑扇区、2040 GiB；资源管理器仅支持 Windows 可读文件系统。关闭软件不会自动卸载。</p><h3>文件预览</h3><p>选择文件后打开「文件预览」：DOCX 正文、表格和内嵌图片；Excel / CSV 工作表、分页与搜索；PDF 翻页与缩放；图片旋转与缩放，以及文本、部分音视频和 ZIP 目录。镜像送入的文件也可预览。全部离线，只读显示；Office 上限 32 MiB、PDF 64 MiB，表格限前 2,000 行 / 100 列。格式覆盖与限制见随包文件预览说明.md。</p><h3>密码分析（78 个工具入口）</h3><p>自动分析支持有限预算的多层编码、部分古典密码、压缩和 XOR 尝试，显示候选排序、转换路径和停止原因。题型工具提供古典密码、现代密码、RSA / ECC、签名、哈希及数论等参数化运算。计算在本机 Worker 运行，可以停止、导出报告或把恢复字节送入文件分析。</p><p>候选分不是正确率，未命中不表示无解；现代密码一般需要密钥，侧信道和高级题型需要样本或额外条件。自动输入上限 32 KiB、8 层，单任务总上限 40 秒。完整适用范围见密码分析内的「覆盖范围」与随附题型说明。</p><h3>CTF 工具</h3><p>EXIF / GPS 标签页支持元数据搜索、原始标签值、经纬度及 JSON 导出。文件树可以按 B / KiB / MiB 大小区间筛选和排序。字符串标签页可定位偏移并将文本送到编码工作台。</p><p>像素 / LSB 支持 8 位非交错 PNG、24/32 位未压缩 BMP。可查看位平面、选择通道与读取顺序、扫描 32 种常见 LSB 组合、导出并继续分析提取结果。不能覆盖所有隐写方式。</p><h3>专项隐写</h3><p>新增 ZIP 伪加密验证与副本修复、PNG CRC / 宽高恢复与调色板低位、零宽字符 / 空格 Tab / Base64 填充位、整数 PCM WAV 波形 / 频谱 / LSB / DTMF / 倒放与声道差、双图 XOR / 差异 / RGB 奇偶 / 边框，以及 GIF / APNG 原始局部帧导出。专项工具需手动运行，结果可保存、加入队列继续分析或导出报告。</p><p>WAV 每段分析最长 120 秒，支持 8/16/24/32 位整数 PCM；动图最多 1,000 帧，不合成前帧；PNG 宽高恢复验证非交错扫描行。真实加密、JPEG DCT、音频压缩格式和特定隐写工具算法不在这些模块范围内。</p><h3>范围与限制</h3><p>边界解析：PNG、JPEG、GIF、WebP、BMP、普通单卷 ZIP、7z。RAR、PDF、GZIP 候选仅签名提示。ZIP64、多卷 ZIP 不做可靠提取。</p><p>单文件 128 MiB，单批最多 1,000 个文件，批量导出 256 MiB，ZIP 解压单成员 32 MiB、合计 128 MiB，像素分析上限约 8 百万像素。超过限制会明确提示。</p><p>开源组件：exifr 7.1.3（MIT），fflate 0.8.3（MIT），均内置在此文件中，许可见源码包 vendor 目录。专有 MakerNote 不保证可解释，EXIF 时间不擅自转换时区，GPS 来自元数据而非实际位置验证。</p><p>推荐使用新版 Edge / Chrome。应用不联网、不上传、不自动打开导出的文件。刷新或关闭页面会清空内存中的队列，请及时导出报告。</p>
+</div></dialog>
+<script id="coreCode">/*__CORE__*/</script>
+<script id="exifCode">/*__EXIF__*/</script>
+<script id="flateCode">/*__FLATE__*/</script>
+<script id="ctfCode">/*__CTF__*/</script>
+<script id="stegoCode">/*__STEGO__*/</script>
+<script id="audioCode">/*__AUDIO__*/</script>
+<script id="animationCode">/*__ANIMATION__*/</script>
+<script id="workerCode" type="text/plain">/*__WORKER__*/</script>
+<script>/*__APP__*/</script>
+<script>/*__EXTRA__*/</script>
+<script>/*__LAB__*/</script>
+<script>/*__DISK__*/</script>
+<script>/*__HASH__*/</script>
+<script>/*__MOUNT__*/</script>
+<script id="hexCryptoWorkerSource" type="text/plain">/*__CRYPTO_WORKER__*/</script>
+<script id="cryptoExamplesCode">/*__CRYPTO_EXAMPLES__*/</script>
+<script id="cryptoCatalogCode">/*__CRYPTO_CATALOG__*/</script>
+<script id="cryptoUiCode">/*__CRYPTO_UI__*/</script>
+<script id="previewCoreCode">/*__PREVIEW_CORE__*/</script>
+<script id="previewWorkerSource" type="text/plain">/*__PREVIEW_WORKER__*/</script>
+<script id="previewPdfLibrary" type="text/plain">/*__PREVIEW_PDF_LIBRARY__*/</script>
+<script id="previewPdfWorker" type="text/plain">/*__PREVIEW_PDF_WORKER__*/</script>
+<script id="previewPdfAssets" type="application/json">/*__PREVIEW_PDF_JSON__*/</script>
+<script id="previewPdfCode">/*__PREVIEW_PDF__*/</script>
+<script id="previewUiCode">/*__PREVIEW_UI__*/</script>
+</body></html>

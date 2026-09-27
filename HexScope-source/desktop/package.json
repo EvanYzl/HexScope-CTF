@@ -1,0 +1,17 @@
+{
+  "name": "hexscope-ctf",
+  "productName": "HexScope CTF",
+  "version": "4.1.0",
+  "description": "Portable offline CTF steganography and binary inspection workbench",
+  "main": "main.cjs",
+  "private": true,
+  "author": {
+    "name": "是羊羊羊呀",
+    "url": "https://github.com/EvanYzl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EvanYzl/HexScope-CTF.git"
+  },
+  "homepage": "https://github.com/EvanYzl/HexScope-CTF"
+}

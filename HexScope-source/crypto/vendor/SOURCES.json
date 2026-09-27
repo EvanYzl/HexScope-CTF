@@ -1,0 +1,69 @@
+{
+  "components": [
+    {
+      "name": "crypto-js",
+      "version": "4.2.0",
+      "source": "https://github.com/brix/crypto-js",
+      "archive": "https://registry.npmjs.org/crypto-js/-/crypto-js-4.2.0.tgz",
+      "integrity": "sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==",
+      "archiveSHA256": "2d288a658b3eae000d7fadfdfdf5fe2bec3952cb19212360db8c7686c2b6ce09",
+      "license": "MIT",
+      "usage": "Offline known-key AES/DES/3DES/Blowfish raw-block compatibility; no password inference."
+    },
+    {
+      "name": "@noble/hashes",
+      "version": "1.8.0",
+      "source": {
+        "type": "git",
+        "url": "git+https://github.com/paulmillr/noble-hashes.git"
+      },
+      "archive": "https://registry.npmjs.org/@noble/hashes/-/hashes-1.8.0.tgz",
+      "integrity": "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==",
+      "license": "MIT",
+      "licenseFile": "vendor/licenses/noble-hashes.LICENSE"
+    },
+    {
+      "name": "@noble/ciphers",
+      "version": "1.3.0",
+      "source": {
+        "type": "git",
+        "url": "git+https://github.com/paulmillr/noble-ciphers.git"
+      },
+      "archive": "https://registry.npmjs.org/@noble/ciphers/-/ciphers-1.3.0.tgz",
+      "integrity": "sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==",
+      "license": "MIT",
+      "licenseFile": "vendor/licenses/noble-ciphers.LICENSE"
+    },
+    {
+      "name": "@noble/curves",
+      "version": "1.9.7",
+      "source": {
+        "type": "git",
+        "url": "git+https://github.com/paulmillr/noble-curves.git"
+      },
+      "archive": "https://registry.npmjs.org/@noble/curves/-/curves-1.9.7.tgz",
+      "integrity": "sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==",
+      "license": "MIT",
+      "licenseFile": "vendor/licenses/noble-curves.LICENSE"
+    },
+    {
+      "name": "twofish-ts",
+      "version": "1.0.2",
+      "source": {
+        "type": "git",
+        "url": "git+https://github.com/gliese1337/twofish.git"
+      },
+      "archive": "https://registry.npmjs.org/twofish-ts/-/twofish-ts-1.0.2.tgz",
+      "integrity": "sha512-ogx3C6CE/zviqpFApfixBIqxzfF0P8lO1e0ep0w7squTLmGMnbYx/s7CutQCmRxQO68XUvY4iseeQ09rNITYOA==",
+      "license": "MIT",
+      "licenseFile": "vendor/licenses/twofish-ts.LICENSE.txt"
+    }
+  ],
+  "builtFiles": {
+    "vendor/crypto-js.js": "ee02257ffbaf0a9b481c7039b0f3bb20c360c9674fe4be8b38ae709b2ea59bbe",
+    "vendor/fflate.js": "462ef8041fc970e3615a20a9dd2b2e3047a073b2da729ef4f02b634bba8b7b83",
+    "vendor/hexscope-core.js": "e482bd139479e2588a570592f04f3cc5d86afb0a015a3a8ef0e896ee1e4cd6db",
+    "vendor/hexscope-ctf.js": "3781ae99b3d50d22b084e3696086fda91b7bfc00c26d262cd520f06d36ef3587",
+    "vendor/noble-bundle.js": "5117d71538328f9c8145c4b592dde36d5e077689c041cf05a6b15da1d2b002c1"
+  }
+}

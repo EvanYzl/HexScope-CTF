@@ -1,0 +1,83 @@
+{
+  "application": "HexScope CTF 4.1 + Crypto + Preview",
+  "branding": {
+    "author": "是羊羊羊呀",
+    "credit": "Created by 是羊羊羊呀",
+    "repository": "https://github.com/EvanYzl/HexScope-CTF",
+    "HTMLCredits": 3
+  },
+  "runtime": {
+    "node": "24.21.0",
+    "acorn": "8.18.0",
+    "ada": "4.0.0",
+    "amaro": "1.1.11",
+    "ares": "1.34.8",
+    "brotli": "1.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.4.3",
+    "merve": "1.2.2",
+    "modules": "149",
+    "napi": "10",
+    "nbytes": "0.1.4",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.70.0",
+    "nghttp3": "",
+    "ngtcp2": "",
+    "openssl": "0.0.0",
+    "simdjson": "4.6.7",
+    "simdutf": "7.7.0",
+    "sqlite": "3.53.4",
+    "tz": "2025c",
+    "undici": "7.29.1",
+    "unicode": "17.0",
+    "uv": "1.52.1",
+    "uvwasi": "0.0.23",
+    "v8": "15.2.124.28-electron.0",
+    "zlib": "1.3.2.1-motley",
+    "zstd": "1.6.0",
+    "electron": "44.4.5",
+    "chrome": "152.0.7977.130"
+  },
+  "PATH": "Windows system directories only",
+  "htmlSHA256": "5f9d5aa7aa9f1786a5dcc9c71c20cdaf8684cc3c449f2002c8e79e153cb9fe09",
+  "cryptography": {
+    "toolsExecuted": 78,
+    "automaticExamples": 3,
+    "recoveredBytes": "exact match",
+    "runtimeWorker": "actual worker_threads running the bundled browser worker in a VM context"
+  },
+  "preview": {
+    "office": "actual packaged worker: DOCX text/table/image, XLSX formatted cell and hidden worksheet passed",
+    "pdf": "actual packaged PDF worker: two-page PDF and text extraction passed",
+    "assets": "CMaps, fonts and WASM embedded in tested HTML",
+    "network": "no fetching implemented in the verification harness",
+    "nativeRendering": "not tested by this smoke; native off-screen canvas tested by developer suite"
+  },
+  "icon": {
+    "sizes": [
+      16,
+      20,
+      24,
+      32,
+      40,
+      48,
+      64,
+      128,
+      256
+    ],
+    "sourceSHA256": "0d3191f1f67ea0c20ec77c63cbbffcfc683f98e73475a0a48f0c29d0d243e7fa",
+    "assets": "all hashes match",
+    "offlineFavicon": "matches bundled PNG"
+  },
+  "E01segments": 6,
+  "E01sourceHashAlgorithms": 12,
+  "singleFileHashAlgorithms": 12,
+  "sourceHashes": "all match independent Python RAW vectors",
+  "fileHandoffZIP": "detected using bundled file-analysis code",
+  "fileWithinImageHash": "matched",
+  "VHDdecodedSHA256": "matched",
+  "WindowsVHDRecognition": "correct media size, detached",
+  "actualDriveMount": "not performed",
+  "nativeGUI": "not launched or tested"
+}

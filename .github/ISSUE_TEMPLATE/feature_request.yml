@@ -1,0 +1,18 @@
+name: 功能建议
+description: 建议新的 CTF 题型、预览格式或工作流程。
+title: "[建议] "
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景
+      description: "你遇到了什么题型或操作需求？"
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 期望的功能
+      description: "描述输入、操作及期望输出；可以补充公开题目或文档链接。"
+    validations:
+      required: true

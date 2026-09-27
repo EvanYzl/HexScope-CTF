@@ -1,0 +1,10 @@
+{
+  "builder": "esbuild 0.25.5",
+  "pdfjs": "6.3.289",
+  "modifications": "Official legacy ESM files (including upstream core-js polyfills) bundled as local browser IIFEs; process is undefined; unused Node import.meta.url becomes about:blank.",
+  "files": {
+    "pdf.bundle.js": "93b65d9ec66545166c2d073abf3e1331c8695ccd54bd34e7c30a5e39c93cb9a6",
+    "pdf.worker.bundle.js": "a445ea73634a043fd8f65f8878ed2283d3a8829414900eef9f649de3f6472dc4"
+  },
+  "mammothSHA256": "e549ac6375e8d0d991d526a49d89530a72f7ee006b512b9821ce1b8af93e8e89"
+}

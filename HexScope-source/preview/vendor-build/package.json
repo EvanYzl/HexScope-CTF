@@ -1,0 +1,6 @@
+{
+  "name": "hexscope-preview-vendor-build",
+  "private": true,
+  "scripts": {"build": "node build.cjs"},
+  "devDependencies": {"esbuild": "0.25.5", "mammoth": "1.13.0"}
+}

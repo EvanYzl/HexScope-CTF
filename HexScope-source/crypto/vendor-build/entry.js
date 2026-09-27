@@ -1,0 +1,14 @@
+import {md5,sha1,ripemd160,MD5,SHA1} from '@noble/hashes/legacy';
+import {sha224,sha256,sha384,sha512,sha512_224,sha512_256,SHA256} from '@noble/hashes/sha2';
+import {sha3_224,sha3_256,sha3_384,sha3_512,keccak_256} from '@noble/hashes/sha3';
+import {blake2b,blake2s} from '@noble/hashes/blake2';
+import {hmac} from '@noble/hashes/hmac';
+import {pbkdf2} from '@noble/hashes/pbkdf2';
+import {gcm} from '@noble/ciphers/aes';
+import {salsa20} from '@noble/ciphers/salsa';
+import {chacha20,chacha20poly1305} from '@noble/ciphers/chacha';
+import {ed25519,x25519} from '@noble/curves/ed25519';
+import {p256} from '@noble/curves/nist';
+import {secp256k1} from '@noble/curves/secp256k1';
+import * as twofish from 'twofish-ts';
+globalThis.HexNoble={hashes:{md5,sha1,sha224,sha256,sha384,sha512,sha512_224,sha512_256,sha3_224,sha3_256,sha3_384,sha3_512,keccak_256,blake2b,blake2s,ripemd160},classes:{md5:MD5,sha1:SHA1,sha256:SHA256},hmac,pbkdf2,gcm,salsa20,chacha20,chacha20poly1305,ed25519,x25519,p256,secp256k1,twofish};

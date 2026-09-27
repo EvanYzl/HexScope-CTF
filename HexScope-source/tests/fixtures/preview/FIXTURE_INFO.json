@@ -1,0 +1,16 @@
+{
+  "origin": "Locally generated public test vectors; DOCX: Python zipfile; PNG: Pillow; XLSX: openpyxl; XLS/XLSB/ODS: SheetJS 0.20.3; PDF: hand-built objects; encrypted PDF: pypdf 6.19.0 AES-256. Password: hexscope. No user-private data.",
+  "files": {
+    "encrypted.pdf": "261535fa035e69518abe92fc653a75eb2c8cdb771d98a3692b89d87edb54d929",
+    "gbk.txt": "ba44fa3087a608af2f94c60668a4fda56b32a2378477c96f9b9ed3c717e38ccb",
+    "pixel.png": "f78e16c70457afbfe8579ab9f4104e34e6e115415aa9f9f1fac0ca67e8a3df8c",
+    "sample.csv": "ebb8d5eb8a3749dbe99d6d9b8a798fed95cfdcde2ebaa0fd9e94b3e090211b4f",
+    "sample.docx": "a8ad6b6face2e9cbf1af500d3f574fba6f9b5c2655e1846eaf12b97336598d18",
+    "sample.ods": "5098b1ffab5398893c4556a92a43b81304b104f56f45e65179f285119e42b4eb",
+    "sample.pdf": "d9c12ceac3c69f5282b65f1bbf074875539b9e7ad5f2711f46d82f89e9def2d6",
+    "sample.xls": "4d563fae953940e745632a288957c11cafde1e687e1bb4e20552c6f1f773e70f",
+    "sample.xlsb": "d2696b4bbc218cea78f3bfb67143ef09e178d63b3dd810317679d75f900b2295",
+    "sample.xlsx": "324d008fe7e5add8c08650de6fe3104867f3563d992290aa3c5b9f79582f7f2f",
+    "utf16.txt": "88b563b87af4f6760115ac8cb3b0324561f7b777a1a61bbd68761c4ea423985e"
+  }
+}

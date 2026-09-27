@@ -1,0 +1,24 @@
+{
+  "sources": [
+    {
+      "file": "libewf-20130416-source.tar.gz",
+      "url": "https://gitlab.com/kalilinux/packages/libewf/-/archive/upstream/20130416/libewf-upstream-20130416.tar.gz",
+      "sha256": "f1a3697d5ec9b68f6b847818ad6982d794c78e1b66da63a6621cf868e71cdae2"
+    },
+    {
+      "file": "libvhdi-source.tar.gz",
+      "url": "https://github.com/libyal/libvhdi/tree/f594ed4d6744743cab0bfb581a4174857a1a75f2",
+      "sha256": "25283b695d2005238e136c2e7d40516e8aa54753333131da3794f8ef820a5ab7"
+    },
+    {
+      "file": "libvmdk-source.tar.gz",
+      "url": "https://github.com/libyal/libvmdk/tree/71b8943adbe10d70531f10544eea864888d23d68",
+      "sha256": "f932956bdc8ea42734c62994a877c9c3a39371f87af62ba909e12a6998283e25"
+    },
+    {
+      "file": "sleuthkit-4.15.0.tar.gz",
+      "url": "https://github.com/sleuthkit/sleuthkit/releases/download/sleuthkit-4.15.0/sleuthkit-4.15.0.tar.gz",
+      "sha256": "3a8c1e7d18a9b81f3e5e8aa78313974aceaafc6e051d636bc92cd7168286eca9"
+    }
+  ]
+}

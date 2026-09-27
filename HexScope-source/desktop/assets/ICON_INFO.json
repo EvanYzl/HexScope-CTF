@@ -1,0 +1,20 @@
+{
+  "origin": "Image supplied by the user on 2026-09-27",
+  "conversion": "Whole image retained; proportional resizing and ICO/PNG format conversion using Windows System.Drawing.",
+  "sizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    128,
+    256
+  ],
+  "files": {
+    "icon-source.jpg": "0d3191f1f67ea0c20ec77c63cbbffcfc683f98e73475a0a48f0c29d0d243e7fa",
+    "hexscope.ico": "1808a765fb0b0cab7e3f975f7b8c31cbc882bd3704783341f2a24d5bd40dbd01",
+    "hexscope.png": "947852c7acd28694cd661fea6b26099f4a3f03751999e6948a272e19e82bdea7"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "module": "HexScope Crypto",
+  "version": "1.0.0",
+  "baseFile": "HexScope-4.0.html",
+  "baseSHA256": "8332af997ff4e5ad94a1730b34cfcd58ba14a11733317da4595e705fc4a925a8",
+  "outputFile": "HexScope-密码增强版.html",
+  "outputSHA256": "860b19b0ed3eff6b6c6475119320b59d77fb6d8a968a5365f1ad4104e8eb5d4c",
+  "note": "Independent build; original desktop/source files were not overwritten."
+}
