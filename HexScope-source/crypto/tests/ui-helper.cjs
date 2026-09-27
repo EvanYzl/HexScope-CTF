@@ -16,6 +16,8 @@ function page(diskApi){
    terminate(){this.dead=true;this.native?.terminate();active.delete(this);}
   };
  }});
+
+ require('../../tests/unlock.cjs')(dom.window);
  return {dom,w:dom.window,$:id=>dom.window.document.getElementById(id),errors,downloads,active,close(){for(const worker of active)worker.terminate();dom.window.close();}};
 }
 async function until(fn,timeout=6000){const start=Date.now();while(!fn()){if(Date.now()-start>timeout)throw Error('UI state timeout');await new Promise(r=>setTimeout(r,10));}}

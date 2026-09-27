@@ -27,13 +27,31 @@
 .mount-panel{border-top:1px solid var(--line);margin-top:24px;padding-top:24px}.mount-target{font:11px var(--mono);overflow-wrap:anywhere;background:#f5f8f1;padding:12px;border-radius:5px}.mount-panel progress{width:100%;height:8px;accent-color:#597c38}.mount-panel .disk-partition{margin:16px 0 0}
 
 .creator-line{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:15px}.creator-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid #dce8dd;background:#f7faf3;color:#456d51;padding:5px 10px;border-radius:999px;font-size:11px}.creator-badge .creator-spark{color:#9baf7c;font-size:14px}.creator-edition{font-size:10px;color:var(--muted)}footer .footer-identity{display:flex;flex-direction:column;gap:7px}.footer-credit{font:10px var(--sans);letter-spacing:0;color:#70826a}.creator-about{display:grid;grid-template-columns:72px 1fr;gap:18px;align-items:center;background:linear-gradient(135deg,#f1f6eb,#faf7ef);border:1px solid #dfe8d6;border-radius:12px;padding:18px;margin-bottom:22px}.creator-about img{width:72px;height:72px;border-radius:16px;object-fit:cover;border:3px solid white;box-shadow:0 3px 12px #2b472415}.creator-about h3{margin:0 0 5px;color:#315a3d;font-size:19px}.creator-about .creator-credit{font-size:13px;color:#486d40;font-weight:600;margin-bottom:5px}.creator-about .creator-tagline{font-size:11px;margin:0;color:#7c8c6f}.creator-about .creator-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.creator-about .creator-tags span{font-size:9px;padding:3px 7px;background:#ffffffad;border:1px solid #e4ebdd;border-radius:4px;color:#6d8260}.creator-repo{grid-column:1/-1;border-top:1px solid #e1e9d9;padding-top:10px;font:10px/1.6 var(--mono);overflow-wrap:anywhere;color:#7c8976}.creator-repo strong{font-family:var(--sans);margin-right:6px}@media(max-width:900px){.creator-line{margin-top:10px}.creator-edition{display:none}.creator-about{grid-template-columns:58px 1fr;gap:12px;padding:14px}.creator-about img{width:58px;height:58px}}
+
+body.login-locked{min-height:100vh;min-height:100dvh;overflow:hidden}
+.login-screen{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:28px;background:radial-gradient(ellipse at 30% 15%,#e3ecdb99,transparent 55%),radial-gradient(ellipse at 85% 90%,#f0e8d299,transparent 50%),#f4f5f2}
+.login-card{width:min(610px,100%);padding:46px 40px 40px;border:1px solid #dfe6d9;border-radius:20px;background:#fcfdf9;box-shadow:0 20px 80px #314c2910}
+.login-identity{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:38px}.login-identity .brandmark{margin:0}.login-identity h1{font-size:26px;letter-spacing:-.6px;font-weight:600;color:#315339}.login-identity h1 small{font:11px var(--mono);color:#849276;letter-spacing:1px;margin-left:6px}
+.login-challenge{display:grid;grid-template-columns:repeat(21,minmax(0,1fr));align-items:center;padding:20px 8px;margin-bottom:26px;border:1px solid #e2e8da;background:#f2f5ec;border-radius:9px;font:19px/1.5 var(--mono);color:#4b6243;user-select:text}.login-challenge span{text-align:center}
+.login-controls{display:grid;grid-template-columns:minmax(0,1fr) 94px;gap:12px}.login-controls input{min-width:0;width:100%;height:46px;padding:10px 14px;font-size:18px;letter-spacing:3px;border:1px solid #dbe3d4;border-radius:7px;background:#fff;outline:none}.login-controls input:focus{border-color:#739460;box-shadow:0 0 0 3px #809d6a1a}.login-controls input[aria-invalid=true]{border-color:#be7770;box-shadow:0 0 0 3px #be777012}.login-controls button{height:46px;border-radius:7px;font-size:13px}
+@media(max-width:600px){.login-screen{padding:16px}.login-card{padding:30px 18px}.login-challenge{font-size:clamp(12px,3.5vw,18px);padding:18px 3px}.login-identity{margin-bottom:28px}.login-identity h1{font-size:23px}}
 </style>
 <style>.crypto-workspace{background:#fff;border:1px solid var(--line,#dce5d4);border-radius:10px;padding:26px}.crypto-title{display:flex;align-items:center;justify-content:space-between;gap:20px}.crypto-title h2{font-size:25px;margin:8px 0}.crypto-title .muted{font-size:12px}.crypto-badge{font-size:11px;padding:9px 13px;background:#eff6e8;border:1px solid #d7e7c8;border-radius:20px;color:#588144;white-space:nowrap}.crypto-tabs{display:flex;gap:22px;border-bottom:1px solid #dce5d4;margin:26px 0 20px}.crypto-tabs button{border:0;border-bottom:2px solid transparent;background:none;padding:11px 2px;color:#839378;font-weight:600}.crypto-tabs button.active{color:#426532;border-bottom-color:#7b9c5f}.crypto-input-head,.crypto-runbar,.crypto-output-head,.crypto-result-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.crypto-input-head{justify-content:space-between;margin:12px 0}.crypto-input-head strong{font-size:13px}.crypto-input-head button,.crypto-runbar button{font-size:11px}.crypto-input{width:100%;min-height:165px;resize:vertical;background:#f8faf5;box-sizing:border-box;border:1px solid #dce5d4;border-radius:7px;padding:16px;font:13px/1.75 var(--mono,monospace);color:#344c2b}.crypto-controls{display:flex;align-items:flex-end;gap:15px;flex-wrap:wrap;margin:15px 0}.crypto-controls label,.crypto-parameters label,#cryptoManualControls>label{font-size:11px;color:#687e59}.crypto-controls label:not(.crypto-check)>input,.crypto-controls select,.crypto-parameters input,.crypto-parameters select,#cryptoTool{display:block;margin-top:6px;font:12px var(--mono,monospace);max-width:100%;box-sizing:border-box}.crypto-controls input[type=number]{width:65px}.crypto-controls input[type=checkbox]{accent-color:#709851}.crypto-controls .crypto-check{display:flex;gap:5px;align-items:center;align-self:center}.crypto-key{flex:1;min-width:160px}.crypto-key input{width:100%}.crypto-runbar{border-top:1px solid #e5ecdf;padding:15px 0}.crypto-runbar>select{font-size:11px;max-width:230px}.crypto-runbar>span{font-size:11px;flex:1;min-width:220px;color:#7d916e;line-height:1.7}.crypto-facts{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid #e4ebdc;border-radius:6px;margin:14px 0}.crypto-facts>div{padding:13px 18px;border-right:1px solid #edf1e8}.crypto-facts small{font-size:10px;color:#829575}.crypto-facts strong{display:block;font:17px var(--mono,monospace);margin-top:8px;color:#416035}.crypto-hints{background:#f6f8ee;border-left:3px solid #a4b37b;color:#73845f;font-size:11px;padding:12px 15px;white-space:pre-wrap;line-height:1.8;margin:15px 0}.crypto-results{display:grid;grid-template-columns:255px minmax(0,1fr);border:1px solid #dfe7d8;border-radius:7px;overflow:hidden;margin-top:15px}.crypto-results>aside{border-right:1px solid #dfe7d8;background:#fafcf6}.crypto-list-title{display:flex;justify-content:space-between;padding:15px;font-size:11px;border-bottom:1px solid #e4eadc}.crypto-list-title span{font-size:9px;color:#98a68d}#cryptoCandidates{max-height:520px;overflow:auto}#cryptoCandidates button{display:block;width:100%;background:transparent;border:0;border-bottom:1px solid #edf1e7;padding:15px;text-align:left;overflow-wrap:anywhere;color:#698457}#cryptoCandidates button.active{background:#eaf3df;box-shadow:3px 0 0 #91af72 inset}#cryptoCandidates strong{font-size:12px;font-weight:600}#cryptoCandidates small{display:block;font:10px var(--mono,monospace);color:#93a084;margin:7px 0}#cryptoCandidates span{display:block;font:11px/1.5 var(--mono,monospace);max-height:34px;overflow:hidden;color:#7f8e72}.crypto-result-detail{padding:19px;min-width:0}.crypto-path{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;color:#738d60;min-height:25px;margin-bottom:12px}.crypto-path span{padding:5px 9px;background:#eff5e9;border-radius:4px}.crypto-path span+span:before{content:'→ ';color:#9da78e}.crypto-output-head{justify-content:space-between;font-size:12px;margin:10px 0}.crypto-output-head select{font-size:11px}#cryptoOutput{box-sizing:border-box;width:100%;min-height:255px;resize:vertical;background:#fbfcf8;border:1px solid #e0e8d9;border-radius:6px;padding:13px;color:#304e25;font:12px/1.7 var(--mono,monospace)}#cryptoResultNote,.crypto-footnote{font-size:11px;color:#8e9c82;line-height:1.8}.crypto-result-actions{justify-content:flex-end;margin-top:18px}.crypto-result-actions button{font-size:11px;padding:8px 11px}.crypto-footnote{margin-top:18px}.crypto-parameters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0}.crypto-parameters input,.crypto-parameters select{width:100%}#cryptoTool{min-width:270px;max-width:100%;font-family:inherit}#cryptoToolNote{font-size:12px;line-height:1.7;color:#8d9b7f}.crypto-json{font-size:11px;color:#8a9a7c;margin:15px 0}.crypto-json textarea{display:block;width:100%;box-sizing:border-box;min-height:100px;margin-top:10px;font:11px/1.7 var(--mono,monospace);padding:12px}.crypto-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0}.crypto-guide-grid article{border:1px solid #e3eadb;border-radius:6px;padding:16px;background:#fafcf6}.crypto-guide-grid h4{font-size:13px;color:#547d3f;margin:0 0 10px}.crypto-guide-grid p,#cryptoGuide>p{font-size:12px;line-height:1.9;color:#829475}.crypto-guide-table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.8;margin:20px 0}.crypto-guide-table th,.crypto-guide-table td{padding:13px 15px;border-bottom:1px solid #e4ecdc;text-align:left;vertical-align:top}.crypto-guide-table th{background:#f2f7eb}.crypto-guide-table td:first-child{width:230px;color:#53763f}.crypto-guide-table td:last-child{color:#89987b}#cryptoGuide h3{font-size:16px;margin-top:24px}@media(max-width:1100px){.crypto-results{grid-template-columns:210px minmax(0,1fr)}.crypto-guide-grid{grid-template-columns:repeat(2,1fr)}.crypto-parameters{grid-template-columns:repeat(2,1fr)}}@media(max-width:800px){.crypto-workspace{padding:16px}.crypto-title{align-items:flex-start;flex-direction:column}.crypto-results{grid-template-columns:1fr}.crypto-results>aside{border-right:0}#cryptoCandidates{max-height:210px}.crypto-facts{grid-template-columns:repeat(3,1fr)}.crypto-guide-grid,.crypto-parameters{grid-template-columns:1fr}.crypto-guide-table td:first-child{width:110px}.crypto-title h2{font-size:21px}}
 </style>
 <style>.preview-heading,.preview-heading>div,.preview-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.preview-heading{justify-content:space-between}.preview-heading .tag:empty{display:none}.preview-tools{margin:12px 0}.preview-tools:empty{display:none}.preview-tools label{display:flex;align-items:center;gap:7px}.preview-tools input[type=number]{width:80px}.preview-tools input[type=search]{min-width:180px;flex:1}.preview-tools select{max-width:300px}.preview-stage{border:1px solid var(--border,#dce2e2);border-radius:10px;min-height:160px;max-height:76vh;overflow:auto;background:#f0f3f5;color:#25333d;padding:18px;position:relative}.preview-stage:empty{display:none}.preview-note{color:var(--muted,#687779);line-height:1.65;font-size:12px;margin-top:12px}.preview-document{background:#fff;color:#182c3a;max-width:850px;margin:auto;padding:30px;line-height:1.8;overflow-wrap:anywhere;box-shadow:0 2px 12px #17334412}.preview-document h1,.preview-document h2,.preview-document h3{color:#183849;line-height:1.5}.preview-document p{color:inherit}.preview-document img{max-width:100%;height:auto}.preview-document table,.preview-sheet{border-collapse:collapse;width:100%;background:#fff;color:#182c3a}.preview-document td,.preview-document th{border:1px solid #c9d6dc;padding:8px}.preview-sheet{font:12px/1.6 ui-monospace,Consolas,monospace;width:max-content;min-width:100%}.preview-sheet td,.preview-sheet th{border:1px solid #dce4e8;padding:7px 10px;min-width:90px;max-width:320px;white-space:pre-wrap;overflow-wrap:anywhere;vertical-align:top}.preview-sheet td{cursor:pointer}.preview-sheet td:focus{outline:2px solid #218576;outline-offset:-2px}.preview-sheet th{background:#e9f1f3;position:sticky;top:-18px;z-index:1;font-weight:600}.preview-sheet th:first-child{min-width:46px}.preview-sheet tr[data-hidden=true]{background:#fffbe9}.preview-sheet td[data-hidden=true]{background:#fffbe9}.preview-stage pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.7 ui-monospace,Consolas,monospace;tab-size:4;color:#233647}.preview-stage.preview-image-stage{background-color:#eef1f2;background-image:linear-gradient(45deg,#dce2e4 25%,transparent 25%),linear-gradient(-45deg,#dce2e4 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#dce2e4 75%),linear-gradient(-45deg,transparent 75%,#dce2e4 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}.preview-image-wrap{display:grid;place-items:center;margin:auto}.preview-image-wrap img{display:block;max-width:none;transform-origin:center}.preview-stage video{max-width:100%;max-height:60vh;display:block;margin:auto}.preview-stage audio{width:100%;margin:20px auto}.preview-pdf-page{display:block;margin:0 auto;background:#fff;box-shadow:0 2px 14px #142b3030}.preview-pdf-text{margin-top:18px;background:#fff;padding:12px}.preview-cell{flex-basis:100%;font:12px/1.7 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:100px;overflow:auto}.preview-warning{color:#8b5106;background:#fff6df;padding:10px;border-radius:6px}.preview-stage .preview-empty{padding:30px 15px;line-height:1.8}.preview-stage [hidden],#previewPanel [hidden]{display:none!important}@media(max-width:800px){.preview-document{padding:16px}.preview-stage{padding:10px}.preview-tools select{max-width:220px}}
 </style>
 </head>
-<body>
+<body class="login-locked">
+<section id="loginScreen" class="login-screen" aria-labelledby="loginTitle">
+  <div class="login-card">
+    <div class="login-identity"><span class="brandmark" aria-hidden="true">H<span>›</span></span><h1 id="loginTitle">HexScope <small>CTF</small></h1></div>
+    <form id="loginForm" autocomplete="off" novalidate>
+      <code id="loginChallenge" class="login-challenge"></code>
+      <div class="login-controls"><input id="loginInput" type="password" aria-label="密码" autocomplete="off" autocapitalize="off" spellcheck="false" disabled><button id="loginSubmit" type="submit" class="primary" disabled>登录</button></div>
+    </form>
+  </div>
+</section>
+<div id="appShell" hidden inert aria-hidden="true">
 <header class="topbar">
   <div class="brand"><span class="brandmark" aria-hidden="true">H<span>›</span></span><div>HexScope <small>CTF 隐写与密码分析</small></div><span class="version">4.1</span></div>
   <div class="top-actions"><span class="local"><i></i> 完全离线 · 文件留在本机</span><button id="helpBtn" class="quiet">使用说明 <span>↗</span></button></div>
@@ -206,6 +224,7 @@
 <h3>如何理解结果</h3><p><b>结构通过：</b>已根据容器结构确定边界。ZIP 压缩成员的内容 CRC 在解压时校验；结构通过不代表不存在其他损坏，也不证明有人故意隐藏。</p><p><b>元数据 / 内嵌：</b>可能为 EXIF 缩略图等合法内容，默认不选入批量导出。</p><p><b>仅签名：</b>不能确认完整性和结束位置，导出为 .bin；可手工调整区间。</p><p><b>未见异常：</b>批量队列仅检查文件结构。EXIF、字符串、像素与 LSB 在相应标签页单独运行；未运行不表示未检出。不覆盖 JPEG DCT、碎片重组、密码破解或所有文件格式。</p>
 <h3>取证镜像（桌面版）</h3><p>打开 E01 首卷或 DD / RAW 镜像，按分区浏览目录树、筛选大小、提取文件或送入隐写分析。分卷须保持完整和原始命名。选择目录导出会递归提取，结果含原路径、inode、时间字段和 SHA-256 清单。镜像按需读取，不受普通文件 128 MiB 限制；送入隐写分析的单个文件仍受此限制。镜像引擎仅在 Windows 便携版可用。</p><h3>哈希、推送与盘符（4.1）</h3><p>「哈希校验」支持本机文件；镜像工作台可计算解码后的完整源盘数据及镜像内单个文件。支持 12 种算法、HEX / Base64 表示、预期值比对、TXT / JSON 导出。镜像内文件或目录可以一键送入文件分析；跳过和失败内容有推送清单。</p><p>E01 可先转固定 VHD，再用 Windows 自带功能选择分区、盘符并只读挂载。转换需要接近源盘容量的空间；挂载和卸载请求管理员授权。固定 VHD 限 512 字节逻辑扇区、2040 GiB；资源管理器仅支持 Windows 可读文件系统。关闭软件不会自动卸载。</p><h3>文件预览</h3><p>选择文件后打开「文件预览」：DOCX 正文、表格和内嵌图片；Excel / CSV 工作表、分页与搜索；PDF 翻页与缩放；图片旋转与缩放，以及文本、部分音视频和 ZIP 目录。镜像送入的文件也可预览。全部离线，只读显示；Office 上限 32 MiB、PDF 64 MiB，表格限前 2,000 行 / 100 列。格式覆盖与限制见随包文件预览说明.md。</p><h3>密码分析（78 个工具入口）</h3><p>自动分析支持有限预算的多层编码、部分古典密码、压缩和 XOR 尝试，显示候选排序、转换路径和停止原因。题型工具提供古典密码、现代密码、RSA / ECC、签名、哈希及数论等参数化运算。计算在本机 Worker 运行，可以停止、导出报告或把恢复字节送入文件分析。</p><p>候选分不是正确率，未命中不表示无解；现代密码一般需要密钥，侧信道和高级题型需要样本或额外条件。自动输入上限 32 KiB、8 层，单任务总上限 40 秒。完整适用范围见密码分析内的「覆盖范围」与随附题型说明。</p><h3>CTF 工具</h3><p>EXIF / GPS 标签页支持元数据搜索、原始标签值、经纬度及 JSON 导出。文件树可以按 B / KiB / MiB 大小区间筛选和排序。字符串标签页可定位偏移并将文本送到编码工作台。</p><p>像素 / LSB 支持 8 位非交错 PNG、24/32 位未压缩 BMP。可查看位平面、选择通道与读取顺序、扫描 32 种常见 LSB 组合、导出并继续分析提取结果。不能覆盖所有隐写方式。</p><h3>专项隐写</h3><p>新增 ZIP 伪加密验证与副本修复、PNG CRC / 宽高恢复与调色板低位、零宽字符 / 空格 Tab / Base64 填充位、整数 PCM WAV 波形 / 频谱 / LSB / DTMF / 倒放与声道差、双图 XOR / 差异 / RGB 奇偶 / 边框，以及 GIF / APNG 原始局部帧导出。专项工具需手动运行，结果可保存、加入队列继续分析或导出报告。</p><p>WAV 每段分析最长 120 秒，支持 8/16/24/32 位整数 PCM；动图最多 1,000 帧，不合成前帧；PNG 宽高恢复验证非交错扫描行。真实加密、JPEG DCT、音频压缩格式和特定隐写工具算法不在这些模块范围内。</p><h3>范围与限制</h3><p>边界解析：PNG、JPEG、GIF、WebP、BMP、普通单卷 ZIP、7z。RAR、PDF、GZIP 候选仅签名提示。ZIP64、多卷 ZIP 不做可靠提取。</p><p>单文件 128 MiB，单批最多 1,000 个文件，批量导出 256 MiB，ZIP 解压单成员 32 MiB、合计 128 MiB，像素分析上限约 8 百万像素。超过限制会明确提示。</p><p>开源组件：exifr 7.1.3（MIT），fflate 0.8.3（MIT），均内置在此文件中，许可见源码包 vendor 目录。专有 MakerNote 不保证可解释，EXIF 时间不擅自转换时区，GPS 来自元数据而非实际位置验证。</p><p>推荐使用新版 Edge / Chrome。应用不联网、不上传、不自动打开导出的文件。刷新或关闭页面会清空内存中的队列，请及时导出报告。</p>
 </div></dialog>
+</div>
 <script id="coreCode">/* HexScope CTF 2.0 — binary inspection core. Offsets are [start, end). */
 (function (root) {
   'use strict';
@@ -1144,7 +1163,7 @@ self.onmessage = async ({data:job}) => {
   } catch(error) {self.postMessage({ok:false,error:error?.message||String(error)});}
 };
 </script>
-<script>(function () {
+<script type="text/plain" data-hexscope-startup>(function () {
   'use strict';
   const C=window.HexCore,$=id=>document.getElementById(id),MiB=1024*1024;
   const state={items:[],selected:null,tab:'overview',offset:0,running:false,scanJob:null,generation:0,exporting:false,next:1,closedDirs:new Set()};
@@ -1425,7 +1444,7 @@ self.onmessage = async ({data:job}) => {
   window.HexApp={state,$,C,esc,size,selected,job,download,toast,addFiles,showTab,showWorkspace,renderList,renderDetail};
 })();
 </script>
-<script>(function(){
+<script type="text/plain" data-hexscope-startup>(function(){
   'use strict';
   const H=window.HexApp,{$,esc,size,selected,job,download,toast}=H,T=window.CTF;
   let extraFile=null,pixelData=null,pixelName='',codecResult=null,stringResult=null,conversionHistory=[],metaJob=null;
@@ -1488,7 +1507,7 @@ self.onmessage = async ({data:job}) => {
   $('codecFileBtn').onclick=()=>$('codecFile').click();$('codecFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>1024*1024)throw new Error('编码工作台载入文件上限 1 MiB；较大文件请在十六进制页先切片。');$('codecInput').value=T.encode('hex',new Uint8Array(await file.arrayBuffer()));$('codecFrom').value='hex';$('codecTo').value='base64';$('codecOperation').value='none';$('codecStatus').textContent='已载入 '+file.name+' · '+size(file.size);}catch(e){toast(e.message);}finally{e.target.value='';}};
 })();
 </script>
-<script>(function(){
+<script type="text/plain" data-hexscope-startup>(function(){
   'use strict';
   const H=window.HexApp,{$,esc,size,selected,job,download,toast}=H;
   let currentFile=null,active=null,serial=0,artifact=null,report=null,zipRepairable=false,reference=null,frameUrl=null,frameFile=null;
@@ -1558,7 +1577,7 @@ self.onmessage = async ({data:job}) => {
   $('animationResults').onclick=e=>{const b=e.target.closest('[data-frame]');if(!b||active)return;run('animationFrame',{index:Number(b.dataset.frame)},(r,item)=>{if(frameUrl)URL.revokeObjectURL(frameUrl);frameUrl=URL.createObjectURL(new Blob([r.data],{type:r.mime}));const img=document.createElement('img');img.src=frameUrl;img.alt='原始局部帧 '+(r.frame.index+1);img.style.maxWidth='100%';img.style.imageRendering='pixelated';$('animationStage').replaceChildren(img);bytes(r,item,r.name,r.mime);});};
 })();
 </script>
-<script>(function(){
+<script type="text/plain" data-hexscope-startup>(function(){
   'use strict';
   const H=window.HexApp,{$,esc,size,toast}=H,api=window.hexscopeDisk;
   const S={image:null,offset:0,sectorSize:512,directory:null,rows:[],all:new Map(),lists:new Map(),parents:new Map(),selected:new Set(),page:0,busy:false,externalBusy:false,indexed:false,statusChecked:false,cancelRequested:false};
@@ -1631,7 +1650,7 @@ self.onmessage = async ({data:job}) => {
   if(!api){$('diskUnavailable').hidden=false;$('diskEngine').textContent='镜像引擎仅在 Windows 便携版中可用。';}controls();
 })();
 </script>
-<script>(function(){
+<script type="text/plain" data-hexscope-startup>(function(){
   'use strict';
   const H=window.HexApp,{$,esc,size,toast,download}=H,api=window.hexscopeDisk;
   const S={target:null,image:null,result:null,busy:false,externalBusy:false,catalog:null};
@@ -1664,7 +1683,7 @@ self.onmessage = async ({data:job}) => {
   if(!api){$('hashUnavailable').hidden=false;status('多算法流式哈希需要完整 Windows 便携版；文件分析中的 SHA-256 仍可使用。');}controls();
 })();
 </script>
-<script>(function(){
+<script type="text/plain" data-hexscope-startup>(function(){
   'use strict';
   const H=window.HexApp,{$,esc,size,toast}=H,api=window.hexscopeDisk;
   const S={image:null,vhd:null,mounted:null,busy:false,system:false,diskBusy:false,hashBusy:false};
@@ -9340,7 +9359,7 @@ for(const [id,key,note]of [['rsa-padding','rsaOAEP','演示使用专门生成的
 root.HexCryptoCatalog={rows,formats};
 })(typeof self!=='undefined'?self:globalThis);
 </script>
-<script id="cryptoUiCode">(function(){
+<script id="cryptoUiCode" type="text/plain" data-hexscope-startup>(function(){
 'use strict';
 if(!window.HexApp||document.getElementById('cryptoWorkspace'))return;
 const H=window.HexApp,{$,esc,toast,download}=H,Catalog=window.HexCryptoCatalog;
@@ -10299,7 +10318,7 @@ function open(bytes,{onPassword=()=>{},...options}={}){
 root.HexPreviewPDF={open,OfflineBinaryDataFactory};
 })(window);
 </script>
-<script id="previewUiCode">(function(){
+<script id="previewUiCode" type="text/plain" data-hexscope-startup>(function(){
 'use strict';
 const H=window.HexApp,P=window.HexPreviewCore,$=H.$;
 const stage=$('previewStage'),tools=$('previewTools'),status=$('previewStatus'),note=$('previewNote');
@@ -10446,5 +10465,80 @@ window.addEventListener('hexscope-workspace',({detail})=>{if(detail.name!=='insp
 window.addEventListener('pagehide',()=>cleanup());
 window.HexPreview={load,stop,cleanup,safeDocument,state:S};
 })();
+</script>
+<script id="loginCode">(function(root,factory){
+  'use strict';
+  const login=factory();
+  if(typeof module==='object'&&module.exports)module.exports=login;
+  else login.mount(root.document,root.crypto);
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  'use strict';
+  const groups=[Array.from('0123456789'),
+    Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'),Array.from('!@#$%^&*()-_=+[]{}:;,.?/~<>')];
+  const alphabet=groups.flat();
+  function generateChallenge(random=globalThis.crypto){
+    if(!random||typeof random.getRandomValues!=='function')throw Error('Secure randomness unavailable');
+    const word=new Uint32Array(1);
+    function index(limit){
+      const ceiling=0x100000000-(0x100000000%limit);
+      do{random.getRandomValues(word);}while(word[0]>=ceiling);
+      return word[0]%limit;
+    }
+    const chars=groups.map(group=>group[index(group.length)]);
+    while(chars.length<21)chars.push(alphabet[index(alphabet.length)]);
+    for(let i=chars.length-1;i>0;i--){const j=index(i+1);[chars[i],chars[j]]=[chars[j],chars[i]];}
+    return chars.join('');
+  }
+  function passwordFor(challenge){
+    const chars=Array.from(challenge);
+    if(chars.length!==21)throw Error('Invalid challenge length');
+    return [0,2,4,6].map(i=>chars[i]).join('');
+  }
+  function mount(document,random){
+    const view=document.defaultView,screen=document.getElementById('loginScreen'),shell=document.getElementById('appShell');
+    const form=document.getElementById('loginForm'),input=document.getElementById('loginInput'),submit=document.getElementById('loginSubmit');
+    let challenge='',unlocked=false,starting=false,composing=false;
+    function blockDrop(event){if(!unlocked){event.preventDefault();event.stopImmediatePropagation();}}
+    view.addEventListener('dragover',blockDrop,true);view.addEventListener('drop',blockDrop,true);
+    try{
+      challenge=generateChallenge(random);
+      const output=document.getElementById('loginChallenge');
+      for(const char of Array.from(challenge)){const span=document.createElement('span');span.textContent=char;output.append(span);}
+      input.disabled=false;submit.disabled=false;input.focus();
+    }catch{return;}
+    input.addEventListener('compositionstart',()=>{composing=true;});
+    input.addEventListener('compositionend',()=>{composing=false;});
+    input.addEventListener('keydown',event=>{
+      if(event.key==='Enter'&&(composing||event.isComposing||event.keyCode===229)){event.preventDefault();event.stopPropagation();}
+    });
+    input.addEventListener('input',()=>input.removeAttribute('aria-invalid'));
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      if(unlocked||starting||composing)return;
+      if(input.value!==passwordFor(challenge)){
+        input.value='';input.setAttribute('aria-invalid','true');input.focus();return;
+      }
+      starting=true;submit.disabled=true;input.value='';
+      let startupError=false;
+      const failed=()=>{startupError=true;};view.addEventListener('error',failed);
+      try{
+        // Preserve source IDs for the worker and verification paths. Execute each UI entry once.
+        for(const source of document.querySelectorAll('script[data-hexscope-startup]')){
+          const script=document.createElement('script');script.textContent=source.textContent;
+          document.head.append(script);script.remove();
+          if(startupError)throw Error('Workspace initialization failed');
+        }
+        shell.hidden=false;shell.inert=false;shell.removeAttribute('inert');shell.removeAttribute('aria-hidden');
+        unlocked=true;challenge='';screen.remove();document.body.classList.remove('login-locked');
+        view.removeEventListener('dragover',blockDrop,true);view.removeEventListener('drop',blockDrop,true);
+        document.getElementById('addBtn').focus();
+      }catch{
+        // Leave the workbench inaccessible if startup fails; do not duplicate partially bound listeners.
+        shell.hidden=true;shell.inert=true;shell.setAttribute('inert','');shell.setAttribute('aria-hidden','true');input.disabled=true;
+      }finally{view.removeEventListener('error',failed);}
+    });
+  }
+  return Object.freeze({generateChallenge,passwordFor,mount});
+});
 </script>
 </body></html>

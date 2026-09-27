@@ -15,12 +15,12 @@ async function eventually(predicate,message='state transition') {
   while(Date.now()<until) {if(predicate())return;await new Promise(resolve=>setTimeout(resolve,5));}
   assert.fail('Timed out: '+message);
 }
-function app(t,diskApi) {
+function app(t,diskApi,options={}) {
   const downloads=[],errors=[],blobs=new Map();let index=0;
   const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e));
   const dom=new JSDOM(html,{runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.hexscopeDisk=diskApi;
     w.TextEncoder=TextEncoder;w.TextDecoder=TextDecoder;w.Blob=Blob;w.File=File;
-    Object.defineProperty(w,'crypto',{value:webcrypto});
+    Object.defineProperty(w,'crypto',{value:options.random||webcrypto});
     w.URL.createObjectURL=blob=>{const id='blob:test-'+index++;blobs.set(id,blob);return id;};
     w.URL.revokeObjectURL=id=>blobs.delete(id);
     w.HTMLAnchorElement.prototype.click=function(){downloads.push({name:this.download,blob:blobs.get(this.href)});};
@@ -45,6 +45,8 @@ function app(t,diskApi) {
       terminate(){this.dead=true;}
     };
   }});
+
+ if(!options.locked)require('./unlock.cjs')(dom.window);
   const w=dom.window,d=w.document,$=id=>d.getElementById(id);
   t.after(()=>{w.close();assert.deepEqual(errors,[],'no DOM script errors');});
   const input=files=>{Object.defineProperty($('fileInput'),'files',{value:files,configurable:true});$('fileInput').dispatchEvent(new w.Event('change'));};

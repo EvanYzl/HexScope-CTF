@@ -40,7 +40,18 @@
     "chrome": "152.0.7977.130"
   },
   "PATH": "Windows system directories only",
-  "htmlSHA256": "5f9d5aa7aa9f1786a5dcc9c71c20cdaf8684cc3c449f2002c8e79e153cb9fe09",
+  "htmlSHA256": "55485dec1d62e556d25561a0f55b0232a6ac4644316efca01bb37e2e3de3bd57",
+  "login": {
+    "challengeLength": 21,
+    "characterClasses": [
+      "ASCII letters",
+      "digits",
+      "punctuation"
+    ],
+    "randomSamples": 32,
+    "startup": "initially hidden; computation checked using packaged HTML",
+    "DOMAndSubmitFlow": "covered by developer regression suite"
+  },
   "cryptography": {
     "toolsExecuted": 78,
     "automaticExamples": 3,

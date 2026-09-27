@@ -199,6 +199,9 @@ def main():
     checks=''.join(digest(p)+'  '+p.name+'\n' for p in [portable,sourcezip,html])
     (out/'SHA256SUMS-4.1-GitHub.txt').write_text(checks,encoding='utf8')
     (out/'SHA256SUMS.txt').write_text(checks,encoding='utf8')
+    if out != docs_root.resolve():
+        shutil.copy2(html, out/'HexScope.html')
+        shutil.copy2(docs_root/'HexScope.build.json',out/'HexScope.build.json')
     print(checks,flush=True)
     print('Verified portable staging directory:',target,flush=True)
     (verification/'打包结果.json').write_text(json.dumps({'portable':portable.name,'source':sourcezip.name,'htmlSHA256':digest(html),'portableSHA256':digest(portable),'sourceSHA256':digest(sourcezip),'stagingDirectory':str(target)},ensure_ascii=False,indent=2),encoding='utf8')

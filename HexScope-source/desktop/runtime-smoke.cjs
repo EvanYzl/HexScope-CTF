@@ -3,6 +3,17 @@
 const path=require('node:path'),fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const {createHash}=require('node:crypto'),{Worker}=require('node:worker_threads');
 function script(html,id){const hit=html.match(new RegExp('<script id="'+id+'"[^>]*>([\\s\\S]*?)</script>'));assert(hit,id);return hit[1];}
+function loginSmoke(html){
+ const context={module:{exports:{}},crypto:require('node:crypto').webcrypto,Uint32Array};vm.createContext(context);vm.runInContext(script(html,'loginCode'),context);
+ const {generateChallenge,passwordFor}=context.module.exports;
+ for(let i=0;i<32;i++){
+  const value=generateChallenge();assert.match(value,/^[\x21-\x7e]{21}$/);assert.match(value,/[A-Za-z]/);assert.match(value,/[0-9]/);assert.match(value,/[^A-Za-z0-9]/);
+ }
+ assert.equal(passwordFor('a1B2c3D4e5F6g7H8i9J0!'),'aBcD');
+ assert(html.includes('id="appShell" hidden inert aria-hidden="true"'));
+ assert.equal((html.match(/data-hexscope-startup/g)||[]).length,9); // Eight inert UI scripts and their boot selector.
+ return {challengeLength:21,characterClasses:['ASCII letters','digits','punctuation'],randomSamples:32,startup:'initially hidden; computation checked using packaged HTML',DOMAndSubmitFlow:'covered by developer regression suite'};
+}
 async function cryptoSmoke(html){
  const bootstrap=`const {parentPort,workerData}=require('node:worker_threads'),vm=require('node:vm');
  const r={TextEncoder,TextDecoder,Uint8Array,Uint32Array,Int32Array,Float32Array,Float64Array,ArrayBuffer,DataView,BigInt,Blob,File,crypto:require('node:crypto').webcrypto,console,setTimeout,clearTimeout,CompressionStream,DecompressionStream};
@@ -37,6 +48,7 @@ async function main({directory,scratch,output}){
  const build=JSON.parse(fs.readFileSync(path.join(app,'HexScope.build.json'),'utf8'));
  assert.equal(branding.author,'是羊羊羊呀');assert.equal(build.author,branding.author);assert.equal(build.repository,branding.repository);
  assert.equal(html.split(branding.credit).length-1,3,'homepage, footer and about credits');
+ const login=loginSmoke(html);
  const icon=JSON.parse(fs.readFileSync(path.join(app,'assets/ICON_INFO.json'),'utf8'));
  for(const [file,sha]of Object.entries(icon.files))assert.equal(createHash('sha256').update(fs.readFileSync(path.join(app,'assets',file))).digest('hex'),sha);
  assert(html.includes('data:image/png;base64,'+fs.readFileSync(path.join(app,'assets/hexscope.png')).toString('base64')));
@@ -61,7 +73,7 @@ async function main({directory,scratch,output}){
   fs.mkdirSync(scratch,{recursive:true});const converted=await f.task(()=>convertVhd(f,image.id,scratch));assert.equal(converted.manifest.decodedSHA256,expected.hashes.sha256);
   const mounts=new WindowsMount(app),chosen=await mounts.select(converted.filename),status=await mounts.execute('status',{vhdId:chosen.id});
   assert.equal(status.attached,false);assert.equal(status.mediaBytes,expected.bytes);
-  const result={application:'HexScope CTF 4.1 + Crypto + Preview',branding:{author:branding.author,credit:branding.credit,repository:branding.repository,HTMLCredits:3},runtime:process.versions,PATH:'Windows system directories only',htmlSHA256:createHash('sha256').update(html).digest('hex'),cryptography,preview,icon:{sizes:icon.sizes,sourceSHA256:icon.files['icon-source.jpg'],assets:'all hashes match',offlineFavicon:'matches bundled PNG'},
+  const result={application:'HexScope CTF 4.1 + Crypto + Preview',branding:{author:branding.author,credit:branding.credit,repository:branding.repository,HTMLCredits:3},runtime:process.versions,PATH:'Windows system directories only',htmlSHA256:createHash('sha256').update(html).digest('hex'),login,cryptography,preview,icon:{sizes:icon.sizes,sourceSHA256:icon.files['icon-source.jpg'],assets:'all hashes match',offlineFavicon:'matches bundled PNG'},
    E01segments:6,E01sourceHashAlgorithms:sourceHash.hashes.length,singleFileHashAlgorithms:localHash.hashes.length,sourceHashes:'all match independent Python RAW vectors',
    fileHandoffZIP:'detected using bundled file-analysis code',fileWithinImageHash:'matched',VHDdecodedSHA256:'matched',WindowsVHDRecognition:'correct media size, detached',actualDriveMount:'not performed',nativeGUI:'not launched or tested'};
   fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));

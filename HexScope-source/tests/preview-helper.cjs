@@ -41,6 +41,8 @@ function page(diskApi){
    terminate(){this.dead=true;this.port?.terminate();workers.delete(this);}
   };
  }});
+ require('./unlock.cjs')(dom.window);
+
  const w=dom.window,$=id=>w.document.getElementById(id);
  return {dom,w,$,errors,blobs,workers,async open(bytes,name){w.HexApp.state.auto=false;const file=new File([bytes],name);w.HexApp.addFiles([file]);const item=w.HexApp.state.items.at(-1);w.HexApp.state.selected=item.id;w.HexApp.showTab('preview');await until(()=>$('previewStop').disabled||!$('previewPasswordForm').hidden,15000);return item;},close(){w.HexPreview.cleanup();for(const worker of workers)worker.terminate();dom.window.close();}};
 }

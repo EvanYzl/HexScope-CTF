@@ -45,6 +45,8 @@ function app(t) {
       terminate(){this.dead=true;}
     };
   }});
+
+ require('./unlock.cjs')(dom.window);
   const w=dom.window,d=w.document,$=id=>d.getElementById(id);
   t.after(()=>{w.close();assert.deepEqual(errors,[],'no DOM script errors');});
   const input=files=>{Object.defineProperty($('fileInput'),'files',{value:files,configurable:true});$('fileInput').dispatchEvent(new w.Event('change'));};
